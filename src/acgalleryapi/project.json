@@ -1,4 +1,7 @@
-﻿{
+{
+  "title": "AC Gallery API",
+  "copyright": "Alva Chien",
+  "description": "API for galllery related objects",
   "dependencies": {
     "Microsoft.NETCore.App": {
       "version": "1.0.1",
@@ -47,7 +50,7 @@
   "publishOptions": {
     "include": [
       "wwwroot",
-      "appsettings.json",
+      "appsettings*.json",
       "web.config",
       "exiftool.exe"
     ]

@@ -19,11 +19,7 @@ namespace acgalleryapi.Controllers
         public IEnumerable<AlbumViewModel> Get([FromQuery] String photoid = null)
         {
             List<AlbumViewModel> listVm = new List<AlbumViewModel>();
-#if DEBUG
-            SqlConnection conn = new SqlConnection(Startup.DebugConnectionString);
-#else
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
-#endif
             String queryString = "";
 
             try
@@ -167,11 +163,7 @@ namespace acgalleryapi.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-#if DEBUG
-            SqlConnection conn = new SqlConnection(Startup.DebugConnectionString);
-#else
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
-#endif
             AlbumViewModel avm = null;
 
             var usrObj = User.FindFirst(c => c.Type == "sub");
@@ -264,11 +256,7 @@ namespace acgalleryapi.Controllers
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     String cmdText = @"INSERT INTO [dbo].[Album]
                                ([Title]
@@ -333,11 +321,7 @@ namespace acgalleryapi.Controllers
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
                 var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
 
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     String cmdText = String.Empty;
 
@@ -435,11 +419,7 @@ namespace acgalleryapi.Controllers
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
                 var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumDelete").Value;
 
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     String cmdText = String.Empty;
 
@@ -539,11 +519,7 @@ namespace acgalleryapi.Controllers
 
             try
             {
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     await conn.OpenAsync();
 
@@ -653,11 +629,7 @@ namespace acgalleryapi.Controllers
             var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
             try
             {
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     await conn.OpenAsync();
 

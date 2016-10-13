@@ -19,7 +19,7 @@
     "acgalleryapi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:5000/api/values",
+      "launchUrl": "http://localhost:5000/api/album",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

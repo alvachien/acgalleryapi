@@ -18,11 +18,7 @@ namespace acgalleryapi.Controllers
         public IActionResult GetPhotos([FromQuery] String albumid = null, String accessCode = null)
         {
             List<PhotoViewModel> rstFiles = new List<PhotoViewModel>();
-#if DEBUG
-            SqlConnection conn = new SqlConnection(Startup.DebugConnectionString);
-#else
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
-#endif
 
             try
             {
@@ -322,11 +318,7 @@ namespace acgalleryapi.Controllers
             }
 
             // Update the database
-#if DEBUG
-            SqlConnection conn = new SqlConnection(Startup.DebugConnectionString);
-#else
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
-#endif
 
             try
             {
@@ -446,11 +438,7 @@ namespace acgalleryapi.Controllers
 
             try
             {
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     String cmdText = @"UPDATE [Photo]
                                SET [Title] = @Title
@@ -491,11 +479,7 @@ namespace acgalleryapi.Controllers
 
             try
             {
-#if DEBUG
-                using (SqlConnection conn = new SqlConnection(Startup.DebugConnectionString))
-#else
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-#endif
                 {
                     String cmdText = @"DELETE [Photo]
                              WHERE [PhotoID] = @PhotoID
