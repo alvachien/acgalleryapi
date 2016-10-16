@@ -242,4 +242,4 @@ ModelManifest.xml
 .fake/
 
 # Project specified file
-appsettings.*.json
+appsettings.Development.json
