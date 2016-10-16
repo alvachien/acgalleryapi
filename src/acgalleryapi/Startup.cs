@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+#define USE_MICROSOFTAZURE
+//define USE_ALIYUN
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +19,12 @@ namespace acgalleryapi
     {
         public Startup(IHostingEnvironment env)
         {
+#if DEBUG
+            env.EnvironmentName = "Development";
+#else
+            env.EnvironmentName = "Production";
+#endif
+
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -57,12 +67,19 @@ namespace acgalleryapi
                     "https://localhost:1601"
                     )
 #else
+#if USE_MICROSOFTAZURE
+                builder.WithOrigins(
+                    "http://acgallery.azurewebsites.net/",
+                    "https://acgallery.azurewebsites.net/"
+                    )
+#elif USE_ALIYUN
                 builder.WithOrigins(
                     "http://118.178.58.187:5220",
                     "http://118.178.58.187:5300",
                     "https://118.178.58.187:5220",
                     "https://118.178.58.187:5300",
                     )
+#endif
 #endif
                 .AllowAnyHeader()
                 .AllowAnyMethod()
@@ -75,7 +92,11 @@ namespace acgalleryapi
 #if DEBUG
                 Authority = "http://localhost:41016",
 #else
+#if USE_MICROSOFTAZURE
+                Authority = "http://acidserver.azurewebsites.net",
+#elif USE_ALIYUN
                 Authority = "http://118.178.58.187:5100/",
+#endif
 #endif
                 RequireHttpsMetadata = false,
 
