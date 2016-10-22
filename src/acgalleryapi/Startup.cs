@@ -74,10 +74,8 @@ namespace acgalleryapi
                     )
 #elif USE_ALIYUN
                 builder.WithOrigins(
-                    "http://118.178.58.187:5220",
-                    "http://118.178.58.187:5300",
-                    "https://118.178.58.187:5220",
-                    "https://118.178.58.187:5300",
+                    "http://118.178.58.187:5210",
+                    "https://118.178.58.187:5210"
                     )
 #endif
 #endif
