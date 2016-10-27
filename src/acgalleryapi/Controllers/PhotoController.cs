@@ -292,8 +292,8 @@ namespace acgalleryapi.Controllers
 
             return new ObjectResult(rstFiles);
         }
-        
-        // GET api/values/5
+
+        // GET api/photo/5
         [HttpGet("{id}")]
         public string Get(int id)
         {
