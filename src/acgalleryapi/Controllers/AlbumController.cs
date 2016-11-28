@@ -16,7 +16,7 @@ namespace acgalleryapi.Controllers
     {
         // GET: api/album
         [HttpGet]
-        public IEnumerable<AlbumViewModel> Get([FromQuery] String photoid = null)
+        public IEnumerable<AlbumViewModel> Get([FromQuery] String photoid = null, Int32 top = 20, Int32? skip = 0)
         {
             List<AlbumViewModel> listVm = new List<AlbumViewModel>();
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
