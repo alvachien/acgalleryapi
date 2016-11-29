@@ -242,4 +242,7 @@ ModelManifest.xml
 .fake/
 
 # Project specified file
-appsettings*.json
+**/appsettings*.json
+
+# Publish folder
+PublishProfiles/
