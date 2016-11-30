@@ -51,7 +51,15 @@ namespace acgalleryapi
                     }
                 );
 
-            DBConnectionString = Configuration.GetConnectionString("DefaultConnection");
+#if DEBUG
+            DBConnectionString = Configuration.GetConnectionString("DebugConnection");
+#else
+#if USE_MICROSOFTAZURE
+            DBConnectionString = Configuration.GetConnectionString("AzureConnection");
+#elif USE_ALIYUN
+            DBConnectionString = Configuration.GetConnectionString("AliyunConnection");
+#endif
+#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
