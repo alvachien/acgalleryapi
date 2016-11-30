@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace acgalleryapi.ViewModels
 {
-    public class PhotoViewModelBase
+    public class PhotoViewModelBase : BaseViewModel
     {
         [Required]
         [StringLength(40)]

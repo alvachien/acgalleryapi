@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace acgalleryapi.ViewModels
 {
-    public class AlbumViewModel
+    public class AlbumViewModel : BaseViewModel
     {
         public Int32 Id { get; set; }
         [Required]
@@ -30,7 +30,7 @@ namespace acgalleryapi.ViewModels
         public List<PhotoViewModel> PhotoList = new List<PhotoViewModel>();
     }
 
-    public class AlbumPhotoLinkViewModel
+    public class AlbumPhotoLinkViewModel : BaseViewModel
     {
         [Required]
         public Int32 AlbumID { get; set; }
@@ -39,14 +39,14 @@ namespace acgalleryapi.ViewModels
         public String PhotoID { get; set; }
     }
 
-    public class AlbumPhotoByAlbumViewModel
+    public class AlbumPhotoByAlbumViewModel : BaseViewModel
     {
         [Required]
         public Int32 AlbumID { get; set; }
         public List<String> PhotoIDList = new List<string>();
     }
 
-    public class AlbumPhotoByPhotoViewModel
+    public class AlbumPhotoByPhotoViewModel : BaseViewModel
     {
         [Required]
         [StringLength(40)]
