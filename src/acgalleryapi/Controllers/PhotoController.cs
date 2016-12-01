@@ -15,7 +15,7 @@ namespace acgalleryapi.Controllers
     public class PhotoController : Controller
     {
         [HttpGet]
-        public async Task<IActionResult> GetPhotos([FromQuery] String albumid = null, String accessCode = null, Int32 top = 30, Int32 skip = 0)
+        public async Task<IActionResult> GetPhotos([FromQuery] String albumid = null, [FromQuery] String accessCode = null, [FromQuery] Int32 top = 30, [FromQuery] Int32 skip = 0)
         {
             BaseListViewModel<PhotoViewModel> rstFiles = new BaseListViewModel<PhotoViewModel>();
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
@@ -62,7 +62,7 @@ namespace acgalleryapi.Controllers
                               ,[EXIFInfo]
                           FROM [dbo].[Photo] 
                           WHERE [IsPublic] = 1
-                          ORDER BY (SELECT NULL)
+                          ORDER BY (SELECT NULL) 
                             OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
                     else
@@ -249,6 +249,9 @@ namespace acgalleryapi.Controllers
                             rstFiles.TotalCount = reader.GetInt32(0);
                             break;
                         }
+
+                        if (rstFiles.TotalCount == 0)
+                            break;
                     }
                     else
                     {
@@ -302,7 +305,8 @@ namespace acgalleryapi.Controllers
 
                     ++nRstBatch;
 
-                    reader.NextResult();
+                    if (reader.NextResult())
+                        continue;
                 }
             }
             catch (Exception exp)
