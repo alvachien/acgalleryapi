@@ -26,13 +26,6 @@ namespace acgalleryapi.Controllers
             {
                 await conn.OpenAsync();
 
-#if DEBUG
-                foreach (var clm in User.Claims.AsEnumerable())
-                {
-                    System.Diagnostics.Debug.WriteLine("Type = " + clm.Type + "; Value = " + clm.Value);
-                }
-#endif
-
                 var usrObj = User.FindFirst(c => c.Type == "sub");
                 String queryString = String.Empty;
                 String strAlbumAC = String.Empty;
@@ -68,7 +61,9 @@ namespace acgalleryapi.Controllers
                               ,[IsPublic]
                               ,[EXIFInfo]
                           FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1";
+                          WHERE [IsPublic] = 1
+                          ORDER BY (SELECT NULL)
+                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
                     else
                     {
@@ -76,7 +71,7 @@ namespace acgalleryapi.Controllers
                         var usrName = User.FindFirst(c => c.Type == "sub").Value;
                         queryString = @"SELECT count(*) FROM [dbo].[Photo] 
                           WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrName + "'; " + 
-                                @"SELECT [PhotoID]
+                          @"SELECT [PhotoID]
                               ,[Title]
                               ,[Desp]
                               ,[Width]
@@ -99,7 +94,7 @@ namespace acgalleryapi.Controllers
                               ,[IsPublic]
                               ,[EXIFInfo]
                           FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = " + usrName;
+                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrName + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
                 }
                 else
@@ -212,7 +207,7 @@ namespace acgalleryapi.Controllers
                                 LEFT OUTER JOIN [dbo].[Photo] AS tabb
                                     ON taba.[PhotoID] = tabb.[PhotoID]
                             WHERE taba.[AlbumID] = N'" + albumid + "'; " +
-                                @"SELECT tabb.[PhotoID]
+                            @"SELECT tabb.[PhotoID]
                               ,tabb.[Title]
                               ,tabb.[Desp]
                               ,tabb.[Width]
@@ -238,7 +233,7 @@ namespace acgalleryapi.Controllers
                             FROM [dbo].[AlbumPhoto] AS taba
                                 LEFT OUTER JOIN [dbo].[Photo] AS tabb
                                     ON taba.[PhotoID] = tabb.[PhotoID]
-                            WHERE taba.[AlbumID] = N'" + albumid + "'";
+                            WHERE taba.[AlbumID] = N'" + albumid + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                 }
 
                 SqlCommand cmd = new SqlCommand(queryString, conn);
