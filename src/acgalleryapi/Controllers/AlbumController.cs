@@ -492,6 +492,7 @@ namespace acgalleryapi.Controllers
         {
             Boolean bError = false;
             String strErrMsg = "";
+
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;

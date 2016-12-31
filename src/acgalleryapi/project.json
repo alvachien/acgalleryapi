@@ -3,7 +3,7 @@
   "copyright": "Alva Chien",
   "description": "API for galllery related objects",
   "dependencies": {
-    "IdentityServer4.AccessTokenValidation": "1.0.1-rc3",
+    "IdentityServer4.AccessTokenValidation": "1.0.1",
     "Microsoft.AspNetCore.Cors": "1.1.0",
     "Microsoft.AspNetCore.Mvc": "1.1.0",
     "Microsoft.AspNetCore.Routing": "1.1.0",

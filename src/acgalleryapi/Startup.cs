@@ -106,7 +106,7 @@ namespace acgalleryapi
 #endif
                 RequireHttpsMetadata = false,
 
-                ScopeName = "api.galleryapi",
+                ApiName = "api.galleryapi",
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true
             });
