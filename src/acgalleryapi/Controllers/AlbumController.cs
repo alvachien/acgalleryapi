@@ -16,7 +16,7 @@ namespace acgalleryapi.Controllers
     {
         // GET: api/album
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] String photoid = null, [FromQuery] Int32 top = 30, [FromQuery] Int32 skip = 0)
+        public async Task<IActionResult> Get([FromQuery] String photoid = null, [FromQuery] Int32 top = 100, [FromQuery] Int32 skip = 0)
         {
             BaseListViewModel<AlbumViewModel> listVm = new BaseListViewModel<AlbumViewModel>();
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);

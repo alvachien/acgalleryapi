@@ -15,7 +15,7 @@ namespace acgalleryapi.Controllers
     public class PhotoController : Controller
     {
         [HttpGet]
-        public async Task<IActionResult> GetPhotos([FromQuery] String albumid = null, [FromQuery] String accessCode = null, [FromQuery] Int32 top = 30, [FromQuery] Int32 skip = 0)
+        public async Task<IActionResult> GetPhotos([FromQuery] String albumid = null, [FromQuery] String accessCode = null, [FromQuery] Int32 top = 100, [FromQuery] Int32 skip = 0)
         {
             BaseListViewModel<PhotoViewModel> rstFiles = new BaseListViewModel<PhotoViewModel>();
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
