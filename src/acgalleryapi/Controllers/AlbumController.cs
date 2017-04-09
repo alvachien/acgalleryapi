@@ -186,6 +186,12 @@ namespace acgalleryapi.Controllers
                             }
                             listVm.Add(avm);
                         }
+
+                        if (!String.IsNullOrEmpty(photoid))
+                        {
+                            // Need update the total count
+                            listVm.TotalCount = listVm.ContentList.Count;
+                        }
                     }
 
                     ++nRstBatch;
