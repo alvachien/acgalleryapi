@@ -229,7 +229,6 @@ namespace acgalleryapi.Controllers
                               ,tabb.[ISONumber]
                               ,tabb.[IsPublic]
                               ,tabb.[EXIFInfo] 
-                              ,tabb.[EXIFInfo] 
                             FROM [dbo].[AlbumPhoto] AS taba
                                 LEFT OUTER JOIN [dbo].[Photo] AS tabb
                                     ON taba.[PhotoID] = tabb.[PhotoID]
