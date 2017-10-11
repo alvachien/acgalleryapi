@@ -3,9 +3,6 @@
 //define USE_ALIYUN
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -51,6 +48,24 @@ namespace acgalleryapi
                     }
                 );
 
+            services.AddAuthentication("Bearer")
+                .AddIdentityServerAuthentication(options =>
+                {
+#if DEBUG
+                    options.Authority = "http://localhost:41016";
+#else
+#if USE_MICROSOFTAZURE
+                    options.Authority = "http://acidserver.azurewebsites.net";
+#elif USE_ALIYUN
+                    options.Authority = "http://118.178.58.187:5100/";
+#endif
+#endif
+                    options.RequireHttpsMetadata = false;
+                    options.ApiName = "api.galleryapi";
+                    //options.AutomaticAuthenticate = true;
+                    //options.AutomaticChallenge = true;
+                });
+
 #if DEBUG
             DBConnectionString = Configuration.GetConnectionString("DebugConnection");
 #else
@@ -62,11 +77,9 @@ namespace acgalleryapi
 #endif
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            app.UseAuthentication();
 
             app.UseCors(builder =>
 #if DEBUG
@@ -91,25 +104,6 @@ namespace acgalleryapi
                 .AllowAnyMethod()
                 .AllowCredentials()
                 );
-
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            app.UseIdentityServerAuthentication(new IdentityServerAuthenticationOptions
-            {
-#if DEBUG
-                Authority = "http://localhost:41016",
-#else
-#if USE_MICROSOFTAZURE
-                Authority = "http://acidserver.azurewebsites.net",
-#elif USE_ALIYUN
-                Authority = "http://118.178.58.187:5100/",
-#endif
-#endif
-                RequireHttpsMetadata = false,
-
-                ApiName = "api.galleryapi",
-                AutomaticAuthenticate = true,
-                AutomaticChallenge = true
-            });
 
             app.UseMvc();
         }
