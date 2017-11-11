@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{32126B94-D930-40C1-B18E-2EE85996E1E9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{79EA6C7C-997E-469D-9C29-438680BD510A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "acgalleryapi", "src\acgalleryapi\acgalleryapi.csproj", "{99744134-1EC1-4834-BDBB-7F50D4C1F603}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acgalleryapi.test", "acgalleryapi.test\acgalleryapi.test.csproj", "{D655B06C-75F3-409F-AC3E-DE8D988A224A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,12 +21,17 @@ Global
 		{99744134-1EC1-4834-BDBB-7F50D4C1F603}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99744134-1EC1-4834-BDBB-7F50D4C1F603}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99744134-1EC1-4834-BDBB-7F50D4C1F603}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D655B06C-75F3-409F-AC3E-DE8D988A224A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D655B06C-75F3-409F-AC3E-DE8D988A224A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D655B06C-75F3-409F-AC3E-DE8D988A224A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D655B06C-75F3-409F-AC3E-DE8D988A224A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{99744134-1EC1-4834-BDBB-7F50D4C1F603} = {32126B94-D930-40C1-B18E-2EE85996E1E9}
+		{D655B06C-75F3-409F-AC3E-DE8D988A224A} = {32126B94-D930-40C1-B18E-2EE85996E1E9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FAA58A83-9308-44B9-813B-CC3F9307CB4C}
