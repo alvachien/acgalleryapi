@@ -1,6 +1,8 @@
-﻿
-#define USE_MICROSOFTAZURE
+﻿#if DEBUG
+#else
+#define USE_AZURE
 //define USE_ALIYUN
+#endif
 
 using System;
 using Microsoft.AspNetCore.Builder;
@@ -44,7 +46,7 @@ namespace acgalleryapi
 #if DEBUG
                     options.Authority = "http://localhost:41016";
 #else
-#if USE_MICROSOFTAZURE
+#if USE_AZURE
                     options.Authority = "http://acidserver.azurewebsites.net";
 #elif USE_ALIYUN
                     options.Authority = "http://118.178.58.187:5100/";
@@ -59,7 +61,7 @@ namespace acgalleryapi
 #if DEBUG
             DBConnectionString = Configuration.GetConnectionString("DebugConnection");
 #else
-#if USE_MICROSOFTAZURE
+#if USE_AZURE
             DBConnectionString = Configuration.GetConnectionString("AzureConnection");
 #elif USE_ALIYUN
             DBConnectionString = Configuration.GetConnectionString("AliyunConnection");
@@ -78,7 +80,7 @@ namespace acgalleryapi
                     "https://localhost:1601"
                     )
 #else
-#if USE_MICROSOFTAZURE
+#if USE_AZURE
                 builder.WithOrigins(
                     "http://acgallery.azurewebsites.net/",
                     "https://acgallery.azurewebsites.net/"

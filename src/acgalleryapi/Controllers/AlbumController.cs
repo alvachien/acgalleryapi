@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace acgalleryapi.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     public class AlbumController : Controller
     {

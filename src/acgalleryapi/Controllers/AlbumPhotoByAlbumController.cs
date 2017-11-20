@@ -9,6 +9,7 @@ using acgalleryapi.ViewModels;
 
 namespace acgalleryapi.Controllers
 {
+    [Produces("application/json")]
     [Route("api/albumphotobyalbum")]
     public class AlbumPhotoByAlbumController : Controller
     {

@@ -1,6 +1,4 @@
-﻿USE [acgallery];
-GO
-/****** Object:  Table [dbo].[Album]    Script Date: 10/16/2016 7:02:15 PM ******/
+﻿/****** Object:  Table [dbo].[Album]    Script Date: 10/16/2016 7:02:15 PM ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON

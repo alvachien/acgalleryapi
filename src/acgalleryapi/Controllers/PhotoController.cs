@@ -507,7 +507,7 @@ namespace acgalleryapi.Controllers
             return new ObjectResult(vm);
         }
 
-        // DELETE api/values/5
+        // DELETE api/photo/5
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> Delete(string pid)
