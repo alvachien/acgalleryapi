@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "acgalleryapi", "src\acgalleryapi\acgalleryapi.csproj", "{99744134-1EC1-4834-BDBB-7F50D4C1F603}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acgalleryapi.test", "acgalleryapi.test\acgalleryapi.test.csproj", "{D655B06C-75F3-409F-AC3E-DE8D988A224A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acgalleryapi.test", "src\acgalleryapi.test\acgalleryapi.test.csproj", "{D655B06C-75F3-409F-AC3E-DE8D988A224A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
