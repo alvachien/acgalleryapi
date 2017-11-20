@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
-namespace acgallery
+namespace acgalleryapi
 {
     public class FileUploadSizeRequirement : IAuthorizationRequirement
     {

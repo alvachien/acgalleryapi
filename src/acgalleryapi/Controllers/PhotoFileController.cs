@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using acgalleryapi.ViewModels;
 using ImageMagick;
 
-
 namespace acgalleryapi.Controllers
 {
     [Produces("application/json")]
@@ -32,16 +31,16 @@ namespace acgalleryapi.Controllers
 
         // GET: api/PhotoFile
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult Get()
         {
-            return new string[] { "value1", "value2" };
+            return Forbid();
         }
 
         // GET: api/PhotoFile/5
-        [HttpGet("{id}", Name = "Get")]
-        public string Get(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
         {
-            return "value";
+            return Forbid();
         }
         
         // POST: api/PhotoFile
@@ -85,14 +84,45 @@ namespace acgalleryapi.Controllers
 
         // PUT: api/PhotoFile/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public IActionResult Put(int id, [FromBody]string value)
         {
+            return Forbid();
         }
         
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult DeleteUploadedFile(String strFile)
         {
+            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "wwwroot/uploads");
+            var fileFullPath = Path.Combine(uploads, strFile);
+            var filename = Path.GetFileNameWithoutExtension(fileFullPath);
+            var fileext = Path.GetExtension(fileFullPath);
+            var fileThumbFullPath = Path.Combine(uploads, filename + ".thumb" + fileext);
+
+            try
+            {
+                // File
+                if (System.IO.File.Exists(fileFullPath))
+                {
+                    System.IO.File.Delete(fileFullPath);
+                }
+
+                // Thumbnail file
+                if (System.IO.File.Exists(fileThumbFullPath))
+                {
+                    System.IO.File.Delete(fileThumbFullPath);
+                }
+            }
+            catch (Exception exp)
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
+
+                return BadRequest(exp.Message);
+            }
+
+            return new ObjectResult(new PhotoViewModel());
         }
 
         private async Task<IActionResult> AnalyzeFile(IFormFile ffile, String filePath, String thmFilePath, PhotoViewModel updrst, String usrName)
