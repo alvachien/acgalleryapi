@@ -36,18 +36,21 @@ namespace acgalleryapi.Controllers
             return Forbid();
         }
 
-        // GET: api/PhotoFile/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        // GET: api/PhotoFile/filename
+        [HttpGet("{filename}")]
+        public async Task<IActionResult> Get(string filename)
         {
-            return Forbid();
+            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "/uploads");
+
+            var image = System.IO.File.OpenRead(uploads + "\\" + filename);
+            return File(image, "image/jpeg");
         }
         
         // POST: api/PhotoFile
         [HttpPost]
         public async Task<IActionResult> UploadPhotos(ICollection<IFormFile> files)
         {
-            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "wwwroot/uploads");
+            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "/uploads");
             if (!Directory.Exists(uploads))
             {
                 Directory.CreateDirectory(uploads);
