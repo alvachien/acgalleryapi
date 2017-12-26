@@ -96,7 +96,7 @@ namespace acgalleryapi.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUploadedFile(String strFile)
         {
-            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "wwwroot/uploads");
+            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "/uploads");
             var fileFullPath = Path.Combine(uploads, strFile);
             var filename = Path.GetFileNameWithoutExtension(fileFullPath);
             var fileext = Path.GetExtension(fileFullPath);

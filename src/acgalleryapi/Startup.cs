@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace acgalleryapi
 {
@@ -37,6 +38,13 @@ namespace acgalleryapi
                     options => {
                         options.AddPolicy("GalleryAdmin", policy => policy.RequireRole("GalleryAdmin"));
                         options.AddPolicy("GalleryPro", policy => policy.RequireRole("GalleryPro"));
+                        options.AddPolicy("FileSizeRequirementPolicy",
+                            policy =>
+                            {
+                                policy.AuthenticationSchemes.Add("Bearer");
+                                policy.RequireAuthenticatedUser();
+                                policy.Requirements.Add(new FileUploadSizeRequirement());
+                            });
                     }
                 );
 
@@ -57,6 +65,8 @@ namespace acgalleryapi
                     //options.AutomaticAuthenticate = true;
                     //options.AutomaticChallenge = true;
                 });
+
+            services.AddSingleton<IAuthorizationHandler, FileUploadSizeHandler>();
 
 #if DEBUG
             DBConnectionString = Configuration.GetConnectionString("DebugConnection");
@@ -96,6 +106,8 @@ namespace acgalleryapi
                 .AllowAnyMethod()
                 .AllowCredentials()
                 );
+
+            app.UseStaticFiles();
 
             app.UseMvc();
         }
