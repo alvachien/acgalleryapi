@@ -40,9 +40,7 @@ namespace acgalleryapi.Controllers
         [HttpGet("{filename}")]
         public async Task<IActionResult> Get(string filename)
         {
-            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "/uploads");
-
-            var image = System.IO.File.OpenRead(uploads + "\\" + filename);
+            var image = System.IO.File.OpenRead(Startup.UploadFolder + "\\" + filename);
             return File(image, "image/jpeg");
         }
         
@@ -50,12 +48,6 @@ namespace acgalleryapi.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadPhotos(ICollection<IFormFile> files)
         {
-            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "/uploads");
-            if (!Directory.Exists(uploads))
-            {
-                Directory.CreateDirectory(uploads);
-            }
-
             if (Request.Form.Files.Count <= 0)
                 return BadRequest("No Files");
 
@@ -77,10 +69,10 @@ namespace acgalleryapi.Controllers
             var fileext = filename1.Substring(idx1);
 
             rst.PhotoId = Guid.NewGuid().ToString("N");
-            rst.FileUrl = "/uploads/" + rst.PhotoId + fileext;
-            rst.ThumbnailFileUrl = "/uploads/" + rst.PhotoId + ".thumb" + fileext;
+            rst.FileUrl = rst.PhotoId + fileext;
+            rst.ThumbnailFileUrl = rst.PhotoId + ".thumb" + fileext;
 
-            await AnalyzeFile(file, Path.Combine(uploads, rst.PhotoId + fileext), Path.Combine(uploads, rst.PhotoId + ".thumb" + fileext), rst, usrName);
+            await AnalyzeFile(file, Path.Combine(Startup.UploadFolder, rst.PhotoId + fileext), Path.Combine(Startup.UploadFolder, rst.PhotoId + ".thumb" + fileext), rst, usrName);
 
             return new ObjectResult(rst);
         }
@@ -96,11 +88,10 @@ namespace acgalleryapi.Controllers
         [HttpDelete("{id}")]
         public IActionResult DeleteUploadedFile(String strFile)
         {
-            var uploads = Path.Combine(_hostingEnvironment.ContentRootPath, "/uploads");
-            var fileFullPath = Path.Combine(uploads, strFile);
+            var fileFullPath = Path.Combine(Startup.UploadFolder, strFile);
             var filename = Path.GetFileNameWithoutExtension(fileFullPath);
             var fileext = Path.GetExtension(fileFullPath);
-            var fileThumbFullPath = Path.Combine(uploads, filename + ".thumb" + fileext);
+            var fileThumbFullPath = Path.Combine(Startup.UploadFolder, filename + ".thumb" + fileext);
 
             try
             {

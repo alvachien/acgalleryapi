@@ -5,6 +5,7 @@
 #endif
 
 using System;
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -12,17 +13,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http;
 
 namespace acgalleryapi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            HostingEnvironment = env;
+
+            UploadFolder = env.ContentRootPath + @"\\uploads";
+            if (!Directory.Exists(UploadFolder))
+            {
+                Directory.CreateDirectory(UploadFolder);
+            }
         }
 
         public IConfiguration Configuration { get; }
+        internal static String UploadFolder { get; private set; }
+        public IHostingEnvironment HostingEnvironment { get; private set; }
 
         internal static String DBConnectionString { get; private set; }
 
@@ -107,7 +119,17 @@ namespace acgalleryapi
                 .AllowCredentials()
                 );
 
-            app.UseStaticFiles();
+            //app.UseStaticFiles(); // For the wwwroot folder
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), @"uploads")),
+                RequestPath = new PathString("/uploads"),
+                OnPrepareResponse = ctx =>
+                {
+                    ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=600");
+                }
+            });
 
             app.UseMvc();
         }
