@@ -25,7 +25,7 @@ namespace acgalleryapi
             Configuration = configuration;
             HostingEnvironment = env;
 
-            UploadFolder = env.ContentRootPath + @"\\uploads";
+            UploadFolder = Path.Combine(env.ContentRootPath, @"uploads");
             if (!Directory.Exists(UploadFolder))
             {
                 Directory.CreateDirectory(UploadFolder);
@@ -122,9 +122,8 @@ namespace acgalleryapi
             //app.UseStaticFiles(); // For the wwwroot folder
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), @"uploads")),
-                RequestPath = new PathString("/uploads"),
+                FileProvider = new PhysicalFileProvider(UploadFolder),
+                RequestPath = new PathString("/updphoto"),
                 OnPrepareResponse = ctx =>
                 {
                     ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=600");

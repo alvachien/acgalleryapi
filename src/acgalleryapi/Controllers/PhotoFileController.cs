@@ -74,7 +74,7 @@ namespace acgalleryapi.Controllers
 
             await AnalyzeFile(file, Path.Combine(Startup.UploadFolder, rst.PhotoId + fileext), Path.Combine(Startup.UploadFolder, rst.PhotoId + ".thumb" + fileext), rst, usrName);
 
-            return new ObjectResult(rst);
+            return new JsonResult(rst);
         }
 
         // PUT: api/PhotoFile/5
