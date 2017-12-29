@@ -40,26 +40,27 @@ namespace acgalleryapi.Controllers
                     // Anonymous user
                     if (String.IsNullOrEmpty(photoid))
                     {
-                        queryString = @"With albumfirstphoto as (select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
-	                    join dbo.Photo as tabc
-	                    on tabb.PhotoID = tabc.PhotoID
-	                    group by tabb.AlbumID)
-                        select count(*)
-	                    from dbo.Album as taba
-	                    left outer join albumfirstphoto as tabb
-		                    on taba.AlbumID = tabb.AlbumID
-                        where taba.IsPublic = 1;
+                        queryString = @"WITH albumfirstphoto as (SELECT tabb.AlbumID, COUNT(tabb.PhotoID) as PhotoCount, MIN(tabc.PhotoThumbUrl) as ThumbUrl 
+                            FROM dbo.AlbumPhoto as tabb
+	                        JOIN dbo.Photo as tabc
+	                            ON tabb.PhotoID = tabc.PhotoID
+	                            GROUP BY tabb.AlbumID)
+                        SELECT COUNT(*) FROM dbo.Album as taba
+	                    LEFT OUTER JOIN albumfirstphoto as tabb
+		                    ON taba.AlbumID = tabb.AlbumID
+                        WHERE taba.IsPublic = 1;
 
-                        With albumfirstphoto as (select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
-	                    join dbo.Photo as tabc
-	                    on tabb.PhotoID = tabc.PhotoID
-	                    group by tabb.AlbumID)
-                        select taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                        WITH albumfirstphoto as (SELECT tabb.AlbumID, COUNT(tabb.PhotoID) as PhotoCount, MIN(tabc.PhotoThumbUrl) as ThumbUrl 
+                            FROM dbo.AlbumPhoto as tabb
+	                        JOIN dbo.Photo as tabc
+	                            ON tabb.PhotoID = tabc.PhotoID
+	                            GROUP BY tabb.AlbumID)
+                        SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                        tabb.PhotoCount, tabb.ThumbUrl
-	                    from dbo.Album as taba
-	                    left outer join albumfirstphoto as tabb
-		                    on taba.AlbumID = tabb.AlbumID
-                        where taba.IsPublic = 1
+	                    FROM dbo.Album as taba
+	                    LEFT OUTER JOIN albumfirstphoto as tabb
+		                    ON taba.AlbumID = tabb.AlbumID
+                        WHERE taba.IsPublic = 1
                         ORDER BY (SELECT NULL)
                         OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY;";
                     }
@@ -67,22 +68,22 @@ namespace acgalleryapi.Controllers
                     {
                         // In case the photo id is specified, won't care about the top and skip
                         queryString = @"
-                            select 0;
+                            SELECT 0;
 
-                            With albumfirstphoto as (
-	                        select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
-	                        join dbo.Photo as tabc
-	                        on tabb.PhotoID = tabc.PhotoID
-	                        group by tabb.AlbumID)
-                            select taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                            WITH albumfirstphoto as (
+	                            SELECT tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
+	                            INNER JOIN dbo.Photo as tabc
+	                                ON tabb.PhotoID = tabc.PhotoID
+	                                GROUP BY tabb.AlbumID)
+                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                            tabb.PhotoCount, tabb.ThumbUrl
-	                        from dbo.AlbumPhoto as tabc
-	                        inner join dbo.Album as taba
-		                        on tabc.AlbumID = taba.AlbumID
-                                and taba.IsPublic = 1
-	                        left outer join albumfirstphoto as tabb
-		                        on taba.AlbumID = tabb.AlbumID
-                            where tabc.PhotoID = N'";
+	                        FROM dbo.AlbumPhoto as tabc
+	                        INNER JOIN dbo.Album as taba
+		                        ON tabc.AlbumID = taba.AlbumID
+                                AND taba.IsPublic = 1
+	                        LEFT OUTER JOIN albumfirstphoto as tabb
+		                        ON taba.AlbumID = tabb.AlbumID
+                            WHERE tabc.PhotoID = N'";
                         queryString += photoid;
                         queryString += @"'";
                     }
@@ -92,49 +93,50 @@ namespace acgalleryapi.Controllers
                     // Signed in user
                     if (String.IsNullOrEmpty(photoid))
                     {
-                        queryString = @"With albumfirstphoto as (select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
-                                                                                                                                                             join dbo.Photo as tabc
-                                                                                                                                                             on tabb.PhotoID = tabc.PhotoID
-
-                            group by tabb.AlbumID)
-                            select count(*)
-                            from dbo.Album as taba
-                            left outer join albumfirstphoto as tabb
-                                on taba.AlbumID = tabb.AlbumID
-                            where taba.IsPublic = 1 or(taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "'); "
+                        queryString = @"WITH albumfirstphoto as (select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl 
+                            FROM dbo.AlbumPhoto as tabb
+                            JOIN dbo.Photo as tabc
+                                 ON tabb.PhotoID = tabc.PhotoID GROUP BY tabb.AlbumID)
+                            SELECT  count(*)
+                                FROM dbo.Album as taba
+                            LEFT OUTER JOIN albumfirstphoto as tabb
+                                ON taba.AlbumID = tabb.AlbumID
+                            WHERE taba.IsPublic = 1 OR (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "'); "
                             + 
-                            @"With albumfirstphoto as (select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
-	                        join dbo.Photo as tabc
-	                        on tabb.PhotoID = tabc.PhotoID
-	                        group by tabb.AlbumID)
-                            select taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                            @"WITH albumfirstphoto as (SELECT tabb.AlbumID, COUNT(tabb.PhotoID) as PhotoCount, MIN(tabc.PhotoThumbUrl) as ThumbUrl 
+                                FROM dbo.AlbumPhoto as tabb 
+                                JOIN dbo.Photo as tabc
+	                                ON tabb.PhotoID = tabc.PhotoID
+	                                GROUP BY tabb.AlbumID)
+                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                            tabb.PhotoCount, tabb.ThumbUrl
-	                        from dbo.Album as taba
-	                        left outer join albumfirstphoto as tabb
+	                        FROM dbo.Album as taba
+	                        LEFT OUTER JOIN albumfirstphoto as tabb
 		                        on taba.AlbumID = tabb.AlbumID
-                            where taba.IsPublic = 1 or (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + @"')
+                            WHERE taba.IsPublic = 1 or (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + @"')
                             ORDER BY (SELECT NULL)
                             OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";;
                     }
                     else
                     {
                         queryString = @"
-                            select 0;
-                            With albumfirstphoto as (
-	                        select tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
-	                        join dbo.Photo as tabc
-	                        on tabb.PhotoID = tabc.PhotoID
-	                        group by tabb.AlbumID)
-                            select taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                            SELECT 0;
+                            WITH albumfirstphoto AS (
+	                        SELECT tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
+	                        JOIN dbo.Photo as tabc
+	                        ON tabb.PhotoID = tabc.PhotoID
+	                        GROUP BY tabb.AlbumID)
+                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                            tabb.PhotoCount, tabb.ThumbUrl
-	                        from dbo.AlbumPhoto as tabc
-	                        inner join dbo.Album as taba
-		                        on tabc.AlbumID = taba.AlbumID
-                                on taba.IsPublic = 1 or (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "') " 
+	                        FROM dbo.AlbumPhoto as tabc
+	                        INNER JOIN dbo.Album as taba
+		                        ON tabc.AlbumID = taba.AlbumID
+                                AND taba.IsPublic = 1 OR (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "') " 
                                 + 
-                                @" left outer join albumfirstphoto as tabb
-		                        on taba.AlbumID = tabb.AlbumID
-                            where tabc.PhotoID = N'";
+                                @" 
+                            LEFT OUTER JOIN albumfirstphoto as tabb
+		                      ON taba.AlbumID = tabb.AlbumID
+                            WHERE tabc.PhotoID = N'";
                         queryString += photoid;
                         queryString += @"'";
                     }
