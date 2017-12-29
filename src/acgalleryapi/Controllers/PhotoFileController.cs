@@ -63,7 +63,7 @@ namespace acgalleryapi.Controllers
             }
             var usrName = User.FindFirst(c => c.Type == "sub").Value;
 
-            var rst = new PhotoViewModel();
+            var rst = new PhotoViewModelEx(true);
             var filename1 = file.FileName;
             var idx1 = filename1.LastIndexOf('.');
             var fileext = filename1.Substring(idx1);
@@ -119,7 +119,7 @@ namespace acgalleryapi.Controllers
             return new ObjectResult(new PhotoViewModel());
         }
 
-        private async Task<IActionResult> AnalyzeFile(IFormFile ffile, String filePath, String thmFilePath, PhotoViewModel updrst, String usrName)
+        private async Task<IActionResult> AnalyzeFile(IFormFile ffile, String filePath, String thmFilePath, PhotoViewModelEx updrst, String usrName)
         {
             Boolean bThumbnailCreated = false;
 
@@ -195,12 +195,15 @@ namespace acgalleryapi.Controllers
                     System.Diagnostics.Debug.WriteLine(exp.Message);
 #endif
                     _logger.LogError(exp.Message);
+
+                    updrst.success = false;
+                    updrst.error = exp.Message;
                 }
             }
 
             updrst.UploadedTime = DateTime.Now;
             updrst.IsOrgThumbnail = bThumbnailCreated;
-            updrst.UploadedBy = usrName;
+            updrst.UploadedBy = usrName;            
 
             return Json(true);
         }

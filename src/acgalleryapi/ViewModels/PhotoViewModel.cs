@@ -37,4 +37,19 @@ namespace acgalleryapi.ViewModels
     {
         public List<ExifTagItem> ExifTags = new List<ExifTagItem>();
     }
+
+    public class PhotoViewModelEx : PhotoViewModel
+    {
+        // This class adds the information for FineUploader required:
+        // success: success flag
+        // error: error message
+
+        public PhotoViewModelEx(Boolean bSuc, String strErr = "")
+        {
+            success = bSuc;
+            error = strErr;
+        }
+        public Boolean success;
+        public String error;
+    }
 }
