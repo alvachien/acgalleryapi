@@ -201,6 +201,7 @@ namespace acgalleryapi.Controllers
                 }
             }
 
+            updrst.OrgFileName = ffile.FileName;
             updrst.UploadedTime = DateTime.Now;
             updrst.IsOrgThumbnail = bThumbnailCreated;
             updrst.UploadedBy = usrName;            
