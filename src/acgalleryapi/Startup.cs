@@ -1,7 +1,7 @@
 ﻿#if DEBUG
-#else
-#define USE_AZURE
-//define USE_ALIYUN
+#elif RELEASE
+//#define USE_AZURE
+#define USE_ALIYUN
 #endif
 
 using System;
@@ -69,7 +69,7 @@ namespace acgalleryapi
 #if USE_AZURE
                     options.Authority = "http://acidserver.azurewebsites.net";
 #elif USE_ALIYUN
-                    options.Authority = "http://118.178.58.187:5100/";
+                    options.Authority = "http://118.178.58.187:5100";
 #endif
 #endif
                     options.RequireHttpsMetadata = false;
@@ -104,8 +104,8 @@ namespace acgalleryapi
 #else
 #if USE_AZURE
                 builder.WithOrigins(
-                    "http://acgallery.azurewebsites.net/",
-                    "https://acgallery.azurewebsites.net/"
+                    "http://acgallery.azurewebsites.net",
+                    "https://acgallery.azurewebsites.net"
                     )
 #elif USE_ALIYUN
                 builder.WithOrigins(
