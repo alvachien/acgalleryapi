@@ -65,7 +65,7 @@ namespace acgalleryapi
                 {
 #if DEBUG
                     options.Authority = "http://localhost:41016";
-#else
+#elif RELEASE
 #if USE_AZURE
                     options.Authority = "http://acidserver.azurewebsites.net";
 #elif USE_ALIYUN
@@ -82,7 +82,7 @@ namespace acgalleryapi
 
 #if DEBUG
             DBConnectionString = Configuration.GetConnectionString("DebugConnection");
-#else
+#elif RELEASE
 #if USE_AZURE
             DBConnectionString = Configuration.GetConnectionString("AzureConnection");
 #elif USE_ALIYUN
@@ -101,7 +101,7 @@ namespace acgalleryapi
                     "http://localhost:1601",
                     "https://localhost:1601"
                     )
-#else
+#elif RELEASE
 #if USE_AZURE
                 builder.WithOrigins(
                     "http://acgallery.azurewebsites.net",
