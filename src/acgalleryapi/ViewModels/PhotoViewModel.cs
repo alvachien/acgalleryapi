@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
 namespace acgalleryapi.ViewModels
@@ -36,6 +34,7 @@ namespace acgalleryapi.ViewModels
     public class PhotoViewModel : PhotoViewModelBase
     {
         public List<ExifTagItem> ExifTags = new List<ExifTagItem>();
+        public List<String> Tags = new List<string>();        
     }
 
     public class PhotoViewModelEx : PhotoViewModel
@@ -49,6 +48,7 @@ namespace acgalleryapi.ViewModels
             success = bSuc;
             error = strErr;
         }
+
         public Boolean success;
         public String error;
     }
