@@ -246,4 +246,7 @@ ModelManifest.xml
 
 # Publish folder
 PublishProfiles/
-/src/acgalleryapi/uploads
+
+# Project specific
+uploads/
+src/acgalleryapi/uploads/

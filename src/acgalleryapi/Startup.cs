@@ -1,10 +1,4 @@
-﻿#if DEBUG
-#elif RELEASE
-//#define USE_AZURE
-#define USE_ALIYUN
-#endif
-
-using System;
+﻿using System;
 using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -67,7 +61,7 @@ namespace acgalleryapi
                     options.Authority = "http://localhost:41016";
 #elif RELEASE
 #if USE_AZURE
-                    options.Authority = "http://acidserver.azurewebsites.net";
+                    options.Authority = "https://acidserver.azurewebsites.net";
 #elif USE_ALIYUN
                     options.Authority = "http://118.178.58.187:5100";
 #endif
@@ -104,7 +98,6 @@ namespace acgalleryapi
 #elif RELEASE
 #if USE_AZURE
                 builder.WithOrigins(
-                    "http://acgallery.azurewebsites.net",
                     "https://acgallery.azurewebsites.net"
                     )
 #elif USE_ALIYUN
