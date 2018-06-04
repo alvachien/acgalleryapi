@@ -92,8 +92,8 @@ namespace acgalleryapi
             app.UseCors(builder =>
 #if DEBUG
                 builder.WithOrigins(
-                    "http://localhost:1601",
-                    "https://localhost:1601"
+                    "http://localhost:16001",
+                    "https://localhost:16001"
                     )
 #elif RELEASE
 #if USE_AZURE
