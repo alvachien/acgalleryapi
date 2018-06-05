@@ -19,6 +19,14 @@ namespace acgalleryapi.ViewModels
         public DateTime CreatedAt { get; set; }
         public Boolean IsPublic { get; set; }
         [StringLength(50)]
+        public String AccessCodeHint { get; set; }
+        /**
+         * The field AccessCodeRequired only valid in list view mode
+         * In the list view mode, it shall never return the real access code,
+         * meaning, the AccessCode is empty;
+         */
+        public Boolean AccessCodeRequired { get; set; }
+        [StringLength(50)]
         public String AccessCode { get; set; }
 
         public Int32 PhotoCount { get; set; }

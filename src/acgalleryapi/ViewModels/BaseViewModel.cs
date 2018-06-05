@@ -7,7 +7,6 @@ namespace acgalleryapi.ViewModels
 {
     public abstract class BaseViewModel
     {
-
     }
 
     public class BaseListViewModel<T> where T : BaseViewModel

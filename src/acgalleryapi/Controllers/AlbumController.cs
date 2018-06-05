@@ -20,19 +20,13 @@ namespace acgalleryapi.Controllers
         public async Task<IActionResult> Get([FromQuery] String photoid = null, [FromQuery] Int32 top = 100, [FromQuery] Int32 skip = 0)
         {
             BaseListViewModel<AlbumViewModel> listVm = new BaseListViewModel<AlbumViewModel>();
-            SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
+            SqlConnection conn = null;
             String queryString = "";
             Boolean bError = false;
             String strErrMsg = "";
 
             try
             {
-#if DEBUG
-                foreach (var clm in User.Claims.AsEnumerable())
-                {
-                    System.Diagnostics.Debug.WriteLine("Type = " + clm.Type + "; Value = " + clm.Value);
-                }
-#endif
                 var usrObj = User.FindFirst(c => c.Type == "sub");
 
                 if (usrObj == null)
@@ -55,7 +49,7 @@ namespace acgalleryapi.Controllers
 	                        JOIN dbo.Photo as tabc
 	                            ON tabb.PhotoID = tabc.PhotoID
 	                            GROUP BY tabb.AlbumID)
-                        SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                        SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCodeHint, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                        tabb.PhotoCount, tabb.ThumbUrl
 	                    FROM dbo.Album as taba
 	                    LEFT OUTER JOIN albumfirstphoto as tabb
@@ -67,15 +61,14 @@ namespace acgalleryapi.Controllers
                     else
                     {
                         // In case the photo id is specified, won't care about the top and skip
-                        queryString = @"
-                            SELECT 0;
+                        queryString = @"SELECT 0;
 
                             WITH albumfirstphoto as (
 	                            SELECT tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
 	                            INNER JOIN dbo.Photo as tabc
 	                                ON tabb.PhotoID = tabc.PhotoID
 	                                GROUP BY tabb.AlbumID)
-                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCodeHint, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                            tabb.PhotoCount, tabb.ThumbUrl
 	                        FROM dbo.AlbumPhoto as tabc
 	                        INNER JOIN dbo.Album as taba
@@ -102,37 +95,37 @@ namespace acgalleryapi.Controllers
                             LEFT OUTER JOIN albumfirstphoto as tabb
                                 ON taba.AlbumID = tabb.AlbumID
                             WHERE taba.IsPublic = 1 OR (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "'); "
-                            + 
+                            +
                             @"WITH albumfirstphoto as (SELECT tabb.AlbumID, COUNT(tabb.PhotoID) as PhotoCount, MIN(tabc.PhotoThumbUrl) as ThumbUrl 
                                 FROM dbo.AlbumPhoto as tabb 
                                 JOIN dbo.Photo as tabc
 	                                ON tabb.PhotoID = tabc.PhotoID
 	                                GROUP BY tabb.AlbumID)
-                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCodeHint, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                            tabb.PhotoCount, tabb.ThumbUrl
 	                        FROM dbo.Album as taba
 	                        LEFT OUTER JOIN albumfirstphoto as tabb
 		                        on taba.AlbumID = tabb.AlbumID
                             WHERE taba.IsPublic = 1 or (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + @"')
                             ORDER BY (SELECT NULL)
-                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";;
+                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; "; ;
                     }
                     else
                     {
-                        queryString = @"
-                            SELECT 0;
+                        queryString = @"SELECT 0;
+
                             WITH albumfirstphoto AS (
 	                        SELECT tabb.AlbumID, count(tabb.PhotoID) as PhotoCount, min(tabc.PhotoThumbUrl) as ThumbUrl from dbo.AlbumPhoto as tabb
 	                        JOIN dbo.Photo as tabc
 	                        ON tabb.PhotoID = tabc.PhotoID
 	                        GROUP BY tabb.AlbumID)
-                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
+                            SELECT taba.AlbumID, taba.Title, taba.Desp, taba.IsPublic, taba.AccessCodeHint, taba.AccessCode, taba.CreateAt, taba.CreatedBy,
 	                            tabb.PhotoCount, tabb.ThumbUrl
 	                        FROM dbo.AlbumPhoto as tabc
 	                        INNER JOIN dbo.Album as taba
 		                        ON tabc.AlbumID = taba.AlbumID
-                                AND taba.IsPublic = 1 OR (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "') " 
-                                + 
+                                AND taba.IsPublic = 1 OR (taba.IsPublic = 0 and taba.CreatedBy = N'" + usrObj.Value + "') "
+                                +
                                 @" 
                             LEFT OUTER JOIN albumfirstphoto as tabb
 		                      ON taba.AlbumID = tabb.AlbumID
@@ -142,6 +135,7 @@ namespace acgalleryapi.Controllers
                     }
                 }
 
+                conn = new SqlConnection(Startup.DBConnectionString);
                 await conn.OpenAsync();
                 SqlCommand cmd = new SqlCommand(queryString, conn);
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -161,32 +155,52 @@ namespace acgalleryapi.Controllers
                         while (reader.Read())
                         {
                             AlbumViewModel avm = new AlbumViewModel();
-                            avm.Id = reader.GetInt32(0);
-                            avm.Title = reader.GetString(1);
-                            if (!reader.IsDBNull(2))
-                                avm.Desp = reader.GetString(2);
-                            if (!reader.IsDBNull(3))
-                                avm.IsPublic = reader.GetBoolean(3);
-                            if (!reader.IsDBNull(4))
+                            Int32 idx = 0;
+                            avm.Id = reader.GetInt32(idx++);
+                            avm.Title = reader.GetString(idx++);
+                            if (!reader.IsDBNull(idx))
+                                avm.Desp = reader.GetString(idx++);
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
+                                avm.IsPublic = reader.GetBoolean(idx++);
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
+                                avm.AccessCodeHint = reader.GetString(idx++);
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
                             {
-                                // Cannot just release the AccessCode
-                                //avm.AccessCode = reader.GetString(4);
-                                if (!String.IsNullOrEmpty(reader.GetString(4)))
-                                    avm.AccessCode = "1";
+                                if (!String.IsNullOrEmpty(reader.GetString(idx)))
+                                    avm.AccessCodeRequired = true;
+                                else
+                                    avm.AccessCodeRequired = false;
+                                ++idx;
                             }
-                            if (!reader.IsDBNull(5))
-                                avm.CreatedAt = reader.GetDateTime(5);
-                            if (!reader.IsDBNull(6))
-                                avm.CreatedBy = reader.GetString(6);
-                            if (!reader.IsDBNull(7))
-                                avm.PhotoCount = (Int32)reader.GetInt32(7);
-                            if (!reader.IsDBNull(8))
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
+                                avm.CreatedAt = reader.GetDateTime(idx++);
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
+                                avm.CreatedBy = reader.GetString(idx++);
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
+                                avm.PhotoCount = (Int32)reader.GetInt32(idx++);
+                            else
+                                ++idx;
+                            if (!reader.IsDBNull(idx))
                             {
-                                avm.FirstPhotoThumnailUrl = reader.GetString(8);
+                                avm.FirstPhotoThumnailUrl = reader.GetString(idx++);
 
-                                if (!String.IsNullOrEmpty(avm.AccessCode))
+                                if (avm.AccessCodeRequired)
                                     avm.FirstPhotoThumnailUrl = String.Empty;
                             }
+                            else
+                                ++idx;
                             listVm.Add(avm);
                         }
 
@@ -210,8 +224,12 @@ namespace acgalleryapi.Controllers
             }
             finally
             {
-                conn.Close();
-                conn.Dispose();
+                if (conn != null)
+                {
+                    conn.Close();
+                    conn.Dispose();
+                    conn = null;
+                }
             }
 
             if (bError)
@@ -222,9 +240,9 @@ namespace acgalleryapi.Controllers
 
         // GET api/album/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
+            SqlConnection conn = null;
             AlbumViewModel avm = null;
 
             var usrObj = User.FindFirst(c => c.Type == "sub");
@@ -241,11 +259,14 @@ namespace acgalleryapi.Controllers
                           ,[CreatedBy]
                           ,[CreateAt]
                           ,[IsPublic]
+                          ,[AccessCodeHint]
                           ,[AccessCode]
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + id.ToString();
 
-                conn.Open();
+                conn = new SqlConnection(Startup.DBConnectionString);
+                await conn.OpenAsync();
+
                 SqlCommand cmd = new SqlCommand(queryString, conn);
                 SqlDataReader reader = cmd.ExecuteReader();
 
@@ -253,26 +274,43 @@ namespace acgalleryapi.Controllers
                 {
                     reader.Read(); // Only one record!
 
-                    String strAlbumAC = String.Empty;
-                    String strCreatedBy = String.Empty;
-                    Boolean bIsPublic = false;
-                    if (!reader.IsDBNull(3))
-                        strCreatedBy = reader.GetString(3);
-                    if (!reader.IsDBNull(5))
-                        bIsPublic = reader.GetBoolean(5);
-                    if (!reader.IsDBNull(6))
-                        strAlbumAC = reader.GetString(6);
-
                     avm = new AlbumViewModel();
-                    avm.Id = reader.GetInt32(0);
-                    avm.Title = reader.GetString(1);
-                    if (!reader.IsDBNull(2))
-                        avm.Desp = reader.GetString(2);
-                    avm.CreatedBy = strCreatedBy;
-                    if (!reader.IsDBNull(4))
-                        avm.CreatedAt = reader.GetDateTime(4);
-                    avm.IsPublic = bIsPublic;
-                    avm.AccessCode = String.IsNullOrEmpty(strAlbumAC)? String.Empty : "1";
+                    Int32 idx = 0;
+                    avm.Id = reader.GetInt32(idx++);
+                    avm.Title = reader.GetString(idx++);
+                    if (!reader.IsDBNull(idx))
+                        avm.Desp = reader.GetString(idx++);
+                    else
+                        ++idx;
+                    if (!reader.IsDBNull(idx))
+                        avm.CreatedBy = reader.GetString(idx++);
+                    else
+                        ++idx;
+                    if (!reader.IsDBNull(idx))
+                        avm.CreatedAt = reader.GetDateTime(idx++);
+                    else
+                        ++idx;
+                    if (!reader.IsDBNull(idx))
+                        avm.IsPublic = reader.GetBoolean(idx++);
+                    else
+                        ++idx;
+                    if (!reader.IsDBNull(idx))
+                        avm.AccessCodeHint = reader.GetString(idx++);
+                    else
+                        ++idx;
+                    if (!reader.IsDBNull(idx))
+                    {
+                        if (!String.IsNullOrEmpty(reader.GetString(idx++)))
+                        {
+                            avm.AccessCodeRequired = true;
+                        }
+                        else
+                        {
+                            avm.AccessCodeRequired = false;
+                        }
+                    }
+                    else
+                        ++idx;
 
                     reader.Dispose();
                     cmd.Dispose();
@@ -292,8 +330,12 @@ namespace acgalleryapi.Controllers
             }
             finally
             {
-                conn.Close();
-                conn.Dispose();
+                if (conn != null)
+                {
+                    conn.Close();
+                    conn.Dispose();
+                    conn = null;
+                }
             }
 
             if (bNotExist)
@@ -339,6 +381,7 @@ namespace acgalleryapi.Controllers
                                ,[CreatedBy]
                                ,[CreateAt]
                                ,[IsPublic]
+                               ,[AccessCodeHint]
                                ,[AccessCode])
                          VALUES
                                (@Title
@@ -346,6 +389,7 @@ namespace acgalleryapi.Controllers
                                ,@CreatedBy
                                ,@CreatedAt
                                ,@IsPublic
+                               ,@AccessCodeHint
                                ,@AccessCode
                                 )
                          ; SELECT @Identity = SCOPE_IDENTITY();";
@@ -357,6 +401,7 @@ namespace acgalleryapi.Controllers
                     cmd.Parameters.AddWithValue("@CreatedBy", usrName);
                     cmd.Parameters.AddWithValue("@CreatedAt", vm.CreatedAt);
                     cmd.Parameters.AddWithValue("@IsPublic", vm.IsPublic);
+                    cmd.Parameters.AddWithValue("@AccessCodeHint", String.IsNullOrEmpty(vm.AccessCodeHint) ? String.Empty : vm.AccessCodeHint);
                     cmd.Parameters.AddWithValue("@AccessCode", String.IsNullOrEmpty(vm.AccessCode) ? String.Empty : vm.AccessCode);
                     SqlParameter idparam = cmd.Parameters.AddWithValue("@Identity", SqlDbType.Int);
                     idparam.Direction = ParameterDirection.Output;
@@ -412,6 +457,7 @@ namespace acgalleryapi.Controllers
                           ,[CreatedBy]
                           ,[CreateAt]
                           ,[IsPublic]
+                          ,[AccessCodeHint]
                           ,[AccessCode]
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + vm.Id.ToString() + " FOR UPDATE ";
@@ -460,6 +506,7 @@ namespace acgalleryapi.Controllers
                             SET [Title] = @Title
                                 ,[Desp] = @Desp
                                 ,[IsPublic] = @IsPublic
+                                ,[AccessCodeHint] = @AccessCodeHint
                                 ,[AccessCode] = @AccessCode
                             WHERE [AlbumID] = @Id
                         ";
@@ -471,7 +518,11 @@ namespace acgalleryapi.Controllers
                     else
                         cmd.Parameters.AddWithValue("@Desp", vm.Desp);
                     cmd.Parameters.AddWithValue("@IsPublic", vm.IsPublic);
-                    if (vm.AccessCode == null)
+                    if (String.IsNullOrEmpty(vm.AccessCodeHint))
+                        cmd.Parameters.AddWithValue("@AccessCodeHint", DBNull.Value);
+                    else
+                        cmd.Parameters.AddWithValue("@AccessCodeHint", vm.AccessCodeHint);
+                    if (String.IsNullOrEmpty(vm.AccessCode))
                         cmd.Parameters.AddWithValue("@AccessCode", DBNull.Value);
                     else
                         cmd.Parameters.AddWithValue("@AccessCode", vm.AccessCode);
@@ -517,6 +568,7 @@ namespace acgalleryapi.Controllers
                           ,[CreatedBy]
                           ,[CreateAt]
                           ,[IsPublic]
+                          ,[AccessCodeHint]
                           ,[AccessCode]
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + nID.ToString() + " FOR UPDATE ";
@@ -582,6 +634,5 @@ namespace acgalleryapi.Controllers
 
             return new EmptyResult();
         }
-    }
-    
+    }    
 }
