@@ -11,7 +11,12 @@ You can clone this [repository](https://github.com/alvachien/acgalleryapi.git) o
 
 ### Step 2. Setup your own database.
 You need setup your own database (SQL Server based), and run scripts under folder 'sqls':
-1. DBSchema.sql
+DBSchema.sql
+
+As the project was keep updated, the database schema changes are logged with order.
+
+Also, the scripts have taken the upgrading into account. For instance, when adding a column to a table, the original table defintion will be updated directly, there will be a ALTER table script to handle existing tables.
+
 
 ### Step 3. Change the appsettings.json by adding the connection string:
 The appsettings.json has been removed because it defines the connection strings to the database. This file is manadatory to make the API works. 
@@ -35,29 +40,27 @@ An example file look like following:
 ```
 
 
-### Step 4. Run this API
-Deploy this Web API to IIS or other server.
+### Step 4. Deployment
+By default, this Web API can deploy to IIS or IIS Express, or any other HTTP server which can host ASP.NET Core.
 
 
-## Tools
-Though I using Visual Studio 2017, the project can be processed by any IDE which supports ASP.NET Core.
+## Development Tools
+Though the whole project was compiled with Visual Studio 2017 Community Version, the project can be processed by any IDE which supports ASP.NET Core.
 
 
 ## Unit Test
-This unit test project also included. You can run the unit test to ensure the code run successfully. 
+This unit test project also included. You can run the unit test to ensure the codes run successfully.
 
 
 # Author
 **Alva Chien (Hongjun Qian) | 钱红俊**
 
-A programmer, and a certificated Advanced Photographer.  
+A programmer, a photographer and a father.
  
 Contact me:
 
 1. Via mail: alvachien@163.com. Or,
-2. [Check my flickr](http://www.flickr.com/photos/alvachien). Or,
-3. [Visit my website](http://www.alvachien.com)
-
+2. [Check my flickr](http://www.flickr.com/photos/alvachien). 
 
 
 # Licence

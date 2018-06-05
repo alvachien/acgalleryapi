@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[Album](
 	[CreatedBy] [nvarchar](50) NULL,
 	[CreateAt] [datetime] NULL,
 	[IsPublic] [bit] NULL,
+	[AccessCodeHint] [nvarchar](50) NULL,
 	[AccessCode] [nvarchar](50) NULL,
  CONSTRAINT [PK_Album] PRIMARY KEY CLUSTERED 
 (
@@ -124,3 +125,43 @@ GO
 ALTER TABLE [dbo].[PhotoTag] CHECK CONSTRAINT [FK_PhotoTag_Photo]
 GO
 
+/* UPDATED at 2018.6.5 */
+/****** Object:  Table [dbo].[PhotoRating]    Script Date: 6/5/2018 1:22:20 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[PhotoRating](
+	[PhotoID] [nvarchar](40) NOT NULL,
+	[User] [nvarchar](50) NOT NULL,
+	[Rating] [tinyint] NOT NULL
+ CONSTRAINT [PK_PhotoRating] PRIMARY KEY CLUSTERED 
+(
+	[PhotoID] ASC,
+	[User] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[PhotoRating]  WITH CHECK ADD  CONSTRAINT [FK_PhotoRating_Photo] FOREIGN KEY([PhotoID])
+REFERENCES [dbo].[Photo] ([PhotoID])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[PhotoRating] CHECK CONSTRAINT [FK_PhotoRating_Photo]
+GO
+
+/* Add hint to access code */
+IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = 'Album' AND COLUMN_NAME = 'AccessCodeHint')
+BEGIN
+
+	ALTER TABLE [dbo].[Album]
+	ADD [AccessCodeHint] [nvarchar](50) NULL;
+
+
+END
+GO
