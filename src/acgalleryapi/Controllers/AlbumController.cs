@@ -137,6 +137,7 @@ namespace acgalleryapi.Controllers
 
                 conn = new SqlConnection(Startup.DBConnectionString);
                 await conn.OpenAsync();
+
                 SqlCommand cmd = new SqlCommand(queryString, conn);
                 SqlDataReader reader = cmd.ExecuteReader();
                 Int32 nRstBatch = 0;
@@ -373,9 +374,34 @@ namespace acgalleryapi.Controllers
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
+
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
-                    String cmdText = @"INSERT INTO [dbo].[Album]
+                    await conn.OpenAsync();
+
+                    // Step 1. Read out user authority
+                    UserOperatorAuthEnum? authAlbum = null;
+                    String cmdText = @"SELECT [AlbumCreate] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+
+                    if (!authAlbum.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
+
+                    // Step 2. Create an album
+                    cmdText = @"INSERT INTO [dbo].[Album]
                                ([Title]
                                ,[Desp]
                                ,[CreatedBy]
@@ -445,13 +471,34 @@ namespace acgalleryapi.Controllers
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
-                var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
 
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
-                    String cmdText = String.Empty;
+                    await conn.OpenAsync();
 
-                    String queryString = @"SELECT [AlbumID]
+                    // Step 1. Read out user authority
+                    UserOperatorAuthEnum? authAlbum = null;
+                    String cmdText = @"SELECT [AlbumChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+
+                    if (!authAlbum.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
+
+                    // Step 2. Read album out
+                    cmdText = @"SELECT [AlbumID]
                           ,[Title]
                           ,[Desp]
                           ,[CreatedBy]
@@ -462,8 +509,7 @@ namespace acgalleryapi.Controllers
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + vm.Id.ToString() + " FOR UPDATE ";
 
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(queryString, conn);
+                    SqlCommand cmd = new SqlCommand(cmdText, conn);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
@@ -474,11 +520,11 @@ namespace acgalleryapi.Controllers
                         if (!reader.IsDBNull(3))
                             strCreatedBy = reader.GetString(3);
 
-                        if (String.CompareOrdinal(scopeStr, "All") == 0)
+                        if (authAlbum.Value == UserOperatorAuthEnum.All)
                         {
                             // Do nothing
                         }
-                        else if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                        else if (authAlbum.Value == UserOperatorAuthEnum.OnlyOwner)
                         {
                             if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                             {
@@ -502,6 +548,7 @@ namespace acgalleryapi.Controllers
                     cmd.Dispose();
                     cmd = null;
 
+                    // Step 3. Real update
                     cmdText = @"UPDATE [Album]
                             SET [Title] = @Title
                                 ,[Desp] = @Desp
@@ -556,13 +603,34 @@ namespace acgalleryapi.Controllers
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
-                var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumDelete").Value;
 
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
-                    String cmdText = String.Empty;
+                    await conn.OpenAsync();
 
-                    String queryString = @"SELECT [AlbumID]
+                    // Step 1. Read out user authority
+                    UserOperatorAuthEnum? authAlbumDelete = null;
+                    String cmdText = @"SELECT [AlbumDelete] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbumDelete = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+                    
+                    if (!authAlbumDelete.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
+
+                    // Step 2. Read out album info and check authority
+                    cmdText = @"SELECT [AlbumID]
                           ,[Title]
                           ,[Desp]
                           ,[CreatedBy]
@@ -573,8 +641,7 @@ namespace acgalleryapi.Controllers
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + nID.ToString() + " FOR UPDATE ";
 
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(queryString, conn);
+                    SqlCommand cmd = new SqlCommand(cmdText, conn);
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
@@ -585,11 +652,11 @@ namespace acgalleryapi.Controllers
                         if (!reader.IsDBNull(3))
                             strCreatedBy = reader.GetString(3);
 
-                        if (String.CompareOrdinal(scopeStr, "All") == 0)
+                        if (authAlbumDelete.Value == UserOperatorAuthEnum.All)
                         {
                             // Do nothing
                         }
-                        else if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                        else if (authAlbumDelete.Value == UserOperatorAuthEnum.OnlyOwner)
                         {
                             if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                             {
@@ -609,10 +676,10 @@ namespace acgalleryapi.Controllers
                     {
                         return NotFound();
                     }
-
                     cmd.Dispose();
                     cmd = null;
 
+                    // Step 3. Perform the real deletion
                     cmdText = @"DELETE FROM [Album] WHERE [AlbumID] = " + nID.ToString();
                     cmd = new SqlCommand(cmdText, conn);
 
@@ -632,7 +699,7 @@ namespace acgalleryapi.Controllers
             if (bError)
                 return StatusCode(500, strErrMsg);
 
-            return new EmptyResult();
+            return new OkResult();
         }
     }    
 }
