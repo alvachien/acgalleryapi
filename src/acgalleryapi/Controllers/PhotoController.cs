@@ -21,13 +21,32 @@ namespace acgalleryapi.Controllers
 
             try
             {
-                await conn.OpenAsync();
-
                 var usrObj = User.FindFirst(c => c.Type == "sub");
                 String queryString = String.Empty;
                 String strAlbumAC = String.Empty;
                 String strCreatedBy = String.Empty;
                 Boolean bIsPublic = false;
+                UserOperatorAuthEnum? authRead = null;
+
+                await conn.OpenAsync();
+
+                if (usrObj != null)
+                {
+                    String cmdText = @"SELECT [AlbumRead] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrObj.Value + "'";
+                    SqlCommand cmdUser = new SqlCommand(cmdText, conn);
+                    SqlDataReader readerUser = await cmdUser.ExecuteReaderAsync();
+                    if (readerUser.HasRows)
+                    {
+                        readerUser.Read();
+
+                        authRead = (UserOperatorAuthEnum)readerUser.GetByte(0);
+                    }
+
+                    readerUser.Close();
+                    readerUser = null;
+                    cmdUser.Dispose();
+                    cmdUser = null;
+                }
 
                 if (String.IsNullOrEmpty(albumid))
                 {
@@ -65,9 +84,8 @@ namespace acgalleryapi.Controllers
                     else
                     {
                         // Signed-in user
-                        var usrName = User.FindFirst(c => c.Type == "sub").Value;
                         queryString = @"SELECT count(*) FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrName + "'; " + 
+                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "'; " + 
                           @"SELECT [PhotoID]
                               ,[Title]
                               ,[Desp]
@@ -91,7 +109,7 @@ namespace acgalleryapi.Controllers
                               ,[IsPublic]
                               ,[EXIFInfo]
                           FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrName + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
+                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
                 }
                 else
@@ -149,12 +167,9 @@ namespace acgalleryapi.Controllers
                     else
                     {
                         // Signed-in user
-                        var scopeStr = User.FindFirst(c => c.Type == "GalleryNonPublicAlbumRead").Value;
-                        var usrName = User.FindFirst(c => c.Type == "sub").Value;
-
-                        if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                        if (authRead.HasValue && authRead.Value == UserOperatorAuthEnum.OnlyOwner)
                         {
-                            if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
+                            if (String.CompareOrdinal(strCreatedBy, usrObj.Value) != 0)
                             {
                                 // Not the album creator then needs the access code
                                 if (bIsPublic)
@@ -189,7 +204,7 @@ namespace acgalleryapi.Controllers
                                 // Creator of album, no need to access code at all
                             }
                         }
-                        else if (String.CompareOrdinal(scopeStr, "All") == 0)
+                        else if (authRead.HasValue && authRead.Value == UserOperatorAuthEnum.All)
                         {
                             // Do nothing~
                         }
@@ -402,6 +417,42 @@ namespace acgalleryapi.Controllers
                            ,@IsPublic
                            ,@EXIF)";
 
+                string strMaker = string.Empty, strModel = string.Empty, strLens = string.Empty, strAV = string.Empty, strSpeed = string.Empty, strISO = string.Empty;
+                if (vm.ExifTags.Count > 0)
+                {
+                    vm.ExifTags.RemoveAll(eti =>
+                    {
+                        return eti.group != "EXIF" && eti.group != "Composite";
+                    });
+
+                    foreach(var et in vm.ExifTags)
+                    {
+                        if (et.group == "EXIF")
+                        {
+                            if (et.name == "Camera Model Name")
+                            {
+                                strModel = et.value;
+                            }
+                            else if (et.name == "Make")
+                            {
+                                strMaker = et.value;
+                            }
+                            else if (et.name == "Exposure Time" || et.name == "Shutter Speed Value")
+                            {
+                                strSpeed = et.value;
+                            }
+                            else if (et.name == "F Number" || et.name == "Aperture Value")
+                            {
+                                strAV = et.value;
+                            }
+                            else if(et.name == "ISO")
+                            {
+                                strISO = et.value;
+                            }
+                        }
+                    }
+                }
+
                 await conn.OpenAsync();
 
                 SqlCommand cmd = new SqlCommand(queryString, conn);
@@ -419,13 +470,16 @@ namespace acgalleryapi.Controllers
                 cmd.Parameters.AddWithValue("@PhotoThumbUrl", vm.ThumbnailFileUrl);
                 cmd.Parameters.AddWithValue("@IsOrgThumb", vm.IsOrgThumbnail);
                 cmd.Parameters.AddWithValue("@ThumbCreatedBy", 2); // 1 for ExifTool, 2 stands for others
-                cmd.Parameters.AddWithValue("@CameraMaker", "To-do");
-                cmd.Parameters.AddWithValue("@CameraModel", "To-do");
-                cmd.Parameters.AddWithValue("@LensModel", "To-do");
-                cmd.Parameters.AddWithValue("@AVNumber", "To-do");
-                cmd.Parameters.AddWithValue("@ShutterSpeed", "To-do");
+
+                cmd.Parameters.AddWithValue("@CameraMaker", String.IsNullOrEmpty(strMaker)? DBNull.Value : (object)strMaker);
+                cmd.Parameters.AddWithValue("@CameraModel", String.IsNullOrEmpty(strModel) ? DBNull.Value : (object)strModel);
+                cmd.Parameters.AddWithValue("@LensModel", String.IsNullOrEmpty(strLens) ? DBNull.Value : (object)strLens);
+                cmd.Parameters.AddWithValue("@AVNumber", String.IsNullOrEmpty(strAV) ? DBNull.Value : (object)strAV);
+                cmd.Parameters.AddWithValue("@ShutterSpeed", String.IsNullOrEmpty(strSpeed) ? DBNull.Value : (object)strSpeed);
                 cmd.Parameters.AddWithValue("@IsPublic", vm.IsPublic);
                 cmd.Parameters.AddWithValue("@ISONumber", 0);
+
+                
 
                 String strJson = Newtonsoft.Json.JsonConvert.SerializeObject(vm.ExifTags);
                 cmd.Parameters.AddWithValue("@EXIF", strJson);
@@ -521,8 +575,7 @@ namespace acgalleryapi.Controllers
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     String cmdText = @"DELETE [Photo]
-                             WHERE [PhotoID] = @PhotoID
-                            ";
+                             WHERE [PhotoID] = @PhotoID ";
 
                     conn.Open();
                     SqlCommand cmd = new SqlCommand(cmdText, conn);
