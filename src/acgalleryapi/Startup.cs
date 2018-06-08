@@ -40,19 +40,20 @@ namespace acgalleryapi
             services.AddMvcCore()
                 .AddAuthorization()
                 .AddJsonFormatters()
-                .AddAuthorization(
-                    options => {
-                        options.AddPolicy("GalleryAdmin", policy => policy.RequireRole("GalleryAdmin"));
-                        options.AddPolicy("GalleryPro", policy => policy.RequireRole("GalleryPro"));
-                        options.AddPolicy("FileSizeRequirementPolicy",
-                            policy =>
-                            {
-                                policy.AuthenticationSchemes.Add("Bearer");
-                                policy.RequireAuthenticatedUser();
-                                policy.Requirements.Add(new FileUploadSizeRequirement());
-                            });
-                    }
-                );
+                //.AddAuthorization(
+                //    options => {
+                //        options.AddPolicy("GalleryAdmin", policy => policy.RequireRole("GalleryAdmin"));
+                //        options.AddPolicy("GalleryPro", policy => policy.RequireRole("GalleryPro"));
+                //        options.AddPolicy("FileSizeRequirementPolicy",
+                //            policy =>
+                //            {
+                //                policy.AuthenticationSchemes.Add("Bearer");
+                //                policy.RequireAuthenticatedUser();
+                //                policy.Requirements.Add(new FileUploadSizeRequirement());
+                //            });
+                //    }
+                //)
+                ;
 
             services.AddAuthentication("Bearer")
                 .AddIdentityServerAuthentication(options =>
