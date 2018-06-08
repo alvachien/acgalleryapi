@@ -32,7 +32,6 @@ namespace acgalleryapi.Controllers
 
             // Create it into DB
             var usrName = User.FindFirst(c => c.Type == "sub").Value;
-            var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
 
             try
             {
@@ -40,15 +39,26 @@ namespace acgalleryapi.Controllers
                 {
                     await conn.OpenAsync();
 
-                    String queryString = @"SELECT [AlbumID]
-                          ,[Title]
-                          ,[Desp]
-                          ,[CreatedBy]
-                          ,[CreateAt]
-                          ,[IsPublic]
-                          ,[AccessCode]
-                      FROM [dbo].[Album]
-                      WHERE [AlbumID] = " + vm.AlbumID.ToString();
+                    UserOperatorAuthEnum? authAlbum = null;
+                    String cmdText = @"SELECT [AlbumChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+
+                    if (!authAlbum.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
+
+                    String queryString = @"SELECT [CreatedBy] FROM [dbo].[Album] WHERE [AlbumID] = " + vm.AlbumID.ToString();
 
                     SqlCommand cmd = new SqlCommand(queryString, conn);
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -58,14 +68,14 @@ namespace acgalleryapi.Controllers
                         reader.Read();
 
                         String strCreatedBy = String.Empty;
-                        if (!reader.IsDBNull(3))
-                            strCreatedBy = reader.GetString(3);
+                        if (!reader.IsDBNull(0))
+                            strCreatedBy = reader.GetString(0);
 
-                        if (String.CompareOrdinal(scopeStr, "All") == 0)
+                        if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.All)
                         {
                             // Do nothing
                         }
-                        else if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                        else if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.OnlyOwner)
                         {
                             if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                             {
@@ -91,35 +101,49 @@ namespace acgalleryapi.Controllers
                     cmd.Dispose();
                     cmd = null;
 
-                    List<String> listCmds = new List<string>();
                     // Delete the records from album                    
-                    String cmdText = @"DELETE FROM [dbo].[AlbumPhoto] WHERE [AlbumID] = " + vm.AlbumID.ToString();
-                    listCmds.Add(cmdText);
+                    cmdText = @"DELETE FROM [dbo].[AlbumPhoto] WHERE [AlbumID] = " + vm.AlbumID.ToString();
+                    SqlTransaction tran = conn.BeginTransaction();
 
-                    foreach (String pid in vm.PhotoIDList)
+                    try
                     {
-                        cmdText = @"INSERT INTO [dbo].[AlbumPhoto]
+                        cmd = new SqlCommand(cmdText, conn, tran);
+                        await cmd.ExecuteNonQueryAsync();
+                        cmd.Dispose();
+                        cmd = null;
+
+                        foreach (String pid in vm.PhotoIDList)
+                        {
+                            cmdText = @"INSERT INTO [dbo].[AlbumPhoto]
                                ([AlbumID]
                                ,[PhotoID])
                              VALUES(" + vm.AlbumID.ToString()
-                             + @", N'" + pid
-                             + @"')";
-                        listCmds.Add(cmdText);
-                    }
-                    String allQueries = String.Join(";", listCmds);
+                                 + @", N'" + pid
+                                 + @"')";
+                            cmd = new SqlCommand(cmdText, conn, tran);
+                            await cmd.ExecuteNonQueryAsync();
+                            cmd.Dispose();
+                            cmd = null;
+                        }
 
-                    cmd = new SqlCommand(allQueries, conn);
-                    await cmd.ExecuteNonQueryAsync();
+                        tran.Commit();
+                    }
+                    catch (Exception exp)
+                    {
+                        tran.Rollback();
+                        throw exp;
+                    }
                 }
             }
             catch (Exception exp)
             {
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
                 return StatusCode(500, exp.Message);
             }
 
             return new EmptyResult();
         }
     }
-
 }

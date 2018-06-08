@@ -31,24 +31,35 @@ namespace acgalleryapi.Controllers
             }
 
             var usrName = User.FindFirst(c => c.Type == "sub").Value;
-            var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
+            // var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
             try
             {
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     await conn.OpenAsync();
 
+                    UserOperatorAuthEnum? authAlbum = null;
+                    String cmdText = @"SELECT [AlbumChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+
+                    if (!authAlbum.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
+
                     String albumList = String.Join(",", vm.AlbumIDList);
 
-                    String queryString = @"SELECT [AlbumID]
-                          ,[Title]
-                          ,[Desp]
-                          ,[CreatedBy]
-                          ,[CreateAt]
-                          ,[IsPublic]
-                          ,[AccessCode]
-                      FROM [dbo].[Album]
-                      WHERE [AlbumID] IN ( " + albumList + " )";
+                    String queryString = @"SELECT [CreatedBy] FROM [dbo].[Album] WHERE [AlbumID] IN ( " + albumList + " )";
 
                     SqlCommand cmd = new SqlCommand(queryString, conn);
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -58,14 +69,14 @@ namespace acgalleryapi.Controllers
                         String strCreatedBy = String.Empty;
                         while (reader.Read())
                         {
-                            if (!reader.IsDBNull(3))
-                                strCreatedBy = reader.GetString(3);
+                            if (!reader.IsDBNull(0))
+                                strCreatedBy = reader.GetString(0);
 
-                            if (String.CompareOrdinal(scopeStr, "All") == 0)
+                            if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.All)
                             {
                                 // Do nothing
                             }
-                            else if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                            else if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.OnlyOwner)
                             {
                                 if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                                 {
@@ -92,25 +103,34 @@ namespace acgalleryapi.Controllers
                     cmd.Dispose();
                     cmd = null;
 
-                    List<String> listCmds = new List<string>();
-                    // Delete the records from album                    
-                    String cmdText = @"DELETE FROM [dbo].[AlbumPhoto] WHERE [PhotoID] = N'" + vm.PhotoID + "'";
-                    listCmds.Add(cmdText);
-
-                    foreach (Int32 aid in vm.AlbumIDList)
+                    // Delete the records from album
+                    SqlTransaction tran = conn.BeginTransaction();
+                    try
                     {
-                        cmdText = @"INSERT INTO [dbo].[AlbumPhoto]
-                               ([AlbumID]
-                               ,[PhotoID])
-                         VALUES(" + aid.ToString()
-                        + @", N'" + vm.PhotoID
-                         + @"')";
-                        listCmds.Add(cmdText);
-                    }
-                    String allQueries = String.Join(";", listCmds);
+                        cmdText = @"DELETE FROM [dbo].[AlbumPhoto] WHERE [PhotoID] = N'" + vm.PhotoID + "'";
+                        cmd = new SqlCommand(cmdText, conn, tran);
+                        await cmd.ExecuteNonQueryAsync();
+                        cmd.Dispose();
+                        cmd = null;
 
-                    cmd = new SqlCommand(allQueries, conn);
-                    await cmd.ExecuteNonQueryAsync();
+                        foreach (Int32 aid in vm.AlbumIDList)
+                        {
+                            cmdText = @"INSERT INTO [dbo].[AlbumPhoto]
+                               ([AlbumID]
+                               ,[PhotoID]) VALUES(" + aid.ToString() + @", N'" + vm.PhotoID + @"')";
+                            cmd = new SqlCommand(cmdText, conn, tran);
+                            await cmd.ExecuteNonQueryAsync();
+                            cmd.Dispose();
+                            cmd = null;
+                        }
+
+                        tran.Commit();
+                    }
+                    catch(Exception exp)
+                    {
+                        tran.Rollback();
+                        throw exp;
+                    }
                 }
             }
             catch (Exception exp)

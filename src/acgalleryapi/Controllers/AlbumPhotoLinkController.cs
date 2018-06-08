@@ -31,22 +31,33 @@ namespace acgalleryapi.Controllers
             }
 
             var usrName = User.FindFirst(c => c.Type == "sub").Value;
-            var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     await conn.OpenAsync();
 
-                    String queryString = @"SELECT [AlbumID]
-                          ,[Title]
-                          ,[Desp]
-                          ,[CreatedBy]
-                          ,[CreateAt]
-                          ,[IsPublic]
-                          ,[AccessCode]
-                      FROM [dbo].[Album]
-                      WHERE [AlbumID] = " + vm.AlbumID.ToString();
+                    UserOperatorAuthEnum? authAlbum = null;
+                    String cmdText = @"SELECT [AlbumChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+
+                    if (!authAlbum.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
+
+                    String queryString = @"SELECT [CreatedBy] FROM [dbo].[Album] WHERE [AlbumID] = " + vm.AlbumID.ToString();
 
                     SqlCommand cmd = new SqlCommand(queryString, conn);
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -59,11 +70,11 @@ namespace acgalleryapi.Controllers
                             if (!reader.IsDBNull(3))
                                 strCreatedBy = reader.GetString(3);
 
-                            if (String.CompareOrdinal(scopeStr, "All") == 0)
+                            if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.All)
                             {
                                 // Do nothing
                             }
-                            else if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                            else if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.OnlyOwner)
                             {
                                 if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                                 {
@@ -91,7 +102,7 @@ namespace acgalleryapi.Controllers
                     cmd = null;
 
                     // Delete the records from album
-                    String cmdText = @"INSERT INTO [dbo].[AlbumPhoto] ([AlbumID], [PhotoID]) VALUES( " + vm.AlbumID.ToString() + ", N'" + vm.PhotoID + "');";
+                    cmdText = @"INSERT INTO [dbo].[AlbumPhoto] ([AlbumID], [PhotoID]) VALUES( " + vm.AlbumID.ToString() + ", N'" + vm.PhotoID + "');";
                     cmd = new SqlCommand(cmdText, conn);
                     await cmd.ExecuteNonQueryAsync();
 
@@ -126,12 +137,31 @@ namespace acgalleryapi.Controllers
             }
 
             var usrName = User.FindFirst(c => c.Type == "sub").Value;
-            var scopeStr = User.FindFirst(c => c.Type == "GalleryAlbumChange").Value;
+
             try
             {
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     await conn.OpenAsync();
+
+                    UserOperatorAuthEnum? authAlbum = null;
+                    String cmdText = @"SELECT [AlbumChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                    if (usrReader.HasRows)
+                    {
+                        usrReader.Read();
+                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                    }
+
+                    if (!authAlbum.HasValue)
+                    {
+                        throw new Exception("User has no authoirty set yet!");
+                    }
+                    usrReader.Close();
+                    usrReader = null;
+                    cmdUserRead.Dispose();
+                    cmdUserRead = null;
 
                     String queryString = @"SELECT [CreatedBy]
                       FROM [dbo].[Album]
@@ -148,11 +178,11 @@ namespace acgalleryapi.Controllers
                             if (!reader.IsDBNull(0))
                                 strCreatedBy = reader.GetString(0);
 
-                            if (String.CompareOrdinal(scopeStr, "All") == 0)
+                            if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.All)
                             {
                                 // Do nothing
                             }
-                            else if (String.CompareOrdinal(scopeStr, "OnlyOwner") == 0)
+                            else if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.OnlyOwner)
                             {
                                 if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                                 {
@@ -181,7 +211,7 @@ namespace acgalleryapi.Controllers
                     cmd = null;
 
                     // Delete the records from album
-                    String cmdText = @"DELETE FROM [dbo].[AlbumPhoto] ([AlbumID], [PhotoID]) VALUES( " + vm.AlbumID.ToString() + ", N'" + vm.PhotoID + "');";
+                    cmdText = @"DELETE FROM [dbo].[AlbumPhoto] ([AlbumID], [PhotoID]) VALUES( " + vm.AlbumID.ToString() + ", N'" + vm.PhotoID + "');";
                     cmd = new SqlCommand(cmdText, conn);
                     await cmd.ExecuteNonQueryAsync();
 

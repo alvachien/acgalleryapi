@@ -477,9 +477,7 @@ namespace acgalleryapi.Controllers
                 cmd.Parameters.AddWithValue("@AVNumber", String.IsNullOrEmpty(strAV) ? DBNull.Value : (object)strAV);
                 cmd.Parameters.AddWithValue("@ShutterSpeed", String.IsNullOrEmpty(strSpeed) ? DBNull.Value : (object)strSpeed);
                 cmd.Parameters.AddWithValue("@IsPublic", vm.IsPublic);
-                cmd.Parameters.AddWithValue("@ISONumber", 0);
-
-                
+                cmd.Parameters.AddWithValue("@ISONumber", 0);                
 
                 String strJson = Newtonsoft.Json.JsonConvert.SerializeObject(vm.ExifTags);
                 cmd.Parameters.AddWithValue("@EXIF", strJson);

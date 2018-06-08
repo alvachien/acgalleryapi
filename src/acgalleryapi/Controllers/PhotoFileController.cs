@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using acgalleryapi.ViewModels;
 using ImageMagick;
+using System.Data.Common;
+using System.Data.SqlClient;
 
 namespace acgalleryapi.Controllers
 {
@@ -38,7 +40,7 @@ namespace acgalleryapi.Controllers
 
         // GET: api/PhotoFile/filename
         [HttpGet("{filename}")]
-        public async Task<IActionResult> Get(string filename)
+        public IActionResult Get(string filename)
         {
             var image = System.IO.File.OpenRead(Startup.UploadFolder + "\\" + filename);
             return File(image, "image/jpeg");
@@ -46,6 +48,7 @@ namespace acgalleryapi.Controllers
         
         // POST: api/PhotoFile
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> UploadPhotos(ICollection<IFormFile> files)
         {
             if (Request.Form.Files.Count <= 0)
@@ -53,15 +56,53 @@ namespace acgalleryapi.Controllers
 
             // Only care about the first file
             var file = Request.Form.Files[0];
-            AuthorizationResult ar = await _authorizationService.AuthorizeAsync(User, file, "FileSizeRequirementPolicy");
-            if (ar.Succeeded)
+            //AuthorizationResult ar = await _authorizationService.AuthorizeAsync(User, file, "FileSizeRequirementPolicy");
+            //if (ar.Succeeded)
+            //{
+            //}
+            //else
+            //{
+            //    return BadRequest("File Size is not correct");
+            //}
+
+            var usrName = User.FindFirst(c => c.Type == "sub").Value;
+            Int32 minSize = 0, maxSize = 0; Boolean allowUpload = false;
+            using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
             {
+                String cmdText = @"SELECT [UploadFileMinSize],[UploadFileMaxSize],[PhotoUpload]
+                      FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
+                SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
+                SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
+                if (usrReader.HasRows)
+                {
+                    usrReader.Read();
+                    if (!usrReader.IsDBNull(0))
+                        minSize = usrReader.GetInt32(0);
+                    if (!usrReader.IsDBNull(1))
+                        maxSize = usrReader.GetInt32(1);
+                    if (!usrReader.IsDBNull(2))
+                        allowUpload = usrReader.GetBoolean(2);
+                }
+
+                usrReader.Close();
+                usrReader = null;
+                cmdUserRead.Dispose();
+                cmdUserRead = null;
+            }
+            if (!allowUpload || maxSize == 0 || maxSize <= minSize)
+            {
+                return StatusCode(400, "User has no authoirty or wrongly set!");
+            }
+            // if (file.Length)
+            var fileSize = file.Length / 1024;
+            if (maxSize >= fileSize && minSize <= fileSize)
+            {
+                // Succeed
             }
             else
             {
-                return BadRequest("File Size is not correct");
+                return StatusCode(400, "Wrong size!");
             }
-            var usrName = User.FindFirst(c => c.Type == "sub").Value;
 
             var rst = new PhotoViewModelEx(true);
             var filename1 = file.FileName;
@@ -86,6 +127,7 @@ namespace acgalleryapi.Controllers
         
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
+        [Authorize]
         public IActionResult DeleteUploadedFile(String strFile)
         {
             var fileFullPath = Path.Combine(Startup.UploadFolder, strFile);

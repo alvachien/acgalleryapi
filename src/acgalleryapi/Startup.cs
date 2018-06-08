@@ -113,15 +113,15 @@ namespace acgalleryapi
                 );
 
             //app.UseStaticFiles(); // For the wwwroot folder
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new PhysicalFileProvider(UploadFolder),
-                RequestPath = new PathString("/updphoto"),
-                OnPrepareResponse = ctx =>
-                {
-                    ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=600");
-                }
-            });
+            //app.UseStaticFiles(new StaticFileOptions()
+            //{
+            //    FileProvider = new PhysicalFileProvider(UploadFolder),
+            //    RequestPath = new PathString("/updphoto"),
+            //    OnPrepareResponse = ctx =>
+            //    {
+            //        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=600");
+            //    }
+            //});
 
             app.UseMvc();
         }
