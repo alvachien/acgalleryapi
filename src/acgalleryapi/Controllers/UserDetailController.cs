@@ -23,7 +23,7 @@ namespace acgalleryapi.Controllers
         }
 
         // GET: api/UserDetail/5
-        [HttpGet("{id}")]
+        [HttpGet("{userid}")]
         [Authorize]
         public async Task<IActionResult> Get(String userid)
         {
