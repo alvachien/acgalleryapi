@@ -52,7 +52,7 @@ namespace acgalleryapi.Controllers
                           ,[PhotoDelete]
                           ,[AlbumRead]
                       FROM [dbo].[UserDetail]
-                      WHERE [UserID] = " + userid;
+                      WHERE [UserID] = N'" + userid + "'";
 
                     SqlCommand cmd = new SqlCommand(queryString, conn);
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -239,7 +239,7 @@ namespace acgalleryapi.Controllers
         public void Delete(int id)
         {
             string strSql = @"DELETE FROM [dbo].[UserDetail]
-      WHERE <Search Conditions,,>";
+                WHERE <Search Conditions,,>";
         }
     }
 }

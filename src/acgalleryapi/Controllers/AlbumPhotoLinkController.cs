@@ -45,7 +45,8 @@ namespace acgalleryapi.Controllers
                     if (usrReader.HasRows)
                     {
                         usrReader.Read();
-                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                        if (!usrReader.IsDBNull(0))
+                            authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
                     }
 
                     if (!authAlbum.HasValue)
@@ -67,8 +68,8 @@ namespace acgalleryapi.Controllers
                         String strCreatedBy = String.Empty;
                         while (reader.Read())
                         {
-                            if (!reader.IsDBNull(3))
-                                strCreatedBy = reader.GetString(3);
+                            if (!reader.IsDBNull(0))
+                                strCreatedBy = reader.GetString(0);
 
                             if (authAlbum.HasValue && authAlbum.Value == UserOperatorAuthEnum.All)
                             {
@@ -151,7 +152,8 @@ namespace acgalleryapi.Controllers
                     if (usrReader.HasRows)
                     {
                         usrReader.Read();
-                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                        if (!usrReader.IsDBNull(0))
+                            authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
                     }
 
                     if (!authAlbum.HasValue)

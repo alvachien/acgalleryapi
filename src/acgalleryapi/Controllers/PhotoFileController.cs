@@ -69,6 +69,8 @@ namespace acgalleryapi.Controllers
             Int32 minSize = 0, maxSize = 0; Boolean allowUpload = false;
             using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
             {
+                await conn.OpenAsync();
+
                 String cmdText = @"SELECT [UploadFileMinSize],[UploadFileMaxSize],[PhotoUpload]
                       FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
                 SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);

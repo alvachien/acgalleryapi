@@ -45,7 +45,8 @@ namespace acgalleryapi.Controllers
                     if (usrReader.HasRows)
                     {
                         usrReader.Read();
-                        authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                        if (!usrReader.IsDBNull(0))
+                            authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
                     }
 
                     if (!authAlbum.HasValue)

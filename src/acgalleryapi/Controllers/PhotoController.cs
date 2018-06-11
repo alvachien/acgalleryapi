@@ -39,7 +39,8 @@ namespace acgalleryapi.Controllers
                     {
                         readerUser.Read();
 
-                        authRead = (UserOperatorAuthEnum)readerUser.GetByte(0);
+                        if (!readerUser.IsDBNull(0))
+                            authRead = (UserOperatorAuthEnum)readerUser.GetByte(0);
                     }
 
                     readerUser.Close();
