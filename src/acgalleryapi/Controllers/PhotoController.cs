@@ -423,33 +423,40 @@ namespace acgalleryapi.Controllers
                 {
                     vm.ExifTags.RemoveAll(eti =>
                     {
-                        return eti.group != "EXIF" && eti.group != "Composite";
+                        return eti.group != "EXIF" && eti.group != "Composite" && eti.group != "XMP";
                     });
 
-                    foreach(var et in vm.ExifTags)
+                    foreach (var et in vm.ExifTags)
                     {
-                        if (et.group == "EXIF")
+                        if (et.name == "Camera Model Name")
                         {
-                            if (et.name == "Camera Model Name")
-                            {
+                            if (String.IsNullOrEmpty(strModel))
                                 strModel = et.value;
-                            }
-                            else if (et.name == "Make")
-                            {
+                        }
+                        else if (et.name == "Make")
+                        {
+                            if (String.IsNullOrEmpty(strMaker))
                                 strMaker = et.value;
-                            }
-                            else if (et.name == "Exposure Time" || et.name == "Shutter Speed Value")
-                            {
+                        }
+                        else if (et.name == "Exposure Time" || et.name == "Shutter Speed Value")
+                        {
+                            if (String.IsNullOrEmpty(strSpeed))
                                 strSpeed = et.value;
-                            }
-                            else if (et.name == "F Number" || et.name == "Aperture Value")
-                            {
+                        }
+                        else if (et.name == "F Number" || et.name == "Aperture Value")
+                        {
+                            if (String.IsNullOrEmpty(strAV))
                                 strAV = et.value;
-                            }
-                            else if(et.name == "ISO")
-                            {
+                        }
+                        else if (et.name == "ISO")
+                        {
+                            if (String.IsNullOrEmpty(strISO))
                                 strISO = et.value;
-                            }
+                        }
+                        else if (et.name == "Lens Info" || et.name == "Lens")
+                        {
+                            if (String.IsNullOrEmpty(strLens))
+                                strLens = et.value;
                         }
                     }
                 }

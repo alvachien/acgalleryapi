@@ -380,7 +380,7 @@ namespace acgalleryapi.Controllers
                     await conn.OpenAsync();
 
                     // Step 1. Read out user authority
-                    UserOperatorAuthEnum? authAlbum = null;
+                    Boolean? cancreate = null;
                     String cmdText = @"SELECT [AlbumCreate] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
                     SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
                     SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
@@ -388,10 +388,10 @@ namespace acgalleryapi.Controllers
                     {
                         usrReader.Read();
                         if (!usrReader.IsDBNull(0))
-                            authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                            cancreate = usrReader.GetBoolean(0);
                     }
 
-                    if (!authAlbum.HasValue)
+                    if (!cancreate.HasValue || cancreate.Value == false)
                     {
                         throw new Exception("User has no authoirty set yet!");
                     }
@@ -420,7 +420,6 @@ namespace acgalleryapi.Controllers
                                ,@AccessCode
                                 )
                          ; SELECT @Identity = SCOPE_IDENTITY();";
-                    await conn.OpenAsync();
 
                     SqlCommand cmd = new SqlCommand(cmdText, conn);
                     cmd.Parameters.AddWithValue("@Title", vm.Title);

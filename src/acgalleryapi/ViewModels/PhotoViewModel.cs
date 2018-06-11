@@ -52,4 +52,15 @@ namespace acgalleryapi.ViewModels
         public Boolean success;
         public String error;
     }
+
+    public class PhotoTagViewModel
+    {
+        [Required]
+        [StringLength(40)]
+        public String PhotoId { get; set; }
+        [Required]
+        [StringLength(50)]
+        public String TagString { get; set; }
+
+    }
 }

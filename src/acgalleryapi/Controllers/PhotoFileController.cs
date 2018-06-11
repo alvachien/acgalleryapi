@@ -42,8 +42,14 @@ namespace acgalleryapi.Controllers
         [HttpGet("{filename}")]
         public IActionResult Get(string filename)
         {
-            var image = System.IO.File.OpenRead(Startup.UploadFolder + "\\" + filename);
-            return File(image, "image/jpeg");
+            String strFullFile = Startup.UploadFolder + "\\" + filename;
+            if (System.IO.File.Exists(strFullFile))
+            {
+                var image = System.IO.File.OpenRead(Startup.UploadFolder + "\\" + filename);
+                return File(image, "image/jpeg");
+            }
+
+            return NotFound();
         }
         
         // POST: api/PhotoFile
@@ -181,7 +187,7 @@ namespace acgalleryapi.Controllers
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine("{0}, {1}, {2}", item.group, item.name, item.value);
 #endif
-                        if (item.group != "File")
+                        if (item.group == "EXIF" || item.group == "Composite" || item.group == "XMP")
                             updrst.ExifTags.Add(item);
                     }
                 }
