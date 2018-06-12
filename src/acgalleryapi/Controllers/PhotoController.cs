@@ -595,7 +595,7 @@ namespace acgalleryapi.Controllers
         }
 
         // DELETE api/photo/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{pid}")]
         [Authorize]
         public async Task<IActionResult> Delete(string pid)
         {
@@ -610,14 +610,24 @@ namespace acgalleryapi.Controllers
             {
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
-                    String cmdText = @"DELETE [Photo]
-                             WHERE [PhotoID] = @PhotoID ";
+                    await conn.OpenAsync();
+                    SqlTransaction tran = conn.BeginTransaction();
 
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(cmdText, conn);
+                    String cmdText = @"DELETE [Photo] WHERE [PhotoID] = @PhotoID";
+                    SqlCommand cmd = new SqlCommand(cmdText, conn, tran);
                     cmd.Parameters.AddWithValue("@PhotoID", pid);
-
                     await cmd.ExecuteNonQueryAsync();
+                    cmd.Dispose();
+                    cmd = null;
+
+                    cmdText = @"DELETE FROM [dbo].[PhotoTag] WHERE [PhotoID] = @PhotoID";
+                    cmd = new SqlCommand(cmdText, conn, tran);
+                    cmd.Parameters.AddWithValue("@PhotoID", pid);
+                    await cmd.ExecuteNonQueryAsync();
+                    cmd.Dispose();
+                    cmd = null;
+
+                    tran.Commit();
                 }
             }
             catch (Exception exp)
