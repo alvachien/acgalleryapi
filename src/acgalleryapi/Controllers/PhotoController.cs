@@ -365,6 +365,7 @@ namespace acgalleryapi.Controllers
 
             // Update the database
             SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
+            SqlTransaction tran = null;
             Boolean bError = false;
             String strErrMsg = "";
 
@@ -462,8 +463,10 @@ namespace acgalleryapi.Controllers
                 }
 
                 await conn.OpenAsync();
+                tran = conn.BeginTransaction();
 
-                SqlCommand cmd = new SqlCommand(queryString, conn);
+                // Create photo entry
+                SqlCommand cmd = new SqlCommand(queryString, conn, tran);
                 cmd.Parameters.AddWithValue("@PhotoID", vm.PhotoId);
                 cmd.Parameters.AddWithValue("@Title", vm.Title);
                 cmd.Parameters.AddWithValue("@Desp", vm.Desp);
@@ -491,9 +494,36 @@ namespace acgalleryapi.Controllers
                 cmd.Parameters.AddWithValue("@EXIF", strJson);
 
                 await cmd.ExecuteNonQueryAsync();
+                cmd.Dispose();
+                cmd = null;
+
+                // Create the tags
+                if (vm.Tags.Count > 0)
+                {
+                    foreach (var tag in vm.Tags)
+                    {
+                        queryString = @"INSERT INTO [dbo].[PhotoTag] ([PhotoID],[Tag]) VALUES (@PhotoID, @Tag)";
+                        cmd = new SqlCommand(queryString, conn, tran);
+                        cmd.Parameters.AddWithValue("@PhotoID", vm.PhotoId);
+                        cmd.Parameters.AddWithValue("@Tag", tag);
+
+                        await cmd.ExecuteNonQueryAsync();
+                        cmd.Dispose();
+                        cmd = null;
+                    }
+                }
+
+                tran.Commit();
             }
             catch (Exception exp)
             {
+                if (tran != null)
+                {
+                    tran.Rollback();
+                    tran.Dispose();
+                    tran = null;
+                }
+
                 System.Diagnostics.Debug.WriteLine(exp.Message);
                 strErrMsg = exp.Message;
                 bError = true;
