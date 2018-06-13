@@ -40,7 +40,7 @@ namespace acgalleryapi.Controllers
                 if (usrObj == null)
                 {
                     // Anonymous user
-                    sb.Append(@"SELECT count(*) FROM [dbo].[Photo] WHERE [IsPublic] = 1 ");
+                    sb.Append(@"SELECT count(*) FROM [dbo].[View_Photo] WHERE [IsPublic] = 1 ");
                     if (String.IsNullOrEmpty(subqueries))
                     {
                         sb.Append("; ");
@@ -49,33 +49,7 @@ namespace acgalleryapi.Controllers
                     {
                         sb.Append(" AND " + subqueries + "; ");
                     }
-                    sb.Append(@"SELECT [PhotoID]
-                              ,[Title]
-                              ,[Desp]
-                              ,[Width]
-                              ,[Height]
-                              ,[ThumbWidth]
-                              ,[ThumbHeight]
-                              ,[UploadedAt]
-                              ,[UploadedBy]
-                              ,[OrgFileName]
-                              ,[PhotoUrl]
-                              ,[PhotoThumbUrl]
-                              ,[IsOrgThumb]
-                              ,[ThumbCreatedBy]
-                              ,[CameraMaker]
-                              ,[CameraModel]
-                              ,[LensModel]
-                              ,[AVNumber]
-                              ,[ShutterSpeed]
-                              ,[ISONumber]
-                              ,[IsPublic]
-                              ,[EXIFInfo]
-                              ,SUBSTRING(( SELECT ',' + [dbo].[PhotoTag].Tag AS [text()] From [dbo].[PhotoTag]
-                                    WHERE [dbo].[PhotoTag].PhotoID = [dbo].[Photo].PhotoID
-                                    ORDER BY [dbo].[Photo].PhotoID For XML PATH ('') ), 2, 1000) [Tags]
-                          FROM [dbo].[Photo]
-                          WHERE [IsPublic] = 1");
+                    sb.Append(PhotoController.GetPhotoViewSql() + @" WHERE [IsPublic] = 1");
                     if (String.IsNullOrEmpty(subqueries))
                     {
                     }
@@ -89,7 +63,7 @@ namespace acgalleryapi.Controllers
                 else
                 {
                     // Signed-in user
-                    sb.Append(@"SELECT count(*) FROM [dbo].[Photo] WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
+                    sb.Append(@"SELECT count(*) FROM [dbo].[View_Photo] WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
                     if (String.IsNullOrEmpty(subqueries))
                     {
                         sb.Append("; ");
@@ -98,33 +72,7 @@ namespace acgalleryapi.Controllers
                     {
                         sb.Append(" AND " + subqueries + "; ");
                     }
-                    sb.Append(@"SELECT [PhotoID]
-                              ,[Title]
-                              ,[Desp]
-                              ,[Width]
-                              ,[Height]
-                              ,[ThumbWidth]
-                              ,[ThumbHeight]
-                              ,[UploadedAt]
-                              ,[UploadedBy]
-                              ,[OrgFileName]
-                              ,[PhotoUrl]
-                              ,[PhotoThumbUrl]
-                              ,[IsOrgThumb]
-                              ,[ThumbCreatedBy]
-                              ,[CameraMaker]
-                              ,[CameraModel]
-                              ,[LensModel]
-                              ,[AVNumber]
-                              ,[ShutterSpeed]
-                              ,[ISONumber]
-                              ,[IsPublic]
-                              ,[EXIFInfo]
-                              ,SUBSTRING(( SELECT ',' + [dbo].[PhotoTag].Tag AS [text()] From [dbo].[PhotoTag] 
-                                    WHERE [dbo].[PhotoTag].PhotoID = [dbo].[Photo].PhotoID
-                                    ORDER BY [dbo].[Photo].PhotoID For XML PATH ('') ), 2, 1000) [Tags]
-                          FROM [dbo].[Photo] 
-                          WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
+                    sb.Append(PhotoController.GetPhotoViewSql() + @"WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
                     if (String.IsNullOrEmpty(subqueries))
                     {
                     }
@@ -163,47 +111,7 @@ namespace acgalleryapi.Controllers
                         while (reader.Read())
                         {
                             PhotoViewModel rst = new PhotoViewModel();
-
-                            //cmd.Parameters.AddWithValue("@PhotoID", nid.ToString("N"));   // 1
-                            rst.PhotoId = reader.GetString(0);
-                            //cmd.Parameters.AddWithValue("@Title", nid.ToString("N"));     // 2
-                            rst.Title = reader.GetString(1);
-                            //cmd.Parameters.AddWithValue("@Desp", nid.ToString("N"));      // 3
-                            rst.Desp = reader.GetString(2);
-                            if (!reader.IsDBNull(3))
-                                rst.Width = reader.GetInt32(3);
-                            if (!reader.IsDBNull(4))
-                                rst.Height = reader.GetInt32(4);
-                            if (!reader.IsDBNull(5))
-                                rst.ThumbWidth = reader.GetInt32(5);
-                            if (!reader.IsDBNull(6))
-                                rst.ThumbHeight = reader.GetInt32(6);
-                            //cmd.Parameters.AddWithValue("@UploadedAt", DateTime.Now);     // 8
-                            rst.UploadedTime = reader.GetDateTime(7);
-                            //cmd.Parameters.AddWithValue("@UploadedBy", "Tester");         // 9
-                            //cmd.Parameters.AddWithValue("@OrgFileName", rst.OrgFileName); // 10
-                            rst.OrgFileName = reader.GetString(9);
-                            //cmd.Parameters.AddWithValue("@PhotoUrl", rst.FileUrl);        // 11
-                            rst.FileUrl = reader.GetString(10); // 11 - 1
-                                                                //cmd.Parameters.AddWithValue("@PhotoThumbUrl", rst.ThumbnailFileUrl); // 12
-                            if (!reader.IsDBNull(11)) // 12 - 1
-                                rst.ThumbnailFileUrl = reader.GetString(11);
-                            //cmd.Parameters.AddWithValue("@IsOrgThumb", bThumbnailCreated);    // 13
-                            //cmd.Parameters.AddWithValue("@ThumbCreatedBy", 2); // 1 for ExifTool, 2 stands for others; // 14
-                            //cmd.Parameters.AddWithValue("@CameraMaker", "To-do"); // 15
-                            //cmd.Parameters.AddWithValue("@CameraModel", "To-do"); // 16
-                            //cmd.Parameters.AddWithValue("@LensModel", "To-do");   // 17
-                            //cmd.Parameters.AddWithValue("@AVNumber", "To-do");    // 18
-                            //cmd.Parameters.AddWithValue("@ShutterSpeed", "To-do"); // 19
-                            //cmd.Parameters.AddWithValue("@ISONumber", 0);         // 20
-                            //cmd.Parameters.AddWithValue("@IsPublic", true);       // 21
-                            if (!reader.IsDBNull(20))
-                                rst.IsPublic = reader.GetBoolean(20);
-                            //String strJson = Newtonsoft.Json.JsonConvert.SerializeObject(rst.ExifTags);
-                            //cmd.Parameters.AddWithValue("@EXIF", strJson);        // 22
-                            if (!reader.IsDBNull(21))
-                                rst.ExifTags = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ExifTagItem>>(reader.GetString(21));
-
+                            PhotoController.DataRowToPhoto(reader, rst);
                             rstFiles.Add(rst);
                         }
                     }

@@ -29,12 +29,24 @@ namespace acgalleryapi.ViewModels
         public String OrgFileName { get; set; }
         public Boolean IsOrgThumbnail { get; set; }
         public Boolean IsPublic { get; set; }
+        [StringLength(50)]
+        public String CameraMaker { get; set; }
+        [StringLength(100)]
+        public String CameraModel { get; set; }
+        [StringLength(100)]
+        public string LensModel { get; set; }
+        [StringLength(20)]
+        public String AVNumber { get; set; }
+        [StringLength(50)]
+        public string ShutterSpeed { get; set; }
+        public Int32 ISONumber { get; set; }
     }
 
     public class PhotoViewModel : PhotoViewModelBase
     {
         public List<ExifTagItem> ExifTags = new List<ExifTagItem>();
-        public List<String> Tags = new List<string>();        
+        public List<String> Tags = new List<string>();
+        public Double AvgRating { get; set; }
     }
 
     public class PhotoViewModelEx : PhotoViewModel

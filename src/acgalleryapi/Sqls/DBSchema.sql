@@ -190,3 +190,21 @@ CREATE TABLE [dbo].[UserDetail](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+
+-- Updated at 2018.6.13
+/****** Object:  View [dbo].[View_Photo]    Script Date: 2018/6/13 19:42:31 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE VIEW [dbo].[View_Photo]
+AS
+SELECT [dbo].[Photo].*,
+(SELECT AVG(RATING) FROM [dbo].[PhotoRating] WHERE [dbo].[PhotoRating].PhotoID = [dbo].[Photo].PhotoID ) AS RATING,
+SUBSTRING(( SELECT ',' + [dbo].[PhotoTag].Tag AS [text()] From [dbo].[PhotoTag]
+   WHERE [dbo].[PhotoTag].PhotoID = [dbo].[Photo].PhotoID
+   ORDER BY [dbo].[Photo].PhotoID For XML PATH ('') ), 2, 1000) [Tags]
+FROM [dbo].[Photo]
+GO

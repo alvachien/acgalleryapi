@@ -54,69 +54,25 @@ namespace acgalleryapi.Controllers
                     if (usrObj == null)
                     {
                         // Anonymous user
-                        queryString = @"SELECT count(*) FROM [dbo].[Photo] WHERE [IsPublic] = 1;
-                               SELECT [PhotoID]
-                              ,[Title]
-                              ,[Desp]
-                              ,[Width]
-                              ,[Height]
-                              ,[ThumbWidth]
-                              ,[ThumbHeight]
-                              ,[UploadedAt]
-                              ,[UploadedBy]
-                              ,[OrgFileName]
-                              ,[PhotoUrl]
-                              ,[PhotoThumbUrl]
-                              ,[IsOrgThumb]
-                              ,[ThumbCreatedBy]
-                              ,[CameraMaker]
-                              ,[CameraModel]
-                              ,[LensModel]
-                              ,[AVNumber]
-                              ,[ShutterSpeed]
-                              ,[ISONumber]
-                              ,[IsPublic]
-                              ,[EXIFInfo]
-                          FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1
-                          ORDER BY (SELECT NULL) 
+                        queryString = @"SELECT count(*) FROM [dbo].[Photo] WHERE [IsPublic] = 1; "
+                            + PhotoController.GetPhotoViewSql()
+                            + @"WHERE [IsPublic] = 1 ORDER BY (SELECT NULL) 
                             OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
                     else
                     {
                         // Signed-in user
                         queryString = @"SELECT count(*) FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "'; " + 
-                          @"SELECT [PhotoID]
-                              ,[Title]
-                              ,[Desp]
-                              ,[Width]
-                              ,[Height]
-                              ,[ThumbWidth]
-                              ,[ThumbHeight]
-                              ,[UploadedAt]
-                              ,[UploadedBy]
-                              ,[OrgFileName]
-                              ,[PhotoUrl]
-                              ,[PhotoThumbUrl]
-                              ,[IsOrgThumb]
-                              ,[ThumbCreatedBy]
-                              ,[CameraMaker]
-                              ,[CameraModel]
-                              ,[LensModel]
-                              ,[AVNumber]
-                              ,[ShutterSpeed]
-                              ,[ISONumber]
-                              ,[IsPublic]
-                              ,[EXIFInfo]
-                          FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
+                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "'; "
+                          + PhotoController.GetPhotoViewSql()
+                          + @" WHERE [IsPublic] = 1 OR [UploadedBy] = N'" 
+                          + usrObj.Value + "' ORDER BY (SELECT NULL) OFFSET " 
+                          + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
                 }
                 else
                 {
-                    String queryString2 = @"
-                        SELECT [AlbumID]
+                    String queryString2 = @"SELECT [AlbumID]
                           ,[CreatedBy]
                           ,[IsPublic]
                           ,[AccessCode]
@@ -242,8 +198,10 @@ namespace acgalleryapi.Controllers
                               ,tabb.[ISONumber]
                               ,tabb.[IsPublic]
                               ,tabb.[EXIFInfo] 
+                              ,tabb.[Rating]
+                              ,tabb.[Tags]
                             FROM [dbo].[AlbumPhoto] AS taba
-                                LEFT OUTER JOIN [dbo].[Photo] AS tabb
+                                LEFT OUTER JOIN [dbo].[View_Photo] AS tabb
                                     ON taba.[PhotoID] = tabb.[PhotoID]
                             WHERE taba.[AlbumID] = N'" + albumid + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                 }
@@ -271,45 +229,7 @@ namespace acgalleryapi.Controllers
                         {
                             PhotoViewModel rst = new PhotoViewModel();
 
-                            //cmd.Parameters.AddWithValue("@PhotoID", nid.ToString("N"));   // 1
-                            rst.PhotoId = reader.GetString(0);
-                            //cmd.Parameters.AddWithValue("@Title", nid.ToString("N"));     // 2
-                            rst.Title = reader.GetString(1);
-                            //cmd.Parameters.AddWithValue("@Desp", nid.ToString("N"));      // 3
-                            rst.Desp = reader.GetString(2);
-                            if (!reader.IsDBNull(3))
-                                rst.Width = reader.GetInt32(3);
-                            if (!reader.IsDBNull(4))
-                                rst.Height = reader.GetInt32(4);
-                            if (!reader.IsDBNull(5))
-                                rst.ThumbWidth = reader.GetInt32(5);
-                            if (!reader.IsDBNull(6))
-                                rst.ThumbHeight = reader.GetInt32(6);
-                            //cmd.Parameters.AddWithValue("@UploadedAt", DateTime.Now);     // 8
-                            rst.UploadedTime = reader.GetDateTime(7);
-                            //cmd.Parameters.AddWithValue("@UploadedBy", "Tester");         // 9
-                            //cmd.Parameters.AddWithValue("@OrgFileName", rst.OrgFileName); // 10
-                            rst.OrgFileName = reader.GetString(9);
-                            //cmd.Parameters.AddWithValue("@PhotoUrl", rst.FileUrl);        // 11
-                            rst.FileUrl = reader.GetString(10); // 11 - 1
-                                                                //cmd.Parameters.AddWithValue("@PhotoThumbUrl", rst.ThumbnailFileUrl); // 12
-                            if (!reader.IsDBNull(11)) // 12 - 1
-                                rst.ThumbnailFileUrl = reader.GetString(11);
-                            //cmd.Parameters.AddWithValue("@IsOrgThumb", bThumbnailCreated);    // 13
-                            //cmd.Parameters.AddWithValue("@ThumbCreatedBy", 2); // 1 for ExifTool, 2 stands for others; // 14
-                            //cmd.Parameters.AddWithValue("@CameraMaker", "To-do"); // 15
-                            //cmd.Parameters.AddWithValue("@CameraModel", "To-do"); // 16
-                            //cmd.Parameters.AddWithValue("@LensModel", "To-do");   // 17
-                            //cmd.Parameters.AddWithValue("@AVNumber", "To-do");    // 18
-                            //cmd.Parameters.AddWithValue("@ShutterSpeed", "To-do"); // 19
-                            //cmd.Parameters.AddWithValue("@ISONumber", 0);         // 20
-                            //cmd.Parameters.AddWithValue("@IsPublic", true);       // 21
-                            if (!reader.IsDBNull(20))
-                                rst.IsPublic = reader.GetBoolean(20);
-                            //String strJson = Newtonsoft.Json.JsonConvert.SerializeObject(rst.ExifTags);
-                            //cmd.Parameters.AddWithValue("@EXIF", strJson);        // 22
-                            if (!reader.IsDBNull(21))
-                                rst.ExifTags = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ExifTagItem>>(reader.GetString(21));
+                            DataRowToPhoto(reader, rst);
 
                             rstFiles.Add(rst);
                         }
@@ -644,6 +564,123 @@ namespace acgalleryapi.Controllers
                 return StatusCode(500, strErrMsg);
 
             return new EmptyResult();
+        }
+
+        internal static string GetPhotoViewSql()
+        {
+            return @"SELECT [PhotoID]
+                    ,[Title]
+                    ,[Desp]
+                    ,[Width]
+                    ,[Height]
+                    ,[ThumbWidth]
+                    ,[ThumbHeight]
+                    ,[UploadedAt]
+                    ,[UploadedBy]
+                    ,[OrgFileName]
+                    ,[PhotoUrl]
+                    ,[PhotoThumbUrl]
+                    ,[IsOrgThumb]
+                    ,[ThumbCreatedBy]
+                    ,[CameraMaker]
+                    ,[CameraModel]
+                    ,[LensModel]
+                    ,[AVNumber]
+                    ,[ShutterSpeed]
+                    ,[ISONumber]
+                    ,[IsPublic]
+                    ,[EXIFInfo]
+                    ,[Rating]
+                    ,[Tags]
+                    FROM [dbo].[View_Photo]";
+        }
+
+        internal static void DataRowToPhoto(SqlDataReader reader, PhotoViewModel rst)
+        {
+            Int32 idx = 0;
+            rst.PhotoId = reader.GetString(idx++);
+            rst.Title = reader.GetString(idx++);
+            rst.Desp = reader.GetString(idx++);
+            if (!reader.IsDBNull(idx))
+                rst.Width = reader.GetInt32(idx++);
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+                rst.Height = reader.GetInt32(idx++);
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+                rst.ThumbWidth = reader.GetInt32(idx++);
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+                rst.ThumbHeight = reader.GetInt32(idx++);
+            else
+                ++idx;
+            rst.UploadedTime = reader.GetDateTime(idx++);
+            if (!reader.IsDBNull(idx))
+                rst.UploadedBy = reader.GetString(idx++);
+            else
+                ++idx;
+            rst.OrgFileName = reader.GetString(idx++);
+            rst.FileUrl = reader.GetString(idx++); // 11 - 1
+            if (!reader.IsDBNull(idx))
+                rst.ThumbnailFileUrl = reader.GetString(idx++);
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+                rst.IsOrgThumbnail = reader.GetBoolean(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@ThumbCreatedBy", 2); // 1 for ExifTool, 2 stands for others; // 14
+            ++idx;
+            //cmd.Parameters.AddWithValue("@CameraMaker", "To-do"); // 15
+            if (!reader.IsDBNull(idx))
+                rst.CameraMaker = reader.GetString(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@CameraModel", "To-do"); // 16
+            if (!reader.IsDBNull(idx))
+                rst.CameraModel = reader.GetString(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@LensModel", "To-do");   // 17
+            if (!reader.IsDBNull(idx))
+                rst.LensModel = reader.GetString(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@AVNumber", "To-do");    // 18
+            if (!reader.IsDBNull(idx))
+                rst.AVNumber = reader.GetString(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@ShutterSpeed", "To-do"); // 19
+            if (!reader.IsDBNull(idx))
+                rst.ShutterSpeed = reader.GetString(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@ISONumber", 0);         // 20
+            if (!reader.IsDBNull(idx))
+                rst.ISONumber = reader.GetInt32(idx++);
+            else
+                ++idx;
+            //cmd.Parameters.AddWithValue("@IsPublic", true);       // 21
+            if (!reader.IsDBNull(idx))
+                rst.IsPublic = reader.GetBoolean(idx++);
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+                rst.ExifTags = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ExifTagItem>>(reader.GetString(idx++));
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+                rst.AvgRating = reader.GetDouble(idx++);
+            else
+                ++idx;
+            if (!reader.IsDBNull(idx))
+            {
+                rst.Tags.AddRange(reader.GetString(idx).Split(';'));
+            }
         }
     }
 }
