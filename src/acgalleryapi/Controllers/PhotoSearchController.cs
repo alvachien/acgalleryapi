@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using acgalleryapi.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -13,8 +14,8 @@ namespace acgalleryapi.Controllers
     [Route("api/PhotoSearch")]
     public class PhotoSearchController : Controller
     {
-        // GET: api/PhotoSearch
-        [HttpGet]
+        // POST: api/PhotoSearch
+        [HttpPost]
         public async Task<IActionResult> Get([FromBody]PhotoSearchFilterViewModel filters, [FromQuery]Int32 top = 100, Int32 skip = 0)
         {
             BaseListViewModel<PhotoViewModel> rstFiles = new BaseListViewModel<PhotoViewModel>();
@@ -27,6 +28,7 @@ namespace acgalleryapi.Controllers
                 var usrObj = User.FindFirst(c => c.Type == "sub");
                 String queryString = String.Empty;
                 String subqueries = String.Empty;
+                StringBuilder sb = new StringBuilder();
 
                 for (Int32 i = 0; i < filters.FieldList.Count; i++)
                 {
@@ -38,8 +40,16 @@ namespace acgalleryapi.Controllers
                 if (usrObj == null)
                 {
                     // Anonymous user
-                    queryString = @"SELECT count(*) FROM [dbo].[Photo] WHERE [IsPublic] = 1; " + 
-                               @"; SELECT [PhotoID]
+                    sb.Append(@"SELECT count(*) FROM [dbo].[Photo] WHERE [IsPublic] = 1 ");
+                    if (String.IsNullOrEmpty(subqueries))
+                    {
+                        sb.Append("; ");
+                    }
+                    else
+                    {
+                        sb.Append(" AND " + subqueries + "; ");
+                    }
+                    sb.Append(@"SELECT [PhotoID]
                               ,[Title]
                               ,[Desp]
                               ,[Width]
@@ -62,16 +72,30 @@ namespace acgalleryapi.Controllers
                               ,[IsPublic]
                               ,[EXIFInfo]
                           FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1
-                          ORDER BY (SELECT NULL) 
-                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
+                          WHERE [IsPublic] = 1");
+                    if (String.IsNullOrEmpty(subqueries))
+                    {
+                    }
+                    else
+                    {
+                        sb.Append(" AND " + subqueries);
+                    }
+                    sb.Append(@" ORDER BY (SELECT NULL) 
+                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ");
                 }
                 else
                 {
                     // Signed-in user
-                    queryString = @"SELECT count(*) FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "'; " +
-                      @"SELECT [PhotoID]
+                    sb.Append(@"SELECT count(*) FROM [dbo].[Photo] WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
+                    if (String.IsNullOrEmpty(subqueries))
+                    {
+                        sb.Append("; ");
+                    }
+                    else
+                    {
+                        sb.Append(" AND " + subqueries + "; ");
+                    }
+                    sb.Append(@"SELECT [PhotoID]
                               ,[Title]
                               ,[Desp]
                               ,[Width]
@@ -94,8 +118,21 @@ namespace acgalleryapi.Controllers
                               ,[IsPublic]
                               ,[EXIFInfo]
                           FROM [dbo].[Photo] 
-                          WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "' ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
+                          WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
+                    if (String.IsNullOrEmpty(subqueries))
+                    {
+                    }
+                    else
+                    {
+                        sb.Append(" AND " + subqueries);
+                    }
+                    sb.Append(@" ORDER BY (SELECT NULL) 
+                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ");
                 }
+                queryString = sb.ToString();
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(queryString);
+#endif
                 await conn.OpenAsync();
 
                 SqlCommand cmd = new SqlCommand(queryString, conn);
