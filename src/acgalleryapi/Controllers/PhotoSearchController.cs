@@ -71,7 +71,10 @@ namespace acgalleryapi.Controllers
                               ,[ISONumber]
                               ,[IsPublic]
                               ,[EXIFInfo]
-                          FROM [dbo].[Photo] 
+                              ,SUBSTRING(( SELECT ',' + [dbo].[PhotoTag].Tag AS [text()] From [dbo].[PhotoTag]
+                                    WHERE [dbo].[PhotoTag].PhotoID = [dbo].[Photo].PhotoID
+                                    ORDER BY [dbo].[Photo].PhotoID For XML PATH ('') ), 2, 1000) [Tags]
+                          FROM [dbo].[Photo]
                           WHERE [IsPublic] = 1");
                     if (String.IsNullOrEmpty(subqueries))
                     {
@@ -117,6 +120,9 @@ namespace acgalleryapi.Controllers
                               ,[ISONumber]
                               ,[IsPublic]
                               ,[EXIFInfo]
+                              ,SUBSTRING(( SELECT ',' + [dbo].[PhotoTag].Tag AS [text()] From [dbo].[PhotoTag] 
+                                    WHERE [dbo].[PhotoTag].PhotoID = [dbo].[Photo].PhotoID
+                                    ORDER BY [dbo].[Photo].PhotoID For XML PATH ('') ), 2, 1000) [Tags]
                           FROM [dbo].[Photo] 
                           WHERE ([IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "')");
                     if (String.IsNullOrEmpty(subqueries))
