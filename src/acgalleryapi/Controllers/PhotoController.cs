@@ -55,7 +55,7 @@ namespace acgalleryapi.Controllers
                     {
                         // Anonymous user
                         queryString = @"SELECT count(*) FROM [dbo].[Photo] WHERE [IsPublic] = 1; "
-                            + PhotoController.GetPhotoViewSql()
+                            + GetPhotoViewSql()
                             + @"WHERE [IsPublic] = 1 ORDER BY (SELECT NULL) 
                             OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
                     }
@@ -64,7 +64,7 @@ namespace acgalleryapi.Controllers
                         // Signed-in user
                         queryString = @"SELECT count(*) FROM [dbo].[Photo] 
                           WHERE [IsPublic] = 1 OR [UploadedBy] = N'" + usrObj.Value + "'; "
-                          + PhotoController.GetPhotoViewSql()
+                          + GetPhotoViewSql()
                           + @" WHERE [IsPublic] = 1 OR [UploadedBy] = N'" 
                           + usrObj.Value + "' ORDER BY (SELECT NULL) OFFSET " 
                           + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ";
@@ -476,6 +476,9 @@ namespace acgalleryapi.Controllers
             {
                 return BadRequest("Title is a must!");
             }
+            var usrObj = User.FindFirst(c => c.Type == "sub");
+            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+                return BadRequest("User info cannot load");
 
             Boolean bError = false;
             String strErrMsg = "";
@@ -489,13 +492,95 @@ namespace acgalleryapi.Controllers
                              WHERE [PhotoID] = @PhotoID
                             ";
 
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(cmdText, conn);
-                    cmd.Parameters.AddWithValue("@PhotoID", vm.PhotoId);
-                    cmd.Parameters.AddWithValue("@Title", vm.Title);
-                    cmd.Parameters.AddWithValue("@Desp", vm.Desp);
+                    await conn.OpenAsync();
 
-                    await cmd.ExecuteNonQueryAsync();
+                    UserOperatorAuthEnum? authChange = null;
+                    if (usrObj != null)
+                    {
+                        String sqlString = @"SELECT [PhotoChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrObj.Value + "'";
+                        SqlCommand cmdUser = new SqlCommand(sqlString, conn);
+                        SqlDataReader readerUser = await cmdUser.ExecuteReaderAsync();
+                        if (readerUser.HasRows)
+                        {
+                            readerUser.Read();
+
+                            if (!readerUser.IsDBNull(0))
+                                authChange = (UserOperatorAuthEnum)readerUser.GetByte(0);
+                        }
+
+                        readerUser.Close();
+                        readerUser = null;
+                        cmdUser.Dispose();
+                        cmdUser = null;
+                    }
+                    if (authChange == null)
+                    {
+                        return Unauthorized();
+                    }
+                    else
+                    {
+                        if (authChange.Value == UserOperatorAuthEnum.OnlyOwner)
+                        {
+                            String sqlString = @"SELECT [UploadedBy] FROM [dbo].[Photo] WHERE [PhotoID] = N'" + usrObj.Value + "'";
+                            SqlCommand cmdPhoto = new SqlCommand(sqlString, conn);
+                            SqlDataReader readerPhoto = await cmdPhoto.ExecuteReaderAsync();
+                            if (readerPhoto.HasRows)
+                            {
+                                readerPhoto.Read();
+
+                                if (!readerPhoto.IsDBNull(0))
+                                {
+                                    if (String.CompareOrdinal(readerPhoto.GetString(0), usrObj.Value) != 0)
+                                    {
+                                        return Unauthorized();
+                                    }
+                                }
+                                else
+                                {
+                                    // Not exist
+                                    return NotFound();
+                                }
+                            }
+                            else
+                            {
+                                return NotFound();
+                            }
+
+                            readerPhoto.Close();
+                            readerPhoto = null;
+                            cmdPhoto.Dispose();
+                            cmdPhoto = null;
+                        }
+                    }
+
+                    SqlTransaction tran = conn.BeginTransaction();
+
+                    try
+                    {
+                        // Update the photo itself
+                        SqlCommand cmd = new SqlCommand(cmdText, conn, tran);
+                        cmd.Parameters.AddWithValue("@PhotoID", vm.PhotoId);
+                        cmd.Parameters.AddWithValue("@Title", vm.Title);
+                        cmd.Parameters.AddWithValue("@Desp", vm.Desp);
+
+                        await cmd.ExecuteNonQueryAsync();
+
+                        // Update the rating
+
+                        // Update the tags
+
+                        tran.Commit();
+                    }
+                    catch(Exception exp)
+                    {
+                        if (tran != null)
+                        {
+                            tran.Rollback();
+                            tran = null;
+                        }
+
+                        throw exp;
+                    }
                 }
             }
             catch (Exception exp)
@@ -524,6 +609,11 @@ namespace acgalleryapi.Controllers
                 return BadRequest("No data is inputted");
             }
 
+            var usrObj = User.FindFirst(c => c.Type == "sub");
+            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+                return BadRequest("User info cannot load");
+
+            UserOperatorAuthEnum? authDelete = null;
             Boolean bError = false;
             String strErrMsg = "";
             try
@@ -531,6 +621,65 @@ namespace acgalleryapi.Controllers
                 using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     await conn.OpenAsync();
+
+                    if (usrObj != null)
+                    {
+                        String sqlString = @"SELECT [PhotoDelete] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrObj.Value + "'";
+                        SqlCommand cmdUser = new SqlCommand(sqlString, conn);
+                        SqlDataReader readerUser = await cmdUser.ExecuteReaderAsync();
+                        if (readerUser.HasRows)
+                        {
+                            readerUser.Read();
+
+                            if (!readerUser.IsDBNull(0))
+                                authDelete = (UserOperatorAuthEnum)readerUser.GetByte(0);
+                        }
+
+                        readerUser.Close();
+                        readerUser = null;
+                        cmdUser.Dispose();
+                        cmdUser = null;
+                    }
+                    if (authDelete == null)
+                    {
+                        return Unauthorized();
+                    }
+                    else
+                    {
+                        if (authDelete.Value == UserOperatorAuthEnum.OnlyOwner)
+                        {
+                            String sqlString = @"SELECT [UploadedBy] FROM [dbo].[Photo] WHERE [PhotoID] = N'" + usrObj.Value + "'";
+                            SqlCommand cmdPhoto = new SqlCommand(sqlString, conn);
+                            SqlDataReader readerPhoto = await cmdPhoto.ExecuteReaderAsync();
+                            if (readerPhoto.HasRows)
+                            {
+                                readerPhoto.Read();
+
+                                if (!readerPhoto.IsDBNull(0))
+                                {
+                                    if (String.CompareOrdinal(readerPhoto.GetString(0), usrObj.Value) != 0)
+                                    {
+                                        return Unauthorized();
+                                    }
+                                }
+                                else
+                                {
+                                    // Not exist
+                                    return NotFound();
+                                }                                    
+                            }
+                            else
+                            {
+                                return NotFound();
+                            }
+
+                            readerPhoto.Close();
+                            readerPhoto = null;
+                            cmdPhoto.Dispose();
+                            cmdPhoto = null;
+                        }
+                    }
+
                     SqlTransaction tran = conn.BeginTransaction();
 
                     String cmdText = @"DELETE [Photo] WHERE [PhotoID] = @PhotoID";
@@ -566,6 +715,7 @@ namespace acgalleryapi.Controllers
             return new EmptyResult();
         }
 
+        // Get photo view SQL
         internal static string GetPhotoViewSql()
         {
             return @"SELECT [PhotoID]
@@ -595,6 +745,7 @@ namespace acgalleryapi.Controllers
                     FROM [dbo].[View_Photo]";
         }
 
+        // Row to ViewModel
         internal static void DataRowToPhoto(SqlDataReader reader, PhotoViewModel rst)
         {
             Int32 idx = 0;
@@ -679,7 +830,7 @@ namespace acgalleryapi.Controllers
                 ++idx;
             if (!reader.IsDBNull(idx))
             {
-                rst.Tags.AddRange(reader.GetString(idx).Split(';'));
+                rst.Tags.AddRange(reader.GetString(idx).Split(','));
             }
         }
     }
