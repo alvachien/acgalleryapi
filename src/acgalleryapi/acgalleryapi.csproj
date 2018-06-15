@@ -3,10 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+    <Configurations>Debug;Release;AzureRelease;AliRelease</Configurations>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>TRACE;RELEASE;NETCOREAPP2_0</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='AliRelease|AnyCPU'">
     <DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;USE_ALIYUN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='AzureRelease|AnyCPU'">
+    <DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;USE_AZURE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

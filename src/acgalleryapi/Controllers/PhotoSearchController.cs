@@ -27,15 +27,8 @@ namespace acgalleryapi.Controllers
             {
                 var usrObj = User.FindFirst(c => c.Type == "sub");
                 String queryString = String.Empty;
-                String subqueries = String.Empty;
+                String subqueries = filters.GetFullWhereClause();
                 StringBuilder sb = new StringBuilder();
-
-                for (Int32 i = 0; i < filters.FieldList.Count; i++)
-                {
-                    subqueries += filters.FieldList[i].GenerateSql();
-                    if (i != filters.FieldList.Count - 1)
-                        subqueries += " AND ";
-                }
 
                 if (usrObj == null)
                 {

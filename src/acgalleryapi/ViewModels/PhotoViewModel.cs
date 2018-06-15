@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace acgalleryapi.ViewModels
 {
@@ -367,6 +368,52 @@ namespace acgalleryapi.ViewModels
         public PhotoSearchFilterViewModel()
         {
             this.FieldList = new List<GeneralFilterItem>();
+        }
+
+        public string GetFullWhereClause()
+        {
+            if (!IsValid())
+                return String.Empty;
+
+            // Sort it first
+            FieldList.Sort((a, b) =>
+            {
+                return String.CompareOrdinal(a.FieldName, b.FieldName);
+            });
+
+            String whereClause = "";
+
+            // Find out the items with the same name
+            var listDpl = FieldList.GroupBy(x => x.FieldName).Where(x => x.Count() >= 1).ToList();
+            for (Int32 i = 0; i < listDpl.Count; i++)
+            {
+                List<String> listWhere = new List<string>();
+                foreach(var item in listDpl[i])
+                {
+                    listWhere.Add(item.GenerateSql());
+                }
+                whereClause += " ( " + String.Join(" OR ", listWhere.ToArray()) + " ) ";
+                if (i != listDpl.Count - 1)
+                    whereClause += " AND ";
+            }
+#if DEBUG
+            System.Diagnostics.Debug.WriteLine(whereClause);
+#endif
+
+            return whereClause;
+        }
+
+        private Boolean IsValid()
+        {
+            for(Int32 i = 0; i < FieldList.Count; i++)
+            {
+                if (!FieldList[i].IsValid())
+                {
+                    FieldList.RemoveAt(i);
+                }
+            }
+
+            return FieldList.Count > 0;
         }
     }
 }

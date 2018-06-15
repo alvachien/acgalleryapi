@@ -167,8 +167,25 @@ namespace acgalleryapi.Controllers
                         }
                         else
                         {
-                            // Shall never happened!
-                            return BadRequest();
+                            // Though logged in, but without any rights, it is the same as unlogged in user
+                            if (!bIsPublic)
+                            {
+                                return Unauthorized();
+                            }
+                            if (!String.IsNullOrEmpty(strAlbumAC))
+                            {
+                                if (String.IsNullOrEmpty(accessCode))
+                                {
+                                    return Unauthorized();
+                                }
+                                else
+                                {
+                                    if (String.CompareOrdinal(strAlbumAC, accessCode) != 0)
+                                    {
+                                        return Unauthorized();
+                                    }
+                                }
+                            }
                         }
                     }
 
