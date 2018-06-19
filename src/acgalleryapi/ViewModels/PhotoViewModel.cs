@@ -66,7 +66,7 @@ namespace acgalleryapi.ViewModels
         public String error;
     }
 
-    public class PhotoTagViewModel
+    public sealed class PhotoTagViewModel
     {
         [Required]
         [StringLength(40)]
@@ -75,6 +75,14 @@ namespace acgalleryapi.ViewModels
         [StringLength(50)]
         public String TagString { get; set; }
 
+    }
+
+    public sealed class PhotoTagCountViewModel
+    {
+        [Required]
+        [StringLength(50)]
+        public String TagString { get; set; }
+        public Int32 Count { get; set; }
     }
 
     public enum GeneralFilterOperatorEnum
