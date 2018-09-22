@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
 using Microsoft.AspNetCore.Authorization;
 using acgalleryapi.ViewModels;
+using System.Net;
 
 namespace acgalleryapi.Controllers
 {
@@ -16,10 +17,9 @@ namespace acgalleryapi.Controllers
     {
         // GET: api/UserDetail
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public IActionResult Get()
         {
             return Forbid();
-            //return new string[] { "value1", "value2" };
         }
 
         // GET: api/UserDetail/5
@@ -33,10 +33,13 @@ namespace acgalleryapi.Controllers
             // Create it into DB
             // var usrName = User.FindFirst(c => c.Type == "sub").Value;
             var vmResult = new UserDetailViewModel();
+            SqlConnection conn = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
+            String strErrorMsg = "";
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
+                using (conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     await conn.OpenAsync();
 
@@ -103,7 +106,7 @@ namespace acgalleryapi.Controllers
                     }
                     else
                     {
-                        return NotFound();
+                        errorCode = HttpStatusCode.NotFound;
                     }
 
                     reader.Dispose();
@@ -114,8 +117,34 @@ namespace acgalleryapi.Controllers
             }
             catch (Exception exp)
             {
+                errorCode = HttpStatusCode.InternalServerError;
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
-                return StatusCode(500, exp.Message);
+#endif
+                strErrorMsg = exp.Message;
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Dispose();
+                    conn = null;
+                }
+            }
+
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrorMsg);
+                }
             }
 
             return new ObjectResult(vmResult);
