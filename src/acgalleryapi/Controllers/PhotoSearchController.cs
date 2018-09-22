@@ -84,35 +84,24 @@ namespace acgalleryapi.Controllers
 
                 SqlCommand cmd = new SqlCommand(queryString, conn);
                 SqlDataReader reader = cmd.ExecuteReader();
-                Int32 nRstBatch = 0;
 
-                while (reader.HasRows)
+                if (reader.HasRows)
                 {
-                    if (nRstBatch == 0)
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            rstFiles.TotalCount = reader.GetInt32(0);
-                            break;
-                        }
-
-                        if (rstFiles.TotalCount == 0)
-                            break;
+                        rstFiles.TotalCount = reader.GetInt32(0);
+                        break;
                     }
-                    else
+                }
+                reader.NextResult();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            PhotoViewModel rst = new PhotoViewModel();
-                            PhotoController.DataRowToPhoto(reader, rst);
-                            rstFiles.Add(rst);
-                        }
+                        PhotoViewModel rst = new PhotoViewModel();
+                        PhotoController.DataRowToPhoto(reader, rst);
+                        rstFiles.Add(rst);
                     }
-
-                    ++nRstBatch;
-
-                    if (reader.NextResult())
-                        continue;
                 }
             }
             catch (Exception exp)
@@ -125,6 +114,7 @@ namespace acgalleryapi.Controllers
             {
                 conn.Close();
                 conn.Dispose();
+                conn = null;
             }
 
             if (bError)
