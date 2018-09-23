@@ -34,6 +34,8 @@ namespace acgalleryapi.Controllers
             // var usrName = User.FindFirst(c => c.Type == "sub").Value;
             var vmResult = new UserDetailViewModel();
             SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
             HttpStatusCode errorCode = HttpStatusCode.OK;
             String strErrorMsg = "";
 
@@ -57,8 +59,8 @@ namespace acgalleryapi.Controllers
                       FROM [dbo].[UserDetail]
                       WHERE [UserID] = N'" + userid + "'";
 
-                    SqlCommand cmd = new SqlCommand(queryString, conn);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    cmd = new SqlCommand(queryString, conn);
+                    reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
                     {
@@ -122,9 +124,21 @@ namespace acgalleryapi.Controllers
                 System.Diagnostics.Debug.WriteLine(exp.Message);
 #endif
                 strErrorMsg = exp.Message;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
                 if (conn != null)
                 {
                     conn.Dispose();
@@ -156,29 +170,27 @@ namespace acgalleryapi.Controllers
         public async Task<IActionResult> Post([FromBody]UserDetailViewModel vm)
         {
             if (vm == null)
-            {
                 return BadRequest("No data is inputted");
-            }
 
-            if (TryValidateModel(vm))
-            {
-                // Additional checks
-            }
-            else
-            {
+            if (!TryValidateModel(vm))
                 return BadRequest();
-            }
+
+            SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
+            String strErrMsg = String.Empty;
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
+                String strSql = @"SELECT COUNT(*) FROM [dbo].[UserDetail] WHERE [UserID] = N'" + vm.UserID + "'";
+                using (conn = new SqlConnection(Startup.DBConnectionString))
                 {
                     await conn.OpenAsync();
 
                     // Check the user detail exist or not
-                    String strSql = @"SELECT COUNT(*) FROM [dbo].[UserDetail] WHERE [UserID] = N'" + vm.UserID + "'";
-                    SqlCommand cmd = new SqlCommand(strSql, conn);
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                    cmd = new SqlCommand(strSql, conn);
+                    reader = await cmd.ExecuteReaderAsync();
 
                     Boolean bExist = false;
                     if (reader.HasRows)
@@ -187,10 +199,15 @@ namespace acgalleryapi.Controllers
                         bExist = reader.GetInt32(0) > 0;
 
                         if (bExist)
+                        {
+                            errorCode = HttpStatusCode.BadRequest;
                             throw new Exception("User Info already exist");
+                        }                            
                     }
                     reader.Close();
+                    reader = null;
                     cmd.Dispose();
+                    cmd = null;
 
                     strSql = @"INSERT INTO [dbo].[UserDetail]
                                        ([UserID]
@@ -231,12 +248,51 @@ namespace acgalleryapi.Controllers
 
                     await cmd.ExecuteNonQueryAsync();
 
+                    cmd.Dispose();
+                    cmd = null;
                 }
             }
             catch (Exception exp)
             {
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
-                return StatusCode(500, exp.Message);
+#endif
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
+                strErrMsg = exp.Message;
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
+                if (conn != null)
+                {
+                    conn.Dispose();
+                    conn = null;
+                }
+            }
+
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrMsg);
+                }
             }
 
             return new ObjectResult(vm);
@@ -245,30 +301,31 @@ namespace acgalleryapi.Controllers
         // PUT: api/UserDetail/5
         [HttpPut("{id}")]
         [Authorize]
-        public void Put(int id, [FromBody]string value)
+        public IActionResult Put(int id, [FromBody]string value)
         {
-            string strSql = @"UPDATE [dbo].[UserDetail]
-               SET [UserID] = <UserID, nvarchar(50),>
-                  ,[DisplayAs] = <DisplayAs, nvarchar(50),>
-                  ,[UploadFileMinSize] = <UploadFileMinSize, int,>
-                  ,[UploadFileMaxSize] = <UploadFileMaxSize, int,>
-                  ,[AlbumCreate] = <AlbumCreate, bit,>
-                  ,[AlbumChange] = <AlbumChange, tinyint,>
-                  ,[AlbumDelete] = <AlbumDelete, tinyint,>
-                  ,[PhotoUpload] = <PhotoUpload, bit,>
-                  ,[PhotoChange] = <PhotoChange, tinyint,>
-                  ,[PhotoDelete] = <PhotoDelete, tinyint,>
-                  ,[AlbumRead] = <AlbumRead, tinyint,>
-             WHERE <Search Conditions,,>";
+            //string strSql = @"UPDATE [dbo].[UserDetail]
+            //   SET [UserID] = <UserID, nvarchar(50),>
+            //      ,[DisplayAs] = <DisplayAs, nvarchar(50),>
+            //      ,[UploadFileMinSize] = <UploadFileMinSize, int,>
+            //      ,[UploadFileMaxSize] = <UploadFileMaxSize, int,>
+            //      ,[AlbumCreate] = <AlbumCreate, bit,>
+            //      ,[AlbumChange] = <AlbumChange, tinyint,>
+            //      ,[AlbumDelete] = <AlbumDelete, tinyint,>
+            //      ,[PhotoUpload] = <PhotoUpload, bit,>
+            //      ,[PhotoChange] = <PhotoChange, tinyint,>
+            //      ,[PhotoDelete] = <PhotoDelete, tinyint,>
+            //      ,[AlbumRead] = <AlbumRead, tinyint,>
+            // WHERE <Search Conditions,,>";
+            return Forbid();
         }
         
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{id}")]
         [Authorize]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
-            string strSql = @"DELETE FROM [dbo].[UserDetail]
-                WHERE <Search Conditions,,>";
+            //string strSql = @"DELETE FROM [dbo].[UserDetail] WHERE <Search Conditions,,>";
+            return Forbid();
         }
     }
 }

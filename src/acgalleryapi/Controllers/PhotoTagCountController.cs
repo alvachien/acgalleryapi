@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using acgalleryapi.ViewModels;
 using System.Data.SqlClient;
+using System.Net;
 
 namespace acgalleryapi.Controllers
 {
@@ -36,6 +37,11 @@ namespace acgalleryapi.Controllers
                         listRst.Add(vm);
                     }
                 }
+
+                reader.Close();
+                reader = null;
+                cmd.Dispose();
+                cmd = null;
             }
 
             return new JsonResult(listRst);

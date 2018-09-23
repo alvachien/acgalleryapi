@@ -13,6 +13,7 @@ using acgalleryapi.ViewModels;
 using ImageMagick;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Net;
 
 namespace acgalleryapi.Controllers
 {

@@ -23,8 +23,10 @@ namespace acgalleryapi.Controllers
             BaseListViewModel<AlbumViewModel> listVm = new BaseListViewModel<AlbumViewModel>();
             SqlConnection conn = null;
             String queryString = "";
-            Boolean bError = false;
             String strErrMsg = "";
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
 
             try
             {
@@ -140,8 +142,8 @@ namespace acgalleryapi.Controllers
                 {
                     await conn.OpenAsync();
 
-                    SqlCommand cmd = new SqlCommand(queryString, conn);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    cmd = new SqlCommand(queryString, conn);
+                    reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
                     {
@@ -217,22 +219,46 @@ namespace acgalleryapi.Controllers
             }
             catch (Exception exp)
             {
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
                 strErrMsg = exp.Message;
-                bError = true;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
                 if (conn != null)
                 {
-                    conn.Close();
                     conn.Dispose();
                     conn = null;
                 }
             }
 
-            if (bError)
-                return StatusCode(500, strErrMsg);
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrMsg);
+                }
+            }
 
             return new ObjectResult(listVm);
         }
@@ -241,14 +267,15 @@ namespace acgalleryapi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            SqlConnection conn = null;
             AlbumViewModel avm = null;
 
             var usrObj = User.FindFirst(c => c.Type == "sub");
             String queryString = "";
-            Boolean bError = false;
             String strErrMsg = "";
-            Boolean bNotExist = false;
+            SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
 
             try
             {
@@ -267,8 +294,8 @@ namespace acgalleryapi.Controllers
                 {
                     await conn.OpenAsync();
 
-                    SqlCommand cmd = new SqlCommand(queryString, conn);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    cmd = new SqlCommand(queryString, conn);
+                    reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
                     {
@@ -319,31 +346,53 @@ namespace acgalleryapi.Controllers
                     }
                     else
                     {
-                        bNotExist = true;
+                        errorCode = HttpStatusCode.NotFound;
+                        throw new Exception();
                     }
                 }
             }
             catch (Exception exp)
             {
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
                 strErrMsg = exp.Message;
-                bError = true;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
                 if (conn != null)
                 {
-                    conn.Close();
                     conn.Dispose();
                     conn = null;
                 }
             }
 
-            if (bNotExist)
-                return NotFound();
-
-            if (bError || avm == null)
-                return StatusCode(500, strErrMsg);
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrMsg);
+                }
+            }
 
             return new ObjectResult(avm);
         }
@@ -355,23 +404,18 @@ namespace acgalleryapi.Controllers
         {
             Int32 nNewID = -1;
             if (vm == null)
-            {
                 return BadRequest("No data is inputted");
-            }
 
-            if (TryValidateModel(vm))
-            {
-                // Additional checks
-            }
-            else
-            {
-                return BadRequest();
-            }
+            if (!TryValidateModel(vm))
+                return BadRequest("Cannot parse the object");
 
             // Create it into DB
-            Boolean bError = false;
             String strErrMsg = "";
             SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
+
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
@@ -383,24 +427,25 @@ namespace acgalleryapi.Controllers
                     // Step 1. Read out user authority
                     Boolean? cancreate = null;
                     String cmdText = @"SELECT [AlbumCreate] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
-                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
-                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
-                    if (usrReader.HasRows)
+                    cmd = new SqlCommand(cmdText, conn);
+                    reader = await cmd.ExecuteReaderAsync();
+                    if (reader.HasRows)
                     {
-                        usrReader.Read();
-                        if (!usrReader.IsDBNull(0))
-                            cancreate = usrReader.GetBoolean(0);
+                        reader.Read();
+                        if (!reader.IsDBNull(0))
+                            cancreate = reader.GetBoolean(0);
                     }
 
                     if (!cancreate.HasValue || cancreate.Value == false)
                     {
+                        errorCode = HttpStatusCode.BadRequest;
                         throw new Exception("User has no authoirty set yet!");
                     }
 
-                    usrReader.Close();
-                    usrReader = null;
-                    cmdUserRead.Dispose();
-                    cmdUserRead = null;
+                    reader.Close();
+                    reader = null;
+                    cmd.Dispose();
+                    cmd = null;
 
                     // Step 2. Create an album
                     cmdText = @"INSERT INTO [dbo].[Album]
@@ -411,18 +456,16 @@ namespace acgalleryapi.Controllers
                                ,[IsPublic]
                                ,[AccessCodeHint]
                                ,[AccessCode])
-                         VALUES
-                               (@Title
+                         VALUES (@Title
                                ,@Desp
                                ,@CreatedBy
                                ,@CreatedAt
                                ,@IsPublic
                                ,@AccessCodeHint
-                               ,@AccessCode
-                                )
+                               ,@AccessCode )
                          ; SELECT @Identity = SCOPE_IDENTITY();";
 
-                    SqlCommand cmd = new SqlCommand(cmdText, conn);
+                    cmd = new SqlCommand(cmdText, conn);
                     cmd.Parameters.AddWithValue("@Title", vm.Title);
                     cmd.Parameters.AddWithValue("@Desp", String.IsNullOrEmpty(vm.Desp) ? String.Empty : vm.Desp);
                     cmd.Parameters.AddWithValue("@CreatedBy", usrName);
@@ -439,22 +482,46 @@ namespace acgalleryapi.Controllers
             }
             catch (Exception exp)
             {
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
                 strErrMsg = exp.Message;
-                bError = true;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
                 if (conn != null)
                 {
-                    conn.Close();
                     conn.Dispose();
                     conn = null;
                 }
             }
 
-            if (bError)
-                return StatusCode(500, strErrMsg);
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrMsg);
+                }
+            }
 
             vm.Id = nNewID;
             return new ObjectResult(vm);
@@ -465,20 +532,19 @@ namespace acgalleryapi.Controllers
         public async Task<IActionResult> Update([FromBody] AlbumViewModel vm)
         {
             if (vm == null)
-            {
                 return BadRequest("No data is inputted");
-            }
 
             if (vm.Title != null)
                 vm.Title = vm.Title.Trim();
             if (String.IsNullOrEmpty(vm.Title))
-            {
                 return BadRequest("Title is a must!");
-            }
 
-            Boolean bError = false;
             String strErrMsg = "";
             SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
+
             try
             {
                 var usrName = User.FindFirst(c => c.Type == "sub").Value;
@@ -490,24 +556,25 @@ namespace acgalleryapi.Controllers
                     // Step 1. Read out user authority
                     UserOperatorAuthEnum? authAlbum = null;
                     String cmdText = @"SELECT [AlbumChange] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
-                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
-                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
-                    if (usrReader.HasRows)
+                    cmd = new SqlCommand(cmdText, conn);
+                    reader = await cmd.ExecuteReaderAsync();
+                    if (reader.HasRows)
                     {
-                        usrReader.Read();
-                        if (!usrReader.IsDBNull(0))
-                            authAlbum = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                        reader.Read();
+                        if (!reader.IsDBNull(0))
+                            authAlbum = (UserOperatorAuthEnum)reader.GetByte(0);
                     }
 
                     if (!authAlbum.HasValue)
                     {
+                        errorCode = HttpStatusCode.BadRequest;
                         throw new Exception("User has no authoirty set yet!");
                     }
 
-                    usrReader.Close();
-                    usrReader = null;
-                    cmdUserRead.Dispose();
-                    cmdUserRead = null;
+                    reader.Close();
+                    reader = null;
+                    cmd.Dispose();
+                    cmd = null;
 
                     // Step 2. Read album out
                     cmdText = @"SELECT [AlbumID]
@@ -521,8 +588,8 @@ namespace acgalleryapi.Controllers
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + vm.Id.ToString() + " FOR UPDATE ";
 
-                    SqlCommand cmd = new SqlCommand(cmdText, conn);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    cmd = new SqlCommand(cmdText, conn);
+                    reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
                     {
@@ -540,7 +607,8 @@ namespace acgalleryapi.Controllers
                         {
                             if (String.CompareOrdinal(strCreatedBy, usrName) != 0)
                             {
-                                return Unauthorized();
+                                errorCode = HttpStatusCode.Unauthorized;
+                                throw new Exception();
                             }
                             else
                             {
@@ -549,12 +617,14 @@ namespace acgalleryapi.Controllers
                         }
                         else
                         {
-                            return BadRequest();
+                            errorCode = HttpStatusCode.BadRequest;
+                            throw new Exception();
                         }
                     }
                     else
                     {
-                        return NotFound();
+                        errorCode = HttpStatusCode.NotFound;
+                        throw new Exception();
                     }
 
                     cmd.Dispose();
@@ -567,8 +637,7 @@ namespace acgalleryapi.Controllers
                                 ,[IsPublic] = @IsPublic
                                 ,[AccessCodeHint] = @AccessCodeHint
                                 ,[AccessCode] = @AccessCode
-                            WHERE [AlbumID] = @Id
-                        ";
+                            WHERE [AlbumID] = @Id ";
                     cmd = new SqlCommand(cmdText, conn);
                     cmd.Parameters.AddWithValue("@Id", vm.Id);
                     cmd.Parameters.AddWithValue("@Title", vm.Title);
@@ -591,22 +660,46 @@ namespace acgalleryapi.Controllers
             }
             catch (Exception exp)
             {
+#if DEBUG
                 System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
                 strErrMsg = exp.Message;
-                bError = true;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
                 if (conn != null)
                 {
-                    conn.Close();
                     conn.Dispose();
                     conn = null;
                 }
             }
 
-            if (bError)
-                return StatusCode(500, strErrMsg);
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrMsg);
+                }
+            }
 
             return new ObjectResult(vm);
         }
@@ -615,9 +708,10 @@ namespace acgalleryapi.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(Int32 nID)
         {
-            Boolean bError = false;
             String strErrMsg = "";
             SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
             HttpStatusCode errorCode = HttpStatusCode.OK;
 
             try
@@ -631,13 +725,13 @@ namespace acgalleryapi.Controllers
                     // Step 1. Read out user authority
                     UserOperatorAuthEnum? authAlbumDelete = null;
                     String cmdText = @"SELECT [AlbumDelete] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
-                    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
-                    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
-                    if (usrReader.HasRows)
+                    cmd = new SqlCommand(cmdText, conn);
+                    reader = await cmd.ExecuteReaderAsync();
+                    if (reader.HasRows)
                     {
-                        usrReader.Read();
-                        if (!usrReader.IsDBNull(0))
-                            authAlbumDelete = (UserOperatorAuthEnum)usrReader.GetByte(0);
+                        reader.Read();
+                        if (!reader.IsDBNull(0))
+                            authAlbumDelete = (UserOperatorAuthEnum)reader.GetByte(0);
                     }
                     
                     if (!authAlbumDelete.HasValue)
@@ -646,10 +740,10 @@ namespace acgalleryapi.Controllers
                         throw new Exception();
                     }
 
-                    usrReader.Close();
-                    usrReader = null;
-                    cmdUserRead.Dispose();
-                    cmdUserRead = null;
+                    reader.Close();
+                    reader = null;
+                    cmd.Dispose();
+                    cmd = null;
 
                     // Step 2. Read out album info and check authority
                     cmdText = @"SELECT [AlbumID]
@@ -663,8 +757,8 @@ namespace acgalleryapi.Controllers
                       FROM [dbo].[Album]
                       WHERE [AlbumID] = " + nID.ToString() + " FOR UPDATE ";
 
-                    SqlCommand cmd = new SqlCommand(cmdText, conn);
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    cmd = new SqlCommand(cmdText, conn);
+                    reader = cmd.ExecuteReader();
 
                     if (reader.HasRows)
                     {
@@ -709,15 +803,32 @@ namespace acgalleryapi.Controllers
                     cmd = new SqlCommand(cmdText, conn);
 
                     await cmd.ExecuteNonQueryAsync();
+
+                    cmd.Dispose();
+                    cmd = null;
                 }
             }
             catch (Exception exp)
             {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine(exp.Message);
+#endif
                 strErrMsg = exp.Message;
-                bError = true;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
                 if (conn != null)
                 {
                     conn.Dispose();
@@ -725,7 +836,7 @@ namespace acgalleryapi.Controllers
                 }
             }
 
-            if (bError)
+            if (errorCode != HttpStatusCode.OK)
             {
                 switch (errorCode)
                 {

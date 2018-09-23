@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using acgalleryapi.ViewModels;
@@ -19,9 +20,11 @@ namespace acgalleryapi.Controllers
         public async Task<IActionResult> Get([FromBody]PhotoSearchFilterViewModel filters, [FromQuery]Int32 top = 100, Int32 skip = 0)
         {
             BaseListViewModel<PhotoViewModel> rstFiles = new BaseListViewModel<PhotoViewModel>();
-            SqlConnection conn = new SqlConnection(Startup.DBConnectionString);
-            Boolean bError = false;
             String strErrMsg = "";
+            SqlConnection conn = null;
+            SqlCommand cmd = null;
+            SqlDataReader reader = null;
+            HttpStatusCode errorCode = HttpStatusCode.OK;
 
             try
             {
@@ -50,8 +53,7 @@ namespace acgalleryapi.Controllers
                     {
                         sb.Append(" AND " + subqueries);
                     }
-                    sb.Append(@" ORDER BY (SELECT NULL) 
-                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ");
+                    sb.Append(@" ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ");
                 }
                 else
                 {
@@ -73,34 +75,34 @@ namespace acgalleryapi.Controllers
                     {
                         sb.Append(" AND " + subqueries);
                     }
-                    sb.Append(@" ORDER BY (SELECT NULL) 
-                            OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ");
+                    sb.Append(@" ORDER BY (SELECT NULL) OFFSET " + skip.ToString() + " ROWS FETCH NEXT " + top.ToString() + " ROWS ONLY; ");
                 }
                 queryString = sb.ToString();
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine(queryString);
-#endif
-                await conn.OpenAsync();
 
-                SqlCommand cmd = new SqlCommand(queryString, conn);
-                SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.HasRows)
+                using(conn = new SqlConnection(Startup.DBConnectionString))
                 {
-                    while (reader.Read())
+                    await conn.OpenAsync();
+
+                    cmd = new SqlCommand(queryString, conn);
+                    reader = cmd.ExecuteReader();
+
+                    if (reader.HasRows)
                     {
-                        rstFiles.TotalCount = reader.GetInt32(0);
-                        break;
+                        while (reader.Read())
+                        {
+                            rstFiles.TotalCount = reader.GetInt32(0);
+                            break;
+                        }
                     }
-                }
-                reader.NextResult();
-                if (reader.HasRows)
-                {
-                    while (reader.Read())
+                    reader.NextResult();
+                    if (reader.HasRows)
                     {
-                        PhotoViewModel rst = new PhotoViewModel();
-                        PhotoController.DataRowToPhoto(reader, rst);
-                        rstFiles.Add(rst);
+                        while (reader.Read())
+                        {
+                            PhotoViewModel rst = new PhotoViewModel();
+                            PhotoController.DataRowToPhoto(reader, rst);
+                            rstFiles.Add(rst);
+                        }
                     }
                 }
             }
@@ -108,23 +110,48 @@ namespace acgalleryapi.Controllers
             {
                 System.Diagnostics.Debug.WriteLine(exp.Message);
                 strErrMsg = exp.Message;
-                bError = true;
+                if (errorCode == HttpStatusCode.OK)
+                    errorCode = HttpStatusCode.InternalServerError;
             }
             finally
             {
-                conn.Close();
-                conn.Dispose();
-                conn = null;
+                if (reader != null)
+                {
+                    reader.Dispose();
+                    reader = null;
+                }
+                if (cmd != null)
+                {
+                    cmd.Dispose();
+                    cmd = null;
+                }
+                if (conn != null)
+                {
+                    conn.Dispose();
+                    conn = null;
+                }
             }
 
-            if (bError)
-                return StatusCode(500, strErrMsg);
+            if (errorCode != HttpStatusCode.OK)
+            {
+                switch (errorCode)
+                {
+                    case HttpStatusCode.Unauthorized:
+                        return Unauthorized();
+                    case HttpStatusCode.NotFound:
+                        return NotFound();
+                    case HttpStatusCode.BadRequest:
+                        return BadRequest();
+                    default:
+                        return StatusCode(500, strErrMsg);
+                }
+            }
 
             return new ObjectResult(rstFiles);
         }
 
         // GET: api/PhotoSearch/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public string Get(int id)
         {
             return "value";
