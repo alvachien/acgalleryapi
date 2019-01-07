@@ -202,7 +202,7 @@ GO
 CREATE VIEW [dbo].[View_Photo]
 AS
 SELECT [dbo].[Photo].*,
-(SELECT AVG(RATING) FROM [dbo].[PhotoRating] WHERE [dbo].[PhotoRating].PhotoID = [dbo].[Photo].PhotoID ) AS RATING,
+(SELECT AVG(Rating) FROM [dbo].[PhotoRating] WHERE [dbo].[PhotoRating].PhotoID = [dbo].[Photo].PhotoID ) AS RATING,
 SUBSTRING(( SELECT ',' + [dbo].[PhotoTag].Tag AS [text()] From [dbo].[PhotoTag]
    WHERE [dbo].[PhotoTag].PhotoID = [dbo].[Photo].PhotoID
    ORDER BY [dbo].[Photo].PhotoID For XML PATH ('') ), 2, 1000) [Tags]
