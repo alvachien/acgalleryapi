@@ -31,60 +31,55 @@ namespace acgalleryapi.Controllers
                 {
                     await conn.OpenAsync();
 
-                    String queryString = @"SELECT COUNT(*) FROM [dbo].[Album];
-                        SELECT COUNT(*) FROM [dbo].[Photo];";
+                    String queryString = @"
+                        SELECT COUNT(*) FROM [dbo].[Album];
+                        SELECT COUNT(*) FROM [dbo].[Photo];
+                        SELECT TOP (5) [AlbumID], COUNT([PhotoID]) AS PhotoAmount from dbo.AlbumPhoto
+                                GROUP BY [AlbumID]
+                                ORDER BY PhotoAmount DESC;
+                        SELECT TOP (5) Tag, COUNT(PhotoID) AS PhotoAmount FROM dbo.PhotoTag
+	                        GROUP BY [Tag]
+	                        ORDER BY PhotoAmount DESC;";
 
                     cmd = new SqlCommand(queryString, conn);
                     reader = cmd.ExecuteReader();
 
+                    // 1. Album count
                     if (reader.HasRows)
                     {
                         reader.Read();
-
-                        Int32 idx = 0;
-                        vmResult.UserID = reader.GetString(idx++);
-                        vmResult.DisplayAs = reader.GetString(idx++);
-                        if (!reader.IsDBNull(idx))
-                            vmResult.UploadFileMinSize = reader.GetInt32(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.UploadFileMaxSize = reader.GetInt32(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.AlbumCreate = reader.GetBoolean(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.AlbumChange = (UserOperatorAuthEnum)reader.GetByte(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.AlbumDelete = (UserOperatorAuthEnum)reader.GetByte(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.PhotoUpload = reader.GetBoolean(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.PhotoChange = (UserOperatorAuthEnum)reader.GetByte(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.PhotoDelete = (UserOperatorAuthEnum)reader.GetByte(idx++);
-                        else
-                            ++idx;
-                        if (!reader.IsDBNull(idx))
-                            vmResult.AlbumRead = (UserOperatorAuthEnum)reader.GetByte(idx++);
-                        else
-                            ++idx;
+                        if (!reader.IsDBNull(0))
+                            vmResult.AlbumAmount = reader.GetInt32(0);
                     }
-                    else
+                    await reader.NextResultAsync();
+                    // 2. Photo count
+                    if (reader.HasRows)
                     {
-                        errorCode = HttpStatusCode.NotFound;
+                        reader.Read();
+                        if (!reader.IsDBNull(0))
+                            vmResult.PhotoAmount = reader.GetInt32(0);
                     }
+                    await reader.NextResultAsync();
+                    // 3. Top 5 albums with largest photo amount
+                    if (reader.HasRows)
+                    {
+                        while(reader.Read())
+                        {
+                            if (!reader.IsDBNull(1))
+                                vmResult.PhotoAmountInTop5Album.Add(reader.GetInt32(1));
+                        }
+                    }
+                    await reader.NextResultAsync();
+                    // 4. Top 5 tag with photo amount
+                    if (reader.HasRows)
+                    {
+                        while (reader.Read())
+                        {
+                            if (!reader.IsDBNull(0) && !reader.IsDBNull(1))
+                                vmResult.PhotoAmountInTop5Tag.Add(reader.GetString(0), reader.GetInt32(1));
+                        }
+                    }
+                    await reader.NextResultAsync();
 
                     reader.Dispose();
                     reader = null;

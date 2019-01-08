@@ -4,6 +4,12 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <Configurations>Debug;Release;AzureRelease;AliRelease</Configurations>
+    <Version>1.2.0</Version>
+    <Authors>Alva Chien</Authors>
+    <Company>Alva Chien</Company>
+    <Product>AC Gallery</Product>
+    <Description>AC Gallery</Description>
+    <Copyright>(C) 2019, Alva Chien</Copyright>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

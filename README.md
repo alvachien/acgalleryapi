@@ -1,8 +1,8 @@
-# achihapi
-Web API for [AC Gallery](https://github.com/alvachien/acgallery.git), built on ASP.NET Core.
+# acgalleryapi
+Web API for [AC Gallery](https://github.com/alvachien/acgallery.git), built on ASP.NET Core. This web api can be deploy to Cloud platform like Microsoft Azure.
 
-## Install
-To install this Web API to your own server, please follow the steps below.
+## Deployment
+To deploy this Web API to your own server, please follow the steps below.
 
 
 ### Step 1. Clone or Download
@@ -40,16 +40,16 @@ An example file look like following:
 ```
 
 
-### Step 4. Deployment
+### Step 4. HTTP Server
 By default, this Web API can deploy to IIS or IIS Express, or any other HTTP server which can host ASP.NET Core.
 
 
 ## Development Tools
-Though the whole project was compiled with Visual Studio 2017 Community Version, the project can be processed by any IDE which supports ASP.NET Core.
+Though the whole project was compiled with Visual Studio 2017 Community Version, the project can be processed by command lines with ASP.NET Core supported.
 
 
 ## Unit Test
-This unit test project also included. You can run the unit test to ensure the codes run successfully.
+An unit test project also included in this repo. You can run the unit test to ensure the codes run successfully.
 
 
 # Author
