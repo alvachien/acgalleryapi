@@ -6,12 +6,20 @@ using acgalleryapi.ViewModels;
 using System.Data.SqlClient;
 using Microsoft.AspNetCore.Authorization;
 using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace acgalleryapi.Controllers
 {
     [Route("api/[controller]")]
     public class PhotoController : Controller
     {
+        private IMemoryCache _cache;
+
+        public PhotoController(IMemoryCache cache)
+        {
+            _cache = cache;
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetPhotos([FromQuery] String albumid = null, [FromQuery] String accessCode = null, [FromQuery] Int32 top = 100, [FromQuery] Int32 skip = 0)
         {
@@ -35,9 +43,9 @@ namespace acgalleryapi.Controllers
                 {
                     await conn.OpenAsync();
 
-                    String cmdText = @"SELECT [AlbumRead] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrObj.Value + "'";
                     if (usrObj != null)
                     {
+                        String cmdText = @"SELECT [AlbumRead] FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrObj.Value + "'";
                         cmd = new SqlCommand(cmdText, conn);
                         reader = await cmd.ExecuteReaderAsync();
                         if (reader.HasRows)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using acgalleryapi.ViewModels;
 using System.Data.SqlClient;
 using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace acgalleryapi.Controllers
 {
@@ -16,6 +17,7 @@ namespace acgalleryapi.Controllers
     {
         // GET: api/Statistics
         [HttpGet]
+        [ResponseCache(Duration = 1200)]
         public async Task<IActionResult> Get()
         {
             var vmResult = new StatisticsViewModel();

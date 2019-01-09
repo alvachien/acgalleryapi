@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <Configurations>Debug;Release;AzureRelease;AliRelease</Configurations>
-    <Version>1.2.0</Version>
+    <Version>1.2.2</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
     <Product>AC Gallery</Product>
@@ -23,6 +23,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='AzureRelease|AnyCPU'">
     <DefineConstants>TRACE;RELEASE;NETCOREAPP2_0;USE_AZURE</DefineConstants>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="uploads\**" />
+    <Content Remove="uploads\**" />
+    <EmbeddedResource Remove="uploads\**" />
+    <None Remove="uploads\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="exiftool.exe">

@@ -41,6 +41,7 @@ namespace acgalleryapi.Controllers
 
         // GET: api/PhotoFile/filename
         [HttpGet("{filename}")]
+        [ResponseCache(Duration = 864000)]
         public IActionResult Get(string filename)
         {
             String strFullFile = Startup.UploadFolder + "\\" + filename;

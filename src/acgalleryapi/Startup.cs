@@ -84,6 +84,10 @@ namespace acgalleryapi
             DBConnectionString = Configuration.GetConnectionString("AliyunConnection");
 #endif
 #endif
+            // Response Caching
+            services.AddResponseCaching();
+            // Memory cache
+            services.AddMemoryCache();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -125,6 +129,8 @@ namespace acgalleryapi
             //});
 
             app.UseMvc();
+
+            app.UseResponseCaching();
         }
     }
 }

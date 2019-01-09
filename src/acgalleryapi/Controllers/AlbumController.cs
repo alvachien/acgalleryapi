@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace acgalleryapi.Controllers
 {
@@ -16,6 +17,13 @@ namespace acgalleryapi.Controllers
     [Route("api/[controller]")]
     public class AlbumController : Controller
     {
+        private IMemoryCache _cache;
+
+        public AlbumController(IMemoryCache cache)
+        {
+            _cache = cache;
+        }
+
         // GET: api/album
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] String photoid = null, [FromQuery] Int32 top = 100, [FromQuery] Int32 skip = 0)
