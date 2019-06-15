@@ -136,11 +136,11 @@ namespace acgalleryapi.Controllers
         }
         
         // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{strfile}")]
         [Authorize]
-        public IActionResult DeleteUploadedFile(String strFile)
+        public IActionResult DeleteUploadedFile(String strfile)
         {
-            var fileFullPath = Path.Combine(Startup.UploadFolder, strFile);
+            var fileFullPath = Path.Combine(Startup.UploadFolder, strfile);
             var filename = Path.GetFileNameWithoutExtension(fileFullPath);
             var fileext = Path.GetExtension(fileFullPath);
             var fileThumbFullPath = Path.Combine(Startup.UploadFolder, filename + ".thumb" + fileext);
