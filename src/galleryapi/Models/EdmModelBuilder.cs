@@ -12,7 +12,9 @@ namespace GalleryAPI.Models
             if (_edmModel == null)
             {
                 var builder = new ODataConventionModelBuilder();
-                builder.EntitySet<Album>("Albums");
+                var albums = builder.EntitySet<Album>("Albums");
+                albums.EntityType.Ignore(emp => emp.AccessCode);
+                builder.EntitySet<Photo>("Photos");
 
                 //// two overload function import
                 //var function = builder.Function("CalcByRating");

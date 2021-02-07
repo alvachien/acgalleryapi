@@ -10,6 +10,7 @@ namespace GalleryAPI.Models
         }
 
         public DbSet<Album> Albums { get; set; }
+        public DbSet<Photo> Photos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
