@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace GalleryAPI
+namespace galleryapi
 {
     public class Startup
     {
@@ -25,14 +25,7 @@ namespace GalleryAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
-
             services.AddControllers();
-
-            // Response Caching
-            services.AddResponseCaching();
-            // Memory cache
-            services.AddMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,29 +35,6 @@ namespace GalleryAPI
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseCors(builder =>
-#if DEBUG
-                builder.WithOrigins(
-                    "http://localhost:16001",
-                    "https://localhost:16001"
-                    )
-#elif RELEASE
-#if USE_AZURE
-                builder.WithOrigins(
-                    "https://acgallery.azurewebsites.net"
-                    )
-#elif USE_ALIYUN
-                builder.WithOrigins(
-                    "http://118.178.58.187:5210",
-                    "https://118.178.58.187:5210"
-                    )
-#endif
-#endif
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-                );
 
             app.UseHttpsRedirection();
 
@@ -76,8 +46,6 @@ namespace GalleryAPI
             {
                 endpoints.MapControllers();
             });
-
-            app.UseResponseCaching();
         }
     }
 }

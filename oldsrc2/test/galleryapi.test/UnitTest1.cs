@@ -1,7 +1,7 @@
 using System;
 using Xunit;
 
-namespace GalleryAPI.test
+namespace galleryapi.test
 {
     public class UnitTest1
     {
