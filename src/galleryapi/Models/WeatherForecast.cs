@@ -1,6 +1,6 @@
 using System;
 
-namespace galleryapi
+namespace GalleryAPI.Models
 {
     public class WeatherForecast
     {

@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using GalleryAPI.Models;
 
 namespace GalleryAPI
 {
@@ -21,13 +25,21 @@ namespace GalleryAPI
         }
 
         public IConfiguration Configuration { get; }
+        public String ConnectionString { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
 
-            services.AddControllers();
+            // TBD
+            // services.AddAuthentication();
+            this.ConnectionString = Configuration["GalleryAPI:ConnectionString"];
+            if (!String.IsNullOrEmpty(this.ConnectionString))
+                services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(this.ConnectionString));
+
+            services.AddOData();
+            services.AddRouting();
 
             // Response Caching
             services.AddResponseCaching();
@@ -68,16 +80,60 @@ namespace GalleryAPI
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
+            // TBD
+            // app.UseAuthorization();
 
-            app.UseAuthorization();
+            IEdmModel model = EdmModelBuilder.GetEdmModel();
+
+            // Please add "UseODataBatching()" before "UseRouting()" to support OData $batch.
+            app.UseODataBatching();
+
+            app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapODataRoute(
+                    "nullPrefix", null,
+                    b =>
+                    {
+                        b.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model);
+                        b.AddService<ODataDeserializerProvider>(Microsoft.OData.ServiceLifetime.Singleton, sp => new EntityReferenceODataDeserializerProvider(sp));
+                        b.AddService<IEnumerable<IODataRoutingConvention>>(Microsoft.OData.ServiceLifetime.Singleton,
+                            sp => ODataRoutingConventions.CreateDefaultWithAttributeRouting("nullPrefix", endpoints.ServiceProvider));
+                    });
+
+                endpoints.MapODataRoute("odataPrefix", "odata", model);
+
+                //endpoints.MapODataRoute("myPrefix", "my/{data}", model);
+
+                //endpoints.MapODataRoute("msPrefix", "ms", model, new DefaultODataBatchHandler());
             });
 
+
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //});
+
             app.UseResponseCaching();
+        }
+    }
+
+    public class EntityReferenceODataDeserializerProvider : DefaultODataDeserializerProvider
+    {
+        public EntityReferenceODataDeserializerProvider(IServiceProvider rootContainer)
+            : base(rootContainer)
+        {
+        }
+
+        public override ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
+        {
+            return base.GetEdmTypeDeserializer(edmType);
+        }
+
+        public override ODataDeserializer GetODataDeserializer(Type type, HttpRequest request)
+        {
+            return base.GetODataDeserializer(type, request);
         }
     }
 }
