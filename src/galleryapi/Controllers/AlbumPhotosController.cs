@@ -15,5 +15,12 @@ namespace GalleryAPI.Controllers
         {
             _context = context;
         }
+
+        [EnableQuery]
+        public IActionResult Get()
+        {
+            return Ok(_context.AlbumPhotos);
+        }
+
     }
 }

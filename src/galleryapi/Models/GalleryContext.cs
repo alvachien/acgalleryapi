@@ -12,6 +12,8 @@ namespace GalleryAPI.Models
         public DbSet<Album> Albums { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<PhotoTag> PhotoTags { get; set; }
+        public DbSet<UserDetail> UserDetails { get; set; }
+        public DbSet<AlbumPhoto> AlbumPhotos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

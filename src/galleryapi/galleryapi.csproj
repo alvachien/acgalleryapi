@@ -8,6 +8,7 @@
     <Company>Alva Chien</Company>
     <Product>Photo Gallery</Product>
     <Copyright>(C) Alva Chien, 2021</Copyright>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="7.5.5" />

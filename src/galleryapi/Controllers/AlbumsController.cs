@@ -16,7 +16,7 @@ namespace GalleryAPI.Controllers
             _context = context;
         }
 
-        [EnableQuery]
+        [AlbumEnableQuery]
         public IActionResult Get()
         {
             // Be noted: without the NoTracking setting, the query for $select=HomeAddress with throw exception:
@@ -26,7 +26,7 @@ namespace GalleryAPI.Controllers
             return Ok(_context.Albums);
         }
 
-        [EnableQuery]
+        [AlbumEnableQuery]
         public IActionResult Get(int key)
         {
             return Ok(_context.Albums.FirstOrDefault(c => c.Id == key));
