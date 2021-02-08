@@ -53,5 +53,7 @@ namespace GalleryAPI.Models
         //public Int32 PhotoCount { get; set; }
         //// First photo
         //public String FirstPhotoThumnailUrl { get; set; }
+
+        public List<AlbumPhoto> AlbumPhotos { get; set; }
     }
 }

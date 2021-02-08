@@ -15,6 +15,9 @@ namespace GalleryAPI.Models
                 var albums = builder.EntitySet<Album>("Albums");
                 albums.EntityType.Ignore(emp => emp.AccessCode);
                 builder.EntitySet<Photo>("Photos");
+                builder.EntitySet<AlbumPhoto>("AlbumPhotos");
+                builder.EntitySet<PhotoTag>("PhotoTags");
+                builder.EntitySet<UserDetail>("UserDetails");
 
                 //// two overload function import
                 //var function = builder.Function("CalcByRating");

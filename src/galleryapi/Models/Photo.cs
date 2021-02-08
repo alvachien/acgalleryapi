@@ -86,5 +86,8 @@ namespace GalleryAPI.Models
 
         [Column("ISONumber", TypeName = "INT")]
         public Int32 ISONumber { get; set; }
+
+        public List<AlbumPhoto> AlbumPhotos { get; set; }
+        public List<PhotoTag> Tags { get; set; }
     }
 }
