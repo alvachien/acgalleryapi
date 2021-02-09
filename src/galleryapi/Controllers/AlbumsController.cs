@@ -2,6 +2,7 @@
 using System.Linq;
 using GalleryAPI.Models;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData;
@@ -50,44 +51,44 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetPhotos([FromODataUri]int albumid, string accesscode)
+        public IActionResult GetPhotos([FromODataUri] int AlbumID, [FromODataUri] string AccessCode)
         {
-            //if (parameters == null)
-            //{
-            //    throw new ODataException("Parameters is null");
-            //}
-            //if (parameters.Count == 0)
-            //{
-            //    throw new ODataException("Parameters is empty");
-            //}
-            //if (!parameters.ContainsKey("AlbumID"))
-            //{
-            //    return BadRequest();
-            //}
-
-            //// Album ID
+            // Album ID
             //var aid = (int)parameters.GetValueOrDefault("AlbumID");
-            var album = _context.Albums.FirstOrDefault(c => c.Id == albumid);
-            if (album == null)
-            {
-                return NotFound();
-            }
+            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+            //if (album == null)
+            //{
+            //    return NotFound();
+            //}
 
-            if (!string.IsNullOrEmpty(album.AccessCode))
-            {
-                if (string.CompareOrdinal(accesscode, album.AccessCode) != 0)
-                {
-                    return BadRequest("Access Code is wrong");
-                }
-            }
+            //if (!string.IsNullOrEmpty(album.AccessCode))
+            //{
+            //    if (string.CompareOrdinal(AccessCode, album.AccessCode) != 0)
+            //    {
+            //        return BadRequest("Access Code is wrong");
+            //    }
+            //}
 
             var phts = from ap in _context.AlbumPhotos
                        join photo in _context.Photos
                        on ap.PhotoID equals photo.PhotoId
-                       where ap.AlbumID == albumid
+                       where ap.AlbumID == AlbumID
                        select photo;
 
             return Ok(phts);
         }
+        
+        [HttpGet]        
+        public IActionResult GetPhotos2()
+        {
+            return Ok(_context.Photos);
+        }
+
+        [HttpGet]
+        public IActionResult GetPhotos3()
+        {
+            return Ok(_context.Photos);
+        }
     }
 }
+

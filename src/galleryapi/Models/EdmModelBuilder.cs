@@ -20,9 +20,19 @@ namespace GalleryAPI.Models
                 builder.EntitySet<UserDetail>("UserDetails");
 
                 // Function on Album - Get Photos
-                var function = albums.EntityType.Collection.Function("GetPhotos");
-                function.Parameter<int>("AlbumID");
-                function.Parameter<string>("AccessCode");
+                var functionWithOptional = albums.EntityType.Collection.Function("GetPhotos");
+                functionWithOptional.ReturnsCollectionFromEntitySet<Photo>("Photos");
+                functionWithOptional.Parameter<int>("AlbumID");
+                functionWithOptional.Parameter<int>("AccessCode").Optional();
+                // functionWithOptional.Parameter<string>("aveSalary").HasDefaultValue("129");
+
+                //var function = albums.EntityType.Collection.Function("GetPhotos");
+                //function.Parameter<int>("AlbumID");
+                //function.Parameter<string>("AccessCode");
+                //function.ReturnsCollectionFromEntitySet<Photo>("Photos");
+                var function = albums.EntityType.Collection.Function("GetPhotos2");
+                function.ReturnsCollectionFromEntitySet<Photo>("Photos");
+                function = albums.EntityType.Function("GetPhotos3");
                 function.ReturnsCollectionFromEntitySet<Photo>("Photos");
 
                 // Function on Album - Change Access Code
