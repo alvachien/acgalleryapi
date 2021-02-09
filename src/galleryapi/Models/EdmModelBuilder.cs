@@ -19,6 +19,18 @@ namespace GalleryAPI.Models
                 builder.EntitySet<PhotoTag>("PhotoTags");
                 builder.EntitySet<UserDetail>("UserDetails");
 
+                // Function on Album - Get Photos
+                var function = albums.EntityType.Collection.Function("GetPhotos");
+                function.Parameter<int>("AlbumID");
+                function.Parameter<string>("AccessCode");
+                function.ReturnsCollectionFromEntitySet<Photo>("Photos");
+
+                // Function on Album - Change Access Code
+                var action = albums.EntityType.Action("ChangeAccessCode");
+                action.Parameter<int>("AlbumID");
+                action.Parameter<string>("AccessCode");
+                action.Returns<int>();
+
                 //// two overload function import
                 //var function = builder.Function("CalcByRating");
                 //function.Parameter<int>("order");

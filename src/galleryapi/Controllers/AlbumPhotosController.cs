@@ -21,6 +21,5 @@ namespace GalleryAPI.Controllers
         {
             return Ok(_context.AlbumPhotos);
         }
-
     }
 }
