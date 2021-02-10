@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.OData.Builder;
-using Microsoft.OData.Edm;
+﻿using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 
 namespace GalleryAPI.Models
 {
@@ -20,25 +20,19 @@ namespace GalleryAPI.Models
                 builder.EntitySet<UserDetail>("UserDetails");
 
                 // Function on Album - Get Photos
-                var functionWithOptional = albums.EntityType.Collection.Function("GetPhotos");
-                functionWithOptional.ReturnsCollectionFromEntitySet<Photo>("Photos");
+                var functionWithOptional = albums.EntityType.Collection.Function("GetPhotos").ReturnsCollectionFromEntitySet<Photo>("Photos");
                 functionWithOptional.Parameter<int>("AlbumID");
-                functionWithOptional.Parameter<int>("AccessCode").Optional();
-                // functionWithOptional.Parameter<string>("aveSalary").HasDefaultValue("129");
+                functionWithOptional.Parameter<string>("AccessCode").Optional();
 
-                //var function = albums.EntityType.Collection.Function("GetPhotos");
-                //function.Parameter<int>("AlbumID");
-                //function.Parameter<string>("AccessCode");
-                //function.ReturnsCollectionFromEntitySet<Photo>("Photos");
-                var function = albums.EntityType.Collection.Function("GetPhotos2");
-                function.ReturnsCollectionFromEntitySet<Photo>("Photos");
-                function = albums.EntityType.Function("GetPhotos3");
-                function.ReturnsCollectionFromEntitySet<Photo>("Photos");
+                // Function on Album - GetAlbumPhotos
+                // NOT WORKING!!!
+                //var funcOnEntity = builder.EntityType<Album>().Function("GetAlbumPhotos").ReturnsCollectionFromEntitySet<Photo>("Photos");
+                //funcOnEntity.Parameter<string>("AccessCode").Optional();
 
                 // Function on Album - Change Access Code
-                var action = albums.EntityType.Action("ChangeAccessCode");
+                var action = builder.EntityType<Album>().Collection.Action("ChangeAccessCode").ReturnsFromEntitySet<Album>("Albums");
                 action.Parameter<int>("AlbumID");
-                action.Parameter<string>("AccessCode");
+                action.Parameter<string>("AccessCode").Optional();
                 action.Returns<int>();
 
                 //// two overload function import
@@ -55,6 +49,7 @@ namespace GalleryAPI.Models
                 //action.Parameter<int>("order");
                 //action.ReturnsFromEntitySet<Customer>("Customers");
 
+                //builder.EnableLowerCamelCase();
                 _edmModel = builder.GetEdmModel();
             }
 

@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Batch;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +10,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using GalleryAPI.Models;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Formatter.Deserialization;
+using GalleryAPI.Extensions;
+using Microsoft.AspNetCore.OData.Batch;
+using System.Collections;
+using Microsoft.AspNetCore.OData.Routing;
+using Microsoft.AspNetCore.OData.Routing.Template;
 
 namespace GalleryAPI
 {
@@ -38,8 +41,19 @@ namespace GalleryAPI
             if (!String.IsNullOrEmpty(this.ConnectionString))
                 services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(this.ConnectionString));
 
-            services.AddOData();
-            services.AddRouting();
+            services.AddControllers();
+
+            IEdmModel model = EdmModelBuilder.GetEdmModel();
+
+            services.AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(50)
+                .SetAttributeRouting(false)
+                .AddModel(model)
+                .AddModel("v1", model)
+                // .AddModel("v2{data}", model2, builder => builder.AddService<ODataBatchHandler, DefaultODataBatchHandler>(Microsoft.OData.ServiceLifetime.Singleton))
+                // .ConfigureRoute(route => route.EnableQualifiedOperationCall = false) // use this to configure the built route template
+                );
+
+            services.AddSwaggerGen();
 
             // Response Caching
             services.AddResponseCaching();
@@ -83,37 +97,46 @@ namespace GalleryAPI
             // TBD
             // app.UseAuthorization();
 
-            IEdmModel model = EdmModelBuilder.GetEdmModel();
-
-            // Please add "UseODataBatching()" before "UseRouting()" to support OData $batch.
+            // Add the OData Batch middleware to support OData $Batch
             app.UseODataBatching();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "OData 8.x OpenAPI");
+            });
 
             app.UseRouting();
 
-            app.UseEndpoints(endpoints =>
+            // a test middleware
+            app.Use(next => context =>
             {
-                endpoints.MapODataRoute(
-                    "nullPrefix", null,
-                    b =>
-                    {
-                        b.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model);
-                        b.AddService<ODataDeserializerProvider>(Microsoft.OData.ServiceLifetime.Singleton, sp => new EntityReferenceODataDeserializerProvider(sp));
-                        b.AddService<IEnumerable<IODataRoutingConvention>>(Microsoft.OData.ServiceLifetime.Singleton,
-                            sp => ODataRoutingConventions.CreateDefaultWithAttributeRouting("nullPrefix", endpoints.ServiceProvider));
-                    });
+                var endpoint = context.GetEndpoint();
+                if (endpoint == null)
+                {
+                    return next(context);
+                }
 
-                endpoints.MapODataRoute("odataPrefix", "odata", model);
+                IEnumerable templates;
+                IODataRoutingMetadata metadata = endpoint.Metadata.GetMetadata<IODataRoutingMetadata>();
+                if (metadata != null)
+                {
+                    templates = metadata.Template.GetTemplates();
+                }
 
-                //endpoints.MapODataRoute("myPrefix", "my/{data}", model);
-
-                //endpoints.MapODataRoute("msPrefix", "ms", model, new DefaultODataBatchHandler());
+                return next(context); // put a breaking point here
             });
 
+            app.UseEndpoints(endpoints =>
+            {
+                if (env.IsDevelopment())
+                {
+                    // A odata debuger route is only for debugger view of the all OData endpoint routing.
+                    endpoints.MapGet("/$odata", ODataRouteHandler.HandleOData);
+                }
 
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllers();
-            //});
+                endpoints.MapControllers();
+            });
 
             app.UseResponseCaching();
         }

@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GalleryAPI.Models;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.OData.Routing.Attributes;
 
 namespace GalleryAPI.Controllers
 {
@@ -51,23 +53,28 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetPhotos([FromODataUri] int AlbumID, [FromODataUri] string AccessCode)
+        public IActionResult GetPhotos(int AlbumID, string AccessCode)
         {
             // Album ID
             //var aid = (int)parameters.GetValueOrDefault("AlbumID");
             var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
-            //if (album == null)
-            //{
-            //    return NotFound();
-            //}
+            if (album == null)
+            {
+                return NotFound();
+            }
 
-            //if (!string.IsNullOrEmpty(album.AccessCode))
-            //{
-            //    if (string.CompareOrdinal(AccessCode, album.AccessCode) != 0)
-            //    {
-            //        return BadRequest("Access Code is wrong");
-            //    }
-            //}
+            if (!string.IsNullOrEmpty(album.AccessCode))
+            {
+                if (AccessCode == null)
+                {
+                    return BadRequest("Access code is required");
+                }
+
+                if (string.CompareOrdinal(AccessCode, album.AccessCode) != 0)
+                {
+                    return BadRequest("Access Code is wrong");
+                }
+            }
 
             var phts = from ap in _context.AlbumPhotos
                        join photo in _context.Photos
@@ -77,17 +84,127 @@ namespace GalleryAPI.Controllers
 
             return Ok(phts);
         }
-        
-        [HttpGet]        
-        public IActionResult GetPhotos2()
-        {
-            return Ok(_context.Photos);
-        }
 
         [HttpGet]
-        public IActionResult GetPhotos3()
+        public IActionResult GetPhotos(int AlbumID)
         {
-            return Ok(_context.Photos);
+            // Album ID
+            //var aid = (int)parameters.GetValueOrDefault("AlbumID");
+            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+            if (album == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(album.AccessCode))
+            {
+                return BadRequest("Access code is required");
+            }
+
+            var phts = from ap in _context.AlbumPhotos
+                       join photo in _context.Photos
+                       on ap.PhotoID equals photo.PhotoId
+                       where ap.AlbumID == AlbumID
+                       select photo;
+
+            return Ok(phts);
+        }
+
+        //[HttpGet]
+        //public IActionResult GetAlbumPhotos(int AlbumID, string AccessCode)
+        //{
+        //    // Album ID
+        //    //var aid = (int)parameters.GetValueOrDefault("AlbumID");
+        //    var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+        //    if (album == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (!string.IsNullOrEmpty(album.AccessCode))
+        //    {
+        //        if (AccessCode == null)
+        //        {
+        //            return BadRequest("Access code is required");
+        //        }
+
+        //        if (string.CompareOrdinal(AccessCode, album.AccessCode) != 0)
+        //        {
+        //            return BadRequest("Access Code is wrong");
+        //        }
+        //    }
+
+        //    var phts = from ap in _context.AlbumPhotos
+        //               join photo in _context.Photos
+        //               on ap.PhotoID equals photo.PhotoId
+        //               where ap.AlbumID == AlbumID
+        //               select photo;
+
+        //    return Ok(phts);
+        //}
+
+        //[HttpGet]
+        //public IActionResult GetAlbumPhotos(int AlbumID)
+        //{
+        //    // Album ID
+        //    //var aid = (int)parameters.GetValueOrDefault("AlbumID");
+        //    var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+        //    if (album == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    if (!string.IsNullOrEmpty(album.AccessCode))
+        //    {
+        //        return BadRequest("Access code is required");
+        //    }
+
+        //    var phts = from ap in _context.AlbumPhotos
+        //               join photo in _context.Photos
+        //               on ap.PhotoID equals photo.PhotoId
+        //               where ap.AlbumID == AlbumID
+        //               select photo;
+
+        //    return Ok(phts);
+        //}
+
+        [HttpPost]
+        public IActionResult ChangeAccessCode([FromODataUri] int AlbumID, [FromODataUri] string AccessCode)
+        {
+            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+            if (album == null)
+            {
+                return NotFound();
+            }
+
+            album.AccessCode = AccessCode;
+            if (string.IsNullOrEmpty(album.AccessCode))
+            {
+                album.AccessCodeHint = null;
+            }
+
+            _context.Attach(album);
+            _context.SaveChanges();
+
+            return Ok(album);
+        }
+
+        [HttpPost]
+        public IActionResult ChangeAccessCode([FromODataUri] int AlbumID)
+        {
+            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+            if (album == null)
+            {
+                return NotFound();
+            }
+
+            album.AccessCode = null;
+            album.AccessCodeHint = null;
+
+            _context.Attach(album);
+            _context.SaveChanges();
+
+            return Ok(album);
         }
     }
 }

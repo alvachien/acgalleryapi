@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNet.OData.Query;
-using Microsoft.AspNet.OData.Query.Validators;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GalleryAPI.Models;
 using Microsoft.OData;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Query.Validator;
 
 namespace GalleryAPI.Controllers
 {
