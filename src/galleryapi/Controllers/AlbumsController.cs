@@ -169,9 +169,10 @@ namespace GalleryAPI.Controllers
         //}
 
         [HttpPost]
-        public IActionResult ChangeAccessCode([FromODataUri] int AlbumID, [FromODataUri] string AccessCode)
+        [EnableQuery]
+        public IActionResult ChangeAccessCode(int key, [FromODataUri]string AccessCode)
         {
-            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+            var album = _context.Albums.FirstOrDefault(c => c.Id == key);
             if (album == null)
             {
                 return NotFound();
@@ -189,23 +190,25 @@ namespace GalleryAPI.Controllers
             return Ok(album);
         }
 
-        [HttpPost]
-        public IActionResult ChangeAccessCode([FromODataUri] int AlbumID)
-        {
-            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
-            if (album == null)
-            {
-                return NotFound();
-            }
+        //[HttpPost]
+        //public int ChangeAccessCode(int AlbumID)
+        //{
+        //    var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+        //    if (album == null)
+        //    {
+        //        // return NotFound();
+        //        return 0;
+        //    }
 
-            album.AccessCode = null;
-            album.AccessCodeHint = null;
+        //    album.AccessCode = null;
+        //    album.AccessCodeHint = null;
 
-            _context.Attach(album);
-            _context.SaveChanges();
+        //    _context.Attach(album);
+        //    _context.SaveChanges();
 
-            return Ok(album);
-        }
+        //    // return Ok(album);
+        //    return 1;
+        //}
     }
 }
 

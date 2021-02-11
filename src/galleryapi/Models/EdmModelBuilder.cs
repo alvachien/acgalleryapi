@@ -30,10 +30,9 @@ namespace GalleryAPI.Models
                 //funcOnEntity.Parameter<string>("AccessCode").Optional();
 
                 // Function on Album - Change Access Code
-                var action = builder.EntityType<Album>().Collection.Action("ChangeAccessCode").ReturnsFromEntitySet<Album>("Albums");
-                action.Parameter<int>("AlbumID");
+                var action = builder.EntityType<Album>().Action("ChangeAccessCode");
                 action.Parameter<string>("AccessCode").Optional();
-                action.Returns<int>();
+                action.ReturnsFromEntitySet<Album>("Albums"); 
 
                 //// two overload function import
                 //var function = builder.Function("CalcByRating");
