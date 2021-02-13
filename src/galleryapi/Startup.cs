@@ -46,7 +46,6 @@ namespace GalleryAPI
             IEdmModel model = EdmModelBuilder.GetEdmModel();
 
             services.AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(50)
-                .SetAttributeRouting(false)
                 .AddModel(model)
                 .AddModel("v1", model)
                 // .AddModel("v2{data}", model2, builder => builder.AddService<ODataBatchHandler, DefaultODataBatchHandler>(Microsoft.OData.ServiceLifetime.Singleton))
@@ -96,6 +95,8 @@ namespace GalleryAPI
 
             // TBD
             // app.UseAuthorization();
+
+            // app.UseODataOpenApi();
 
             // Add the OData Batch middleware to support OData $Batch
             app.UseODataBatching();
