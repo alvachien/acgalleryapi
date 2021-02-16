@@ -93,12 +93,11 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpGet]
-        [EnableQuery]
-        public IActionResult GetRelatedPhotos(int AlbumID, string AccessCode)
+        public IActionResult GetRelatedPhotos(int key, string AccessCode)
         {
             // Album ID
             //var aid = (int)parameters.GetValueOrDefault("AlbumID");
-            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+            var album = _context.Albums.FirstOrDefault(c => c.Id == key);
             if (album == null)
             {
                 return NotFound();
@@ -120,14 +119,14 @@ namespace GalleryAPI.Controllers
             var phts = from ap in _context.AlbumPhotos
                        join photo in _context.Photos
                        on ap.PhotoID equals photo.PhotoId
-                       where ap.AlbumID == AlbumID
+                       where ap.AlbumID == key
                        select photo;
 
             return Ok(phts);
         }
 
         [HttpPost]
-        public IActionResult ChangeAccessCode(int key, [FromODataUri] string AccessCode)
+        public IActionResult ChangeAccessCode(int key, ODataActionParameters paras)
         {
             var album = _context.Albums.FirstOrDefault(c => c.Id == key);
             if (album == null)
@@ -135,7 +134,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            // album.AccessCode = (string)paras["AccessCode"];
+            var AccessCode = (string)paras["AccessCode"];
             if (string.IsNullOrEmpty(AccessCode))
             {
                 album.AccessCodeHint = null;

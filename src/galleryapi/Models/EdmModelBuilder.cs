@@ -22,7 +22,7 @@ namespace GalleryAPI.Models
 
             // Function on Album - GetAlbumPhotos
             var funcOnEntity = builder.EntityType<Album>().Function("GetRelatedPhotos").ReturnsCollectionFromEntitySet<Photo>("Photos");
-            funcOnEntity.Parameter<string>("AccessCode").Optional();
+            funcOnEntity.Parameter<string>("AccessCode");
 
             // Action on Album - Change Access Code
             var action = builder.EntityType<Album>().Action("ChangeAccessCode");
