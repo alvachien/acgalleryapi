@@ -23,5 +23,10 @@ namespace GalleryAPI.Controllers
             return Ok(_context.UserDetails);
         }
 
+        [EnableQuery]
+        public IActionResult Get(string key)
+        {
+            return Ok(_context.UserDetails.FirstOrDefault(c => c.UserID == key));
+        }
     }
 }

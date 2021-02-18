@@ -1,4 +1,5 @@
-﻿using Microsoft.OData.Edm;
+﻿using System;
+using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
 
 namespace GalleryAPI.Models
@@ -27,7 +28,7 @@ namespace GalleryAPI.Models
             // Action on Album - Change Access Code
             var action = builder.EntityType<Album>().Action("ChangeAccessCode");
             action.Parameter<string>("AccessCode"); // .Optional();
-            action.ReturnsFromEntitySet<Album>("Albums");
+            action.Returns<Boolean>();
 
             //// two overload function import
             //var function = builder.Function("CalcByRating");

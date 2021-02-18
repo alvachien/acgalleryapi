@@ -93,6 +93,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpGet]
+        [EnableQuery]
         public IActionResult GetRelatedPhotos(int key, string AccessCode)
         {
             // Album ID
@@ -125,6 +126,13 @@ namespace GalleryAPI.Controllers
             return Ok(phts);
         }
 
+        [HttpGet]
+        [EnableQuery]
+        public IActionResult GetRelatedPhotos(int key)
+        {
+            return GetRelatedPhotos(key, null);
+        }
+
         [HttpPost]
         public IActionResult ChangeAccessCode(int key, ODataActionParameters paras)
         {
@@ -147,7 +155,7 @@ namespace GalleryAPI.Controllers
             _context.Attach(album);
             _context.SaveChanges();
 
-            return Ok(album);
+            return Ok(true);
         }
 
         [HttpPost]

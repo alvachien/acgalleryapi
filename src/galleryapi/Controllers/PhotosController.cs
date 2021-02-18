@@ -30,7 +30,7 @@ namespace GalleryAPI.Controllers
         [EnableQuery]
         public IActionResult Get(string key)
         {
-            return Ok(_context.Photos.FirstOrDefault(c => string.CompareOrdinal(c.PhotoId, key) == 0));
+            return Ok(_context.Photos.FirstOrDefault(c => c.PhotoId == key));
         }
 
         /// <summary>
