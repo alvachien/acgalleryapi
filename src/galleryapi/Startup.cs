@@ -17,16 +17,24 @@ using Microsoft.AspNetCore.OData.Batch;
 using System.Collections;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.OData.Routing.Template;
+using System.IO;
 
 namespace GalleryAPI
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+
+            UploadFolder = Path.Combine(env.ContentRootPath, @"uploads");
+            if (!Directory.Exists(UploadFolder))
+            {
+                Directory.CreateDirectory(UploadFolder);
+            }
         }
 
+        internal static String UploadFolder { get; private set; }
         public IConfiguration Configuration { get; }
         public String ConnectionString { get; private set; }
 

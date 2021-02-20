@@ -1,0 +1,330 @@
+{
+	"info": {
+		"_postman_id": "eadc13cf-8817-4c38-b168-5eb3656a9056",
+		"name": "Gallery API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Album Collection",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/Albums",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Albums"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Album",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/Albums(2005)",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Albums(2005)"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Photo Collection",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/Photos",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Photos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Photo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/Photos('07b7a33a055645a3a0f5ea2044a046ae')",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Photos('07b7a33a055645a3a0f5ea2044a046ae')"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Detail Collection",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/UserDetails",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"UserDetails"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Detail",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/UserDetails('a6319719-2f73-426d-9548-8dbcc25fe7a4')",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"UserDetails('a6319719-2f73-426d-9548-8dbcc25fe7a4')"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "metadata",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/$metadata",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"$metadata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Debug OData Endpoint",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/$odata",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"$odata"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Photo Tags Collection",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/PhotoTags",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"PhotoTags"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Function: Get Photos From Album",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/Albums/GetPhotos(2005)?$count=true&$top=3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Albums",
+						"GetPhotos(2005)"
+					],
+					"query": [
+						{
+							"key": "$count",
+							"value": "true"
+						},
+						{
+							"key": "$top",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Function: Get Related Photos",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/Albums(2005)/GetRelatedPhotos(AccessCode='')?$count=true&$top=3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Albums(2005)",
+						"GetRelatedPhotos(AccessCode='')"
+					],
+					"query": [
+						{
+							"key": "$count",
+							"value": "true"
+						},
+						{
+							"key": "$top",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Action: Change Access Code",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"AccessCode\": \"aaa\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:25325/Albums(2006)/ChangeAccessCode",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Albums(2006)",
+						"ChangeAccessCode"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Photo Upload",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "Image1",
+							"type": "file",
+							"src": "/C:/Users/alvachien/Pictures/WeChat Image_20200914223905.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://localhost:25325/api/PhotoFile",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"api",
+						"PhotoFile"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Read Photo File",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:25325/api/PhotoFile/571fef2da4ddd809e6f99f407896b.jpg",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"api",
+						"PhotoFile",
+						"571fef2da4ddd809e6f99f407896b.jpg"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

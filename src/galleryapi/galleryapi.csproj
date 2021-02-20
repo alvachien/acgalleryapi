@@ -3,14 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>2dae3a26-18cd-4ddc-96f7-18d33900a3a6</UserSecretsId>
-    <Version>0.1.0</Version>
+    <Version>0.1.2</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
     <Product>Photo Gallery</Product>
     <Copyright>(C) Alva Chien, 2021</Copyright>
     <OutputType>Exe</OutputType>
+    <Description>Web API for Photo Gallery, built on .Net Core.</Description>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Magick.NET.Core" Version="6.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.0-Nightly202102121313" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.3" />
