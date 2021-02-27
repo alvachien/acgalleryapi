@@ -105,6 +105,8 @@ namespace GalleryAPI.Controllers
             //    return StatusCode(400, "Wrong size!");
             //}
 
+            var filerst = new PhotoFileSuccess();
+            //filerst.name = 
             //var rst = new PhotoViewModelEx(true);
             var filename1 = file.FileName;
             var idx1 = filename1.LastIndexOf('.');
