@@ -64,48 +64,11 @@ namespace GalleryAPI.Controllers
             // Only care about the first file
             var file = Request.Form.Files[0];
 
-            //var usrName = User.FindFirst(c => c.Type == "sub").Value;
-            //Int32 minSize = 0, maxSize = 0; Boolean allowUpload = false;
-            //using (SqlConnection conn = new SqlConnection(Startup.DBConnectionString))
-            //{
-            //    await conn.OpenAsync();
-
-            //    String cmdText = @"SELECT [UploadFileMinSize],[UploadFileMaxSize],[PhotoUpload]
-            //          FROM [dbo].[UserDetail] WHERE [UserID] = N'" + usrName + "'";
-            //    SqlCommand cmdUserRead = new SqlCommand(cmdText, conn);
-            //    SqlDataReader usrReader = await cmdUserRead.ExecuteReaderAsync();
-            //    if (usrReader.HasRows)
-            //    {
-            //        usrReader.Read();
-            //        if (!usrReader.IsDBNull(0))
-            //            minSize = usrReader.GetInt32(0);
-            //        if (!usrReader.IsDBNull(1))
-            //            maxSize = usrReader.GetInt32(1);
-            //        if (!usrReader.IsDBNull(2))
-            //            allowUpload = usrReader.GetBoolean(2);
-            //    }
-
-            //    usrReader.Close();
-            //    usrReader = null;
-            //    cmdUserRead.Dispose();
-            //    cmdUserRead = null;
-            //}
-            //if (!allowUpload || maxSize == 0 || maxSize <= minSize)
-            //{
-            //    return StatusCode(400, "User has no authoirty or wrongly set!");
-            //}
-            //// if (file.Length)
             var fileSize = file.Length / 1024;
-            //if (maxSize >= fileSize && minSize <= fileSize)
-            //{
-            //    // Succeed
-            //}
-            //else
-            //{
-            //    return StatusCode(400, "Wrong size!");
-            //}
-
             var filerst = new PhotoFileSuccess();
+            // Copy file to uploads folder
+
+
             //filerst.name = 
             //var rst = new PhotoViewModelEx(true);
             var filename1 = file.FileName;
