@@ -31,12 +31,12 @@ namespace GalleryAPI.Models
 
     public sealed class PhotoFileSuccessResult
     {
-        public PhotoFileSuccess files { get; set; }
+        public List<PhotoFileSuccess> files { get; set; }
     }
 
     public sealed class PhotoFileErrorResult
     {
-        public PhotoFileError files { get; set; }
+        public List<PhotoFileError> files { get; set; }
     }
 
     // For deletion, need dynamic json~

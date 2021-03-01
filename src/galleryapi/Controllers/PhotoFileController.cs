@@ -13,6 +13,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Net;
 using GalleryAPI.Models;
+using ImageMagick;
 
 namespace GalleryAPI.Controllers
 {
@@ -53,7 +54,7 @@ namespace GalleryAPI.Controllers
             return NotFound();
         }
         
-        // POST: api/PhotoFile
+        // POST: PhotoFile
         [HttpPost]
         //[Authorize]
         public async Task<IActionResult> UploadPhotos(ICollection<IFormFile> files)
@@ -64,31 +65,86 @@ namespace GalleryAPI.Controllers
             // Only care about the first file
             var file = Request.Form.Files[0];
 
-            var fileSize = file.Length / 1024;
-            var filerst = new PhotoFileSuccess();
-            // Copy file to uploads folder
-
-
-            //filerst.name = 
-            //var rst = new PhotoViewModelEx(true);
+            var fileSize = file.Length;
             var filename1 = file.FileName;
             var idx1 = filename1.LastIndexOf('.');
             var fileext = filename1.Substring(idx1);
 
-            var rst = new Photo();
-            rst.PhotoId = Guid.NewGuid().ToString("N");
-            rst.FileUrl = rst.PhotoId + fileext;
-            rst.ThumbnailFileUrl = rst.PhotoId + ".thumb" + fileext;
+            var filerst = new PhotoFileSuccess();
+            // Copy file to uploads folder
+            filerst.deleteType = "DELETE";
+            var randomFileName = Guid.NewGuid().ToString("N");
+            filerst.name = filename1;
+            var targetfilename = randomFileName + fileext;
+            filerst.size = (int)fileSize;
+            filerst.url = "PhotoFile/" + targetfilename;
+            filerst.thumbnailUrl = "PhotoFile/" + randomFileName + ".thumb" + fileext;
+            filerst.deleteUrl = filerst.url;
 
-            var filePath = Path.Combine(Startup.UploadFolder, rst.PhotoId + fileext);
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+
+            PhotoFileErrorResult errrst = null;
+            PhotoFileSuccessResult succrst = new PhotoFileSuccessResult();
+            try
             {
-                await file.CopyToAsync(fileStream);
+                var filePath = Path.Combine(Startup.UploadFolder, targetfilename);
+                var thmFilePath = Path.Combine(Startup.UploadFolder, randomFileName + ".thumb" + fileext);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+
+                    using (IMagickImage image = new MagickImage(filePath))
+                    {
+                        var bThumbnailCreated = false;
+
+                        // Retrieve the exif information
+                        ExifProfile profile = (ExifProfile)image.GetExifProfile();
+                        if (profile != null)
+                        {
+                            using (IMagickImage thumbnail = profile.CreateThumbnail())
+                            {
+                                // Check if exif profile contains thumbnail and save it
+                                if (thumbnail != null)
+                                {
+                                    thumbnail.Write(thmFilePath);
+                                    bThumbnailCreated = true;
+                                }
+                            }
+                        }
+
+                        if (!bThumbnailCreated)
+                        {
+                            MagickGeometry size = new MagickGeometry(256, 256);
+                            // This will resize the image to a fixed size without maintaining the aspect ratio.
+                            // Normally an image will be resized to fit inside the specified size.
+                            size.IgnoreAspectRatio = false;
+
+                            image.Resize(size);
+
+                            // Save the result
+                            image.Write(thmFilePath);
+                        }
+                    }
+                }
+
+                succrst.files = new List<PhotoFileSuccess>();
+                succrst.files.Append(filerst);
+            }
+            catch(Exception exp)
+            {
+                errrst = new PhotoFileErrorResult();
+                var fileerr = new PhotoFileError();
+                fileerr.error = exp.Message;
+                fileerr.name = filename1;
+                errrst.files = new List<PhotoFileError>();
+                errrst.files.Append(fileerr);
             }
 
             //await AnalyzeFile(file, Path.Combine(Startup.UploadFolder, rst.PhotoId + fileext), Path.Combine(Startup.UploadFolder, rst.PhotoId + ".thumb" + fileext), rst, usrName);
-
-            return new JsonResult(rst);
+            if (errrst != null)
+            {
+                return new JsonResult(errrst);
+            }
+            return new JsonResult(filerst);
         }
 
         // PUT: api/PhotoFile/5
