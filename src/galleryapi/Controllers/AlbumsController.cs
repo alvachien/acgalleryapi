@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
+using System;
 
 namespace GalleryAPI.Controllers
 {
@@ -161,6 +162,12 @@ namespace GalleryAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Album album)
         {
+            // Create new entries
+            album.CreatedAt = DateTime.Now;
+
+            this._context.Albums.Add(album);
+            _context.SaveChanges();
+
             return Created(album);
         }
 
@@ -168,6 +175,13 @@ namespace GalleryAPI.Controllers
         public IActionResult Put(int key, [FromBody] Album album)
         {
             return Updated(album);
+        }
+
+        [HttpDelete]
+        public IActionResult Delete(int key)
+        {
+            // var entry = _context.Albums.Find()
+            return Ok();
         }
     }
 }

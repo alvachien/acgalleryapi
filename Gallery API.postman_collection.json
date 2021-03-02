@@ -325,6 +325,34 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Create Post",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"PhotoId\": \"\",\r\n    \"Title\": \"Test 1\",\r\n    \"Desp\": \"Test 1\",\r\n    \"FileUrl\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:25325/Photos",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "25325",
+					"path": [
+						"Photos"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

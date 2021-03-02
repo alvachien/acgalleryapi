@@ -43,9 +43,13 @@ namespace GalleryAPI.Controllers
         /// Check the reponse header, you can see 
         /// "Location" : "http://localhost:2087/test/my/a/Customers(0)"
         /// </summary>
+        [HttpPost]
         [EnableQuery]
         public IActionResult Post([FromBody] Photo photo)
         {
+            this._context.Photos.Add(photo);
+            _context.SaveChanges();
+
             return Created(photo);
         }
     }
