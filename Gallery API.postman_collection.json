@@ -6,80 +6,193 @@
 	},
 	"item": [
 		{
-			"name": "Album Collection",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://localhost:25325/Albums",
-					"protocol": "https",
-					"host": [
-						"localhost"
-					],
-					"port": "25325",
-					"path": [
-						"Albums"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Album",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://localhost:25325/Albums(2005)",
-					"protocol": "https",
-					"host": [
-						"localhost"
-					],
-					"port": "25325",
-					"path": [
-						"Albums(2005)"
-					]
+			"item": [
+				{
+					"name": "Album Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Albums",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Albums"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Album",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Title\": \"Test 3\",\r\n    \"Desp\": \"Test 1\",\r\n    \"CreatedBy\": null,\r\n    \"IsPublic\": true    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:25325/Albums",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Albums"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Album",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Id\": 3,\r\n    \"Title\": \"Test 3\",\r\n    \"Desp\": \"Test 3\",\r\n    \"CreatedBy\": null,\r\n    \"IsPublic\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:25325/Albums(3)",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Albums(3)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Album",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Albums(3)",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Albums(3)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Album",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Albums(2005)",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Albums(2005)"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Photo Collection",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://localhost:25325/Photos",
-					"protocol": "https",
-					"host": [
-						"localhost"
-					],
-					"port": "25325",
-					"path": [
-						"Photos"
-					]
-				}
-			},
-			"response": []
+			]
 		},
 		{
 			"name": "Photo",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://localhost:25325/Photos('07b7a33a055645a3a0f5ea2044a046ae')",
-					"protocol": "https",
-					"host": [
-						"localhost"
-					],
-					"port": "25325",
-					"path": [
-						"Photos('07b7a33a055645a3a0f5ea2044a046ae')"
-					]
+			"item": [
+				{
+					"name": "Create Photo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"PhotoId\": \"\",\r\n    \"Title\": \"Test 1\",\r\n    \"Desp\": \"Test 1\",\r\n    \"FileUrl\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:25325/Photos",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Photo Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Photos",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Photo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Photos('07b7a33a055645a3a0f5ea2044a046ae')",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos('07b7a33a055645a3a0f5ea2044a046ae')"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
 			"name": "User Detail Collection",
@@ -321,34 +434,6 @@
 						"api",
 						"PhotoFile",
 						"571fef2da4ddd809e6f99f407896b.jpg"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create Post",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"PhotoId\": \"\",\r\n    \"Title\": \"Test 1\",\r\n    \"Desp\": \"Test 1\",\r\n    \"FileUrl\": null\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://localhost:25325/Photos",
-					"protocol": "https",
-					"host": [
-						"localhost"
-					],
-					"port": "25325",
-					"path": [
-						"Photos"
 					]
 				}
 			},

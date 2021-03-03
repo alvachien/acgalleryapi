@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace GalleryAPI.Controllers
 {
@@ -51,6 +52,39 @@ namespace GalleryAPI.Controllers
             _context.SaveChanges();
 
             return Created(photo);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Put(string key, [FromBody] Photo pto)
+        {
+            var entry = await _context.Photos.FindAsync(key);
+            if (entry == null)
+            {
+                return NotFound();
+            }
+
+            entry.Desp = pto.Desp;
+            entry.IsPublic = pto.IsPublic;
+            entry.Title = pto.Title;
+            _context.Entry(entry).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Updated(pto);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(string key)
+        {
+            var entry = await _context.Photos.FindAsync(key);
+            if (entry == null)
+            {
+                return NotFound();
+            }
+
+            _context.Photos.Remove(entry);
+            await _context.SaveChangesAsync();
+
+            return StatusCode(204); // HttpStatusCode.NoContent
         }
     }
 }

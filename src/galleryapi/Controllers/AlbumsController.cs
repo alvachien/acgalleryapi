@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using System;
+using System.Threading.Tasks;
 
 namespace GalleryAPI.Controllers
 {
@@ -172,16 +173,36 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(int key, [FromBody] Album album)
+        public async Task<IActionResult> Put(int key, [FromBody] Album album)
         {
+            var entry = await _context.Albums.FindAsync(key);
+            if (entry == null)
+            {
+                return NotFound();
+            }
+
+            entry.Desp = album.Desp;
+            entry.IsPublic = album.IsPublic;
+            entry.Title = album.Title;
+            _context.Entry(entry).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
             return Updated(album);
         }
 
         [HttpDelete]
-        public IActionResult Delete(int key)
+        public async Task<IActionResult> Delete(int key)
         {
-            // var entry = _context.Albums.Find()
-            return Ok();
+            var entry = await _context.Albums.FindAsync(key);
+            if (entry == null)
+            {
+                return NotFound();
+            }
+
+            _context.Albums.Remove(entry);
+            await _context.SaveChangesAsync();
+
+            return StatusCode(204); // HttpStatusCode.NoContent
         }
     }
 }
