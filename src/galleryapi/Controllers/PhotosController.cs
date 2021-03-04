@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using System;
 
 namespace GalleryAPI.Controllers
 {
@@ -48,6 +49,7 @@ namespace GalleryAPI.Controllers
         [EnableQuery]
         public IActionResult Post([FromBody] Photo photo)
         {
+            photo.UploadedTime = DateTime.Now;
             this._context.Photos.Add(photo);
             _context.SaveChanges();
 
