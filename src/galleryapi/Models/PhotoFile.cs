@@ -18,6 +18,10 @@ namespace GalleryAPI.Models
 
     public sealed class PhotoFileSuccess : PhotoFileResult
     {
+        public int width { get; set; }
+        public int height { get; set; }
+        public int thumbwidth { get; set; }
+        public int thumbheight { get; set; }
         public string url { get; set; }
         public string thumbnailUrl { get; set; }
         public string deleteUrl { get; set; }

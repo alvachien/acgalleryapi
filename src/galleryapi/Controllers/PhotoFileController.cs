@@ -74,13 +74,15 @@ namespace GalleryAPI.Controllers
             // Copy file to uploads folder
             filerst.deleteType = "DELETE";
             var randomFileName = Guid.NewGuid().ToString("N");
-            filerst.name = filename1;
+            filerst.name = randomFileName;
             var targetfilename = randomFileName + fileext;
             filerst.size = (int)fileSize;
-            filerst.url = "PhotoFile/" + targetfilename;
-            filerst.thumbnailUrl = "PhotoFile/" + randomFileName + ".thumb" + fileext;
+            // To avoid mass change the existing records in db, the URL won't return.
+            // filerst.url = "PhotoFile/" + targetfilename;
+            // filerst.thumbnailUrl = "PhotoFile/" + randomFileName + ".thumb" + fileext;
+            filerst.url = targetfilename;
+            filerst.thumbnailUrl = randomFileName + ".thumb" + fileext;
             filerst.deleteUrl = filerst.url;
-
 
             PhotoFileErrorResult errrst = null;
             PhotoFileSuccessResult succrst = new PhotoFileSuccessResult();
@@ -94,12 +96,15 @@ namespace GalleryAPI.Controllers
 
                     using (IMagickImage image = new MagickImage(filePath))
                     {
+                        filerst.width = image.Width;
+                        filerst.height = image.Height;
+
                         var bThumbnailCreated = false;
 
                         // Retrieve the exif information
                         ExifProfile profile = (ExifProfile)image.GetExifProfile();
                         if (profile != null)
-                        {
+                        {                            
                             using (IMagickImage thumbnail = profile.CreateThumbnail())
                             {
                                 // Check if exif profile contains thumbnail and save it
@@ -107,6 +112,9 @@ namespace GalleryAPI.Controllers
                                 {
                                     thumbnail.Write(thmFilePath);
                                     bThumbnailCreated = true;
+
+                                    filerst.thumbwidth = thumbnail.Width;
+                                    filerst.thumbheight = thumbnail.Height;
                                 }
                             }
                         }
@@ -119,6 +127,8 @@ namespace GalleryAPI.Controllers
                             size.IgnoreAspectRatio = false;
 
                             image.Resize(size);
+                            filerst.thumbwidth = image.Width;
+                            filerst.thumbheight = image.Height;
 
                             // Save the result
                             image.Write(thmFilePath);
