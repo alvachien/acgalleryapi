@@ -105,6 +105,8 @@ namespace GalleryAPI.Controllers
                         // Add the photo
                         var pht = new Photo();
                         pht.PhotoId = randomFileName;
+                        pht.Title = pht.PhotoId;
+                        pht.Desp = pht.PhotoId;
                         pht.FileUrl = filerst.url;
                         var exifprofile = image.GetExifProfile();
                         if (exifprofile != null)

@@ -1,4 +1,4 @@
-#define USE_AZURE
+//#define USE_AZURE
 
 using System;
 using System.Collections.Generic;
