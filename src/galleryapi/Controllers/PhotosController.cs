@@ -46,14 +46,15 @@ namespace GalleryAPI.Controllers
         /// "Location" : "http://localhost:2087/test/my/a/Customers(0)"
         /// </summary>
         [HttpPost]
-        [EnableQuery]
+        //[EnableQuery]
         public IActionResult Post([FromBody] Photo photo)
         {
-            photo.UploadedTime = DateTime.Now;
-            this._context.Photos.Add(photo);
-            _context.SaveChanges();
+            return Forbid();
+            //photo.UploadedTime = DateTime.Now;
+            //this._context.Photos.Add(photo);
+            //_context.SaveChanges();
 
-            return Created(photo);
+            //return Created(photo);
         }
 
         [HttpPut]

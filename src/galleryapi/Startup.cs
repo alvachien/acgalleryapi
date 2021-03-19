@@ -1,3 +1,5 @@
+#define USE_AZURE
+
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
@@ -45,7 +47,11 @@ namespace GalleryAPI
 
             // TBD
             // services.AddAuthentication();
+#if USE_AZURE
+            this.ConnectionString = Configuration["GalleryAPI_Azure:ConnectionString"];
+#else
             this.ConnectionString = Configuration["GalleryAPI:ConnectionString"];
+#endif
             if (!String.IsNullOrEmpty(this.ConnectionString))
                 services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(this.ConnectionString));
 

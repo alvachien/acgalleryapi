@@ -21,15 +21,18 @@ namespace GalleryAPI.Controllers
     [Route("/PhotoFile")]
     public class PhotoFileController : Controller
     {
-        private IWebHostEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<PhotoFileController> _logger;
-        private IAuthorizationService _authorizationService;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly GalleryContext _context;
 
-        public PhotoFileController(IWebHostEnvironment env, ILogger<PhotoFileController> logger, IAuthorizationService authorizationService)
+        public PhotoFileController(IWebHostEnvironment env, ILogger<PhotoFileController> logger, IAuthorizationService authorizationService,
+            GalleryContext context)
         {
             _hostingEnvironment = env;
             _logger = logger;
             _authorizationService = authorizationService;
+            _context = context;
         }
 
         // GET: api/PhotoFile
@@ -99,6 +102,75 @@ namespace GalleryAPI.Controllers
                         filerst.width = image.Width;
                         filerst.height = image.Height;
 
+                        // Add the photo
+                        var pht = new Photo();
+                        pht.PhotoId = randomFileName;
+                        pht.FileUrl = filerst.url;
+                        var exifprofile = image.GetExifProfile();
+                        if (exifprofile != null)
+                        {
+                            // AV Number
+                            IExifValue value = exifprofile.Values.FirstOrDefault(val => val.Tag == ExifTag.ApertureValue);
+                            try
+                            {
+                                if (value != null) pht.AVNumber = value.GetValue().ToString();
+                            }
+                            catch
+                            {
+                                // DO nothing
+                            }
+                            // Camera Maker
+                            value = exifprofile.Values.FirstOrDefault(val => val.Tag == ExifTag.Make);
+                            try
+                            {
+                                if (value != null) pht.CameraMaker = value.GetValue().ToString();
+                            }
+                            catch
+                            {
+                                // DO nothing
+                            }
+                            // Camera Model
+                            value = exifprofile.Values.FirstOrDefault(val => val.Tag == ExifTag.Model);
+                            try
+                            {
+                                if (value != null) pht.CameraModel = value.GetValue().ToString();
+                            }
+                            catch
+                            {
+                                // DO nothing
+                            }
+                            // ISO number
+                            value = exifprofile.Values.FirstOrDefault(val => val.Tag == ExifTag.ISOSpeed);
+                            try
+                            {
+                                if (value != null) pht.ISONumber = (int)value.GetValue();
+                            }
+                            catch
+                            {
+                                // DO nothing
+                            }
+                            // Lens Model
+                            value = exifprofile.Values.FirstOrDefault(val => val.Tag == ExifTag.LensModel);
+                            try
+                            {
+                                if (value != null) pht.LensModel = value.GetValue().ToString();
+                            }
+                            catch
+                            {
+                                // DO nothing
+                            }
+                            // Shutter Speed
+                            value = exifprofile.Values.FirstOrDefault(val => val.Tag == ExifTag.ShutterSpeedValue);
+                            try
+                            {
+                                if (value != null) pht.ShutterSpeed = (string)value.GetValue();
+                            }
+                            catch
+                            {
+                                // DO nothing
+                            }
+                        }
+
                         var bThumbnailCreated = false;
 
                         // Retrieve the exif information
@@ -115,6 +187,10 @@ namespace GalleryAPI.Controllers
 
                                     filerst.thumbwidth = thumbnail.Width;
                                     filerst.thumbheight = thumbnail.Height;
+
+                                    pht.ThumbHeight = filerst.thumbheight;
+                                    pht.ThumbWidth = filerst.thumbwidth;
+                                    pht.IsOrgThumbnail = true;
                                 }
                             }
                         }
@@ -130,16 +206,24 @@ namespace GalleryAPI.Controllers
                             filerst.thumbwidth = image.Width;
                             filerst.thumbheight = image.Height;
 
+                            pht.ThumbHeight = filerst.thumbheight;
+                            pht.ThumbWidth = filerst.thumbwidth;
+                            pht.IsOrgThumbnail = false;
+
                             // Save the result
                             image.Write(thmFilePath);
                         }
+
+                        pht.UploadedTime = DateTime.Now;
+                        this._context.Photos.Add(pht);
+                        _context.SaveChanges();
                     }
                 }
 
                 succrst.files = new List<PhotoFileSuccess>();
                 succrst.files.Append(filerst);
             }
-            catch(Exception exp)
+            catch (Exception exp)
             {
                 errrst = new PhotoFileErrorResult();
                 var fileerr = new PhotoFileError();
