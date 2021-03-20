@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.OData.Formatter.Value;
+using System.IO;
 
 namespace GalleryAPI.Controllers
 {
@@ -75,6 +79,41 @@ namespace GalleryAPI.Controllers
             return Updated(pto);
         }
 
+        [HttpPatch]
+        public async Task<IActionResult> Patch([FromODataUri] string key, [FromBody] Delta<Photo> patchPhoto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (patchPhoto != null)
+            {
+                var entry = await _context.Photos.FindAsync(key);
+                if (entry == null)
+                {
+                    return NotFound();
+                }
+
+                patchPhoto.Patch(entry);
+                // patchPhoto.App(entry, (Microsoft.AspNetCore.JsonPatch.Adapters.IObjectAdapter)ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                _context.Entry(entry).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                return new ObjectResult(entry);
+            }
+            else
+            {
+                return BadRequest(ModelState);
+            }
+        }
+
         [HttpDelete]
         public async Task<IActionResult> Delete(string key)
         {
@@ -84,6 +123,31 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
+            // Delete the file
+            try
+            {
+                String strFullFile = Startup.UploadFolder + "\\" + entry.FileUrl;
+                var trashFolder = Startup.UploadFolder + "\\Trash";
+                if (!Directory.Exists(trashFolder))
+                {
+                    Directory.CreateDirectory(trashFolder);
+                }
+                if (System.IO.File.Exists(strFullFile))
+                {
+                    System.IO.File.Move(strFullFile, trashFolder + "\\" + entry.FileUrl);
+                }
+                strFullFile = Startup.UploadFolder + "\\" + entry.ThumbnailFileUrl;
+                if (System.IO.File.Exists(strFullFile))
+                {
+                    System.IO.File.Move(strFullFile, trashFolder + "\\" + entry.ThumbnailFileUrl);
+                }
+            }
+            catch
+            {
+                // DO nothing
+            }
+
+            // Delete DB entry
             _context.Photos.Remove(entry);
             await _context.SaveChangesAsync();
 

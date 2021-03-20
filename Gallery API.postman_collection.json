@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "eadc13cf-8817-4c38-b168-5eb3656a9056",
+		"_postman_id": "79dcb718-e9bc-4513-b46f-ce943f4aab6b",
 		"name": "Gallery API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -177,6 +177,53 @@
 					"name": "Photo",
 					"request": {
 						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Photos('07b7a33a055645a3a0f5ea2044a046ae')",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos('07b7a33a055645a3a0f5ea2044a046ae')"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH Title and Desp of Photo",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Title\": \"My Title\",\r\n    \"Desp\": \"My Desp\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:25325/Photos('07b7a33a055645a3a0f5ea2044a046ae')",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos('07b7a33a055645a3a0f5ea2044a046ae')"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Photo",
+					"request": {
+						"method": "DELETE",
 						"header": [],
 						"url": {
 							"raw": "https://localhost:25325/Photos('07b7a33a055645a3a0f5ea2044a046ae')",
