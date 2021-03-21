@@ -3,18 +3,19 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>2dae3a26-18cd-4ddc-96f7-18d33900a3a6</UserSecretsId>
-    <Version>0.1.8</Version>
+    <Version>0.1.10</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
-    <Product>Photo Gallery</Product>
+    <Product>AC Photo Gallery</Product>
     <Copyright>(C) Alva Chien, 2021</Copyright>
     <OutputType>Exe</OutputType>
-    <Description>Web API for Photo Gallery, built on .Net Core.</Description>
+    <Description>Web API for AC Photo Gallery, built on .Net Core.</Description>
     <PackageId>ACGallery.API</PackageId>
+    <PackageProjectUrl>https://github.com/alvachien/acgalleryapi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/alvachien/acgalleryapi</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.2.1" />
-    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.0-Nightly202102121313" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.4" />

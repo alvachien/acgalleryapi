@@ -190,6 +190,7 @@ namespace GalleryAPI.Controllers
                                     filerst.thumbwidth = thumbnail.Width;
                                     filerst.thumbheight = thumbnail.Height;
 
+                                    pht.ThumbnailFileUrl = filerst.thumbnailUrl;
                                     pht.ThumbHeight = filerst.thumbheight;
                                     pht.ThumbWidth = filerst.thumbwidth;
                                     pht.IsOrgThumbnail = true;
@@ -208,6 +209,7 @@ namespace GalleryAPI.Controllers
                             filerst.thumbwidth = image.Width;
                             filerst.thumbheight = image.Height;
 
+                            pht.ThumbnailFileUrl = filerst.thumbnailUrl;
                             pht.ThumbHeight = filerst.thumbheight;
                             pht.ThumbWidth = filerst.thumbwidth;
                             pht.IsOrgThumbnail = false;
