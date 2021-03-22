@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.OData.Formatter;
 
 namespace GalleryAPI.Controllers
 {
@@ -21,6 +23,28 @@ namespace GalleryAPI.Controllers
         public IActionResult Get()
         {
             return Ok(_context.PhotoTags);
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] PhotoTag ptag)
+        {
+            this._context.PhotoTags.Add(ptag);
+            _context.SaveChanges();
+
+            return Created(ptag);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromODataUri] string keyPhotoID, [FromODataUri] string keyTagString)
+        {
+            var entity = this._context.PhotoTags.Find(keyPhotoID, keyTagString);
+            if (entity == null)
+                return NotFound();
+
+            this._context.PhotoTags.Remove(entity);
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

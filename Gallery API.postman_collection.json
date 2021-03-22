@@ -242,6 +242,77 @@
 			]
 		},
 		{
+			"name": "Photo Tags",
+			"item": [
+				{
+					"name": "Photo Tags Collection",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/PhotoTags",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"PhotoTags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Photo Tag",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"PhotoID\": \"091e5114bb6f4ee9b5313716ba2b078d\",\r\n    \"TagString\": \"test11\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:25325/PhotoTags",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"PhotoTags"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Photo Tag",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/PhotoTags(PhotoID='091e5114bb6f4ee9b5313716ba2b078d',TagString='test11')",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"PhotoTags(PhotoID='091e5114bb6f4ee9b5313716ba2b078d',TagString='test11')"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "User Detail Collection",
 			"request": {
 				"method": "GET",
@@ -312,25 +383,6 @@
 					"port": "25325",
 					"path": [
 						"$odata"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Photo Tags Collection",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://localhost:25325/PhotoTags",
-					"protocol": "https",
-					"host": [
-						"localhost"
-					],
-					"port": "25325",
-					"path": [
-						"PhotoTags"
 					]
 				}
 			},
@@ -483,6 +535,15 @@
 						"571fef2da4ddd809e6f99f407896b.jpg"
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "BATCH",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
 			},
 			"response": []
 		}
