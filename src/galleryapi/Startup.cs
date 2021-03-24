@@ -147,7 +147,7 @@ namespace GalleryAPI
                 if (env.IsDevelopment())
                 {
                     // A odata debuger route is only for debugger view of the all OData endpoint routing.
-                    endpoints.MapGet("/$odata", ODataRouteHandler.HandleOData);
+                    // endpoints.MapGet("/$odata", ODataRouteHandler.HandleOData);
                 }
 
                 endpoints.MapControllers();

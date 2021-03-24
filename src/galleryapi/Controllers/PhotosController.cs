@@ -10,6 +10,7 @@ using System;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Value;
 using System.IO;
+using Microsoft.AspNetCore.OData.Deltas;
 
 namespace GalleryAPI.Controllers
 {

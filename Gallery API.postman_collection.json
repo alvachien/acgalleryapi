@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "79dcb718-e9bc-4513-b46f-ce943f4aab6b",
+		"_postman_id": "6b48ec1e-24b5-4454-9469-c313c031e62e",
 		"name": "Gallery API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -160,7 +160,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:25325/Photos",
+							"raw": "https://localhost:25325/Photos?$top=20&$skip=0&$count=true",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -168,6 +168,102 @@
 							"port": "25325",
 							"path": [
 								"Photos"
+							],
+							"query": [
+								{
+									"key": "$top",
+									"value": "20"
+								},
+								{
+									"key": "$skip",
+									"value": "0"
+								},
+								{
+									"key": "$count",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Photo Collection With Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Photos?$top=20&$skip=0&$count=true&$select=PhotoId,Title,Desp,FileUrl,ThumbnailFileUrl,IsPublic&$filter=contains(Title,'est')&$expand=Tags",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos"
+							],
+							"query": [
+								{
+									"key": "$top",
+									"value": "20"
+								},
+								{
+									"key": "$skip",
+									"value": "0"
+								},
+								{
+									"key": "$count",
+									"value": "true"
+								},
+								{
+									"key": "$select",
+									"value": "PhotoId,Title,Desp,FileUrl,ThumbnailFileUrl,IsPublic"
+								},
+								{
+									"key": "$filter",
+									"value": "contains(Title,'est')"
+								},
+								{
+									"key": "$expand",
+									"value": "Tags"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Photo Collection With Filters 2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:25325/Photos?$top=20&$skip=0&$count=true&$expand=Tags($filter=contains(TagString,'og'))",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "25325",
+							"path": [
+								"Photos"
+							],
+							"query": [
+								{
+									"key": "$top",
+									"value": "20"
+								},
+								{
+									"key": "$skip",
+									"value": "0"
+								},
+								{
+									"key": "$count",
+									"value": "true"
+								},
+								{
+									"key": "$expand",
+									"value": "Tags($filter=contains(TagString,'og'))"
+								}
 							]
 						}
 					},
@@ -543,7 +639,9 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": null
+				"url": {
+					"raw": ""
+				}
 			},
 			"response": []
 		}
