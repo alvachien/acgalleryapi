@@ -16,7 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.2.1" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.0-Nightly202103221212" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.0-Nightly202103251211" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.7" />
