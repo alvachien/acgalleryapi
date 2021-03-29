@@ -13,6 +13,13 @@
     <PackageId>ACGallery.API</PackageId>
     <PackageProjectUrl>https://github.com/alvachien/acgalleryapi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alvachien/acgalleryapi</RepositoryUrl>
+    <Configurations>Debug;Release;Debug With Azure Date</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug With Azure Date|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE;USE_AZURE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.2.1" />

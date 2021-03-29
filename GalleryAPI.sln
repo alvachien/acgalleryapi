@@ -9,14 +9,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI", "src\GalleryAP
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug With Azure Date|Any CPU = Debug With Azure Date|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}.Debug With Azure Date|Any CPU.ActiveCfg = Debug|Any CPU
+		{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}.Debug With Azure Date|Any CPU.Build.0 = Debug|Any CPU
 		{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91DA67F3-E43F-41FD-B44D-B4C9B7ED5F52}.Debug With Azure Date|Any CPU.ActiveCfg = Debug With Azure Date|Any CPU
+		{91DA67F3-E43F-41FD-B44D-B4C9B7ED5F52}.Debug With Azure Date|Any CPU.Build.0 = Debug With Azure Date|Any CPU
 		{91DA67F3-E43F-41FD-B44D-B4C9B7ED5F52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{91DA67F3-E43F-41FD-B44D-B4C9B7ED5F52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91DA67F3-E43F-41FD-B44D-B4C9B7ED5F52}.Release|Any CPU.ActiveCfg = Release|Any CPU
