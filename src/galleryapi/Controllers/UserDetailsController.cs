@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GalleryAPI.Controllers
 {
@@ -18,12 +19,7 @@ namespace GalleryAPI.Controllers
         }
 
         [EnableQuery]
-        public IActionResult Get()
-        {
-            return Ok(_context.UserDetails);
-        }
-
-        [EnableQuery]
+        [Authorize]
         public IActionResult Get(string key)
         {
             return Ok(_context.UserDetails.FirstOrDefault(c => c.UserID == key));

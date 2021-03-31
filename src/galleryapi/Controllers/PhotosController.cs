@@ -30,7 +30,14 @@ namespace GalleryAPI.Controllers
             // A tracking query projects owned entity without corresponding owner in result. Owned entities cannot be tracked without their owner...
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            return Ok(_context.Photos);
+            var usrObj = User.FindFirst(c => c.Type == "sub");
+            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+            {
+                //var albs = _context.Alb
+            } 
+
+            var rst = _context.Photos.Where(p => p.IsPublic == true);
+            return Ok(rst);
         }
 
         [EnableQuery]

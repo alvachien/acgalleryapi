@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GalleryAPI.Controllers
 {
@@ -25,7 +26,16 @@ namespace GalleryAPI.Controllers
         {
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            return Ok(_context.Albums);
+            var usrObj = User.FindFirst(c => c.Type == "sub");
+            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+            {
+                var albs = _context.Albums.Where(p => p.IsPublic == true && p.CreatedBy == usrObj.Value);
+                return Ok(albs);
+            }
+
+            var rst = _context.Albums.Where(p => p.IsPublic == true);
+
+            return Ok(rst);
         }
 
         [AlbumEnableQuery]
@@ -36,7 +46,7 @@ namespace GalleryAPI.Controllers
 
         [HttpGet]
         [EnableQuery]
-        public IActionResult GetPhotos(int AlbumID, string AccessCode)
+        public IActionResult GetPhotos(int AlbumID, string AccessCode = null)
         {
             // Album ID
             //var aid = (int)parameters.GetValueOrDefault("AlbumID");
@@ -68,31 +78,31 @@ namespace GalleryAPI.Controllers
             return Ok(phts);
         }
 
-        [HttpGet]
-        [EnableQuery]
-        public IActionResult GetPhotos(int AlbumID)
-        {
-            // Album ID
-            //var aid = (int)parameters.GetValueOrDefault("AlbumID");
-            var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
-            if (album == null)
-            {
-                return NotFound();
-            }
+        //[HttpGet]
+        //[EnableQuery]
+        //public IActionResult GetPhotos(int AlbumID)
+        //{
+        //    // Album ID
+        //    //var aid = (int)parameters.GetValueOrDefault("AlbumID");
+        //    var album = _context.Albums.FirstOrDefault(c => c.Id == AlbumID);
+        //    if (album == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            if (!string.IsNullOrEmpty(album.AccessCode))
-            {
-                return BadRequest("Access code is required");
-            }
+        //    if (!string.IsNullOrEmpty(album.AccessCode))
+        //    {
+        //        return BadRequest("Access code is required");
+        //    }
 
-            var phts = from ap in _context.AlbumPhotos
-                       join photo in _context.Photos
-                       on ap.PhotoID equals photo.PhotoId
-                       where ap.AlbumID == AlbumID
-                       select photo;
+        //    var phts = from ap in _context.AlbumPhotos
+        //               join photo in _context.Photos
+        //               on ap.PhotoID equals photo.PhotoId
+        //               where ap.AlbumID == AlbumID
+        //               select photo;
 
-            return Ok(phts);
-        }
+        //    return Ok(phts);
+        //}
 
         [HttpGet]
         [EnableQuery]
@@ -136,6 +146,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult ChangeAccessCode(int key, ODataActionParameters paras)
         {
             var album = _context.Albums.FirstOrDefault(c => c.Id == key);
@@ -161,6 +172,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult Post([FromBody] Album album)
         {
             // Create new entries
@@ -173,6 +185,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> Put(int key, [FromBody] Album album)
         {
             var entry = await _context.Albums.FindAsync(key);
@@ -191,6 +204,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> Delete(int key)
         {
             var entry = await _context.Albums.FindAsync(key);

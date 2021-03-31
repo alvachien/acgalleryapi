@@ -68,6 +68,25 @@ namespace GalleryAPI
 
             services.AddSwaggerGen();
 
+            services.AddAuthorization();
+            services.AddAuthentication("Bearer")
+                .AddIdentityServerAuthentication(options =>
+                {
+#if DEBUG
+                    options.Authority = "https://localhost:44353";
+#elif RELEASE
+#if USE_AZURE
+                    options.Authority = "https://acidserver.azurewebsites.net";
+#elif USE_ALIYUN
+                    options.Authority = "https://www.alvachien.com/idserver";
+#endif
+#endif
+                    options.RequireHttpsMetadata = false;
+                    options.ApiName = "api.galleryapi";
+                    //options.AutomaticAuthenticate = true;
+                    //options.AutomaticChallenge = true;
+                });
+
             // Response Caching
             services.AddResponseCaching();
             // Memory cache
@@ -85,7 +104,6 @@ namespace GalleryAPI
             app.UseCors(builder =>
 #if DEBUG
                 builder.WithOrigins(
-                    "http://localhost:16001",
                     "https://localhost:16001"
                     )
 #elif RELEASE
@@ -95,8 +113,8 @@ namespace GalleryAPI
                     )
 #elif USE_ALIYUN
                 builder.WithOrigins(
-                    "http://118.178.58.187:5210",
-                    "https://118.178.58.187:5210"
+                    // "http://118.178.58.187:5210",
+                    "https://www.alvachien.com/acgallery"
                     )
 #endif
 #endif
@@ -106,9 +124,6 @@ namespace GalleryAPI
                 );
 
             app.UseHttpsRedirection();
-
-            // TBD
-            // app.UseAuthorization();
 
             // app.UseODataOpenApi();
 
@@ -122,6 +137,8 @@ namespace GalleryAPI
             });
 
             app.UseRouting();
+
+            app.UseAuthorization();
 
             // a test middleware
             app.Use(next => context =>
@@ -154,24 +171,6 @@ namespace GalleryAPI
             });
 
             app.UseResponseCaching();
-        }
-    }
-
-    public class EntityReferenceODataDeserializerProvider : DefaultODataDeserializerProvider
-    {
-        public EntityReferenceODataDeserializerProvider(IServiceProvider rootContainer)
-            : base(rootContainer)
-        {
-        }
-
-        public override ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
-        {
-            return base.GetEdmTypeDeserializer(edmType);
-        }
-
-        public override ODataDeserializer GetODataDeserializer(Type type, HttpRequest request)
-        {
-            return base.GetODataDeserializer(type, request);
         }
     }
 }
