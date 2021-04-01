@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>2dae3a26-18cd-4ddc-96f7-18d33900a3a6</UserSecretsId>
-    <Version>0.1.11</Version>
+    <Version>0.1.12</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
     <Product>AC Photo Gallery</Product>

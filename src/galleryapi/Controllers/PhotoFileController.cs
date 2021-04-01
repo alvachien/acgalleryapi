@@ -53,6 +53,11 @@ namespace GalleryAPI.Controllers
         {
             if (Request.Form.Files.Count <= 0)
                 return BadRequest("No Files");
+            var usrObj = User.FindFirst(c => c.Type == "sub");
+            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+            {
+                return StatusCode(401);
+            }
 
             // Only care about the first file
             var file = Request.Form.Files[0];
@@ -207,8 +212,10 @@ namespace GalleryAPI.Controllers
                             image.Write(thmFilePath);
                         }
 
+                        pht.UploadedBy = usrObj.Value;
                         pht.UploadedTime = DateTime.Now;
                         this._context.Photos.Add(pht);
+
                         _context.SaveChanges();
                     }
                 }

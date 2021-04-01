@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Formatter.Value;
 using System.IO;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GalleryAPI.Controllers
 {
@@ -56,19 +57,20 @@ namespace GalleryAPI.Controllers
         /// Check the reponse header, you can see 
         /// "Location" : "http://localhost:2087/test/my/a/Customers(0)"
         /// </summary>
-        [HttpPost]
-        //[EnableQuery]
-        public IActionResult Post([FromBody] Photo photo)
-        {
-            return Forbid();
-            //photo.UploadedTime = DateTime.Now;
-            //this._context.Photos.Add(photo);
-            //_context.SaveChanges();
+        //[HttpPost]
+        ////[EnableQuery]
+        //public IActionResult Post([FromBody] Photo photo)
+        //{
+        //    return Forbid();
+        //    //photo.UploadedTime = DateTime.Now;
+        //    //this._context.Photos.Add(photo);
+        //    //_context.SaveChanges();
 
-            //return Created(photo);
-        }
+        //    //return Created(photo);
+        //}
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> Put(string key, [FromBody] Photo pto)
         {
             var entry = await _context.Photos.FindAsync(key);
@@ -87,6 +89,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpPatch]
+        [Authorize]
         public async Task<IActionResult> Patch([FromODataUri] string key, [FromBody] Delta<Photo> patchPhoto)
         {
             if (!ModelState.IsValid)
@@ -122,6 +125,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> Delete(string key)
         {
             var entry = await _context.Photos.FindAsync(key);

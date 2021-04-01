@@ -20,6 +20,7 @@ using System.Collections;
 using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.OData.Routing.Template;
 using System.IO;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GalleryAPI
 {
@@ -28,6 +29,7 @@ namespace GalleryAPI
         public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Environment = env;
 
             UploadFolder = Path.Combine(env.ContentRootPath, @"uploads");
             if (!Directory.Exists(UploadFolder))
@@ -38,7 +40,9 @@ namespace GalleryAPI
 
         internal static String UploadFolder { get; private set; }
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Environment { get; }
         public String ConnectionString { get; private set; }
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -68,24 +72,66 @@ namespace GalleryAPI
 
             services.AddSwaggerGen();
 
-            services.AddAuthorization();
-            services.AddAuthentication("Bearer")
-                .AddIdentityServerAuthentication(options =>
+            if (Environment.EnvironmentName == "Development")
+            {
+                services.AddAuthentication("Bearer")
+                    .AddJwtBearer("Bearer", options =>
+                    {
+                        options.Authority = "https://localhost:44353";
+                        options.RequireHttpsMetadata = true;
+                        options.SaveToken = true;
+                        options.IncludeErrorDetails = true;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateAudience = false
+                        };
+
+                        options.Audience = "api.acgallery";
+                    });
+
+                services.AddCors(options =>
                 {
-#if DEBUG
-                    options.Authority = "https://localhost:44353";
-#elif RELEASE
-#if USE_AZURE
-                    options.Authority = "https://acidserver.azurewebsites.net";
-#elif USE_ALIYUN
-                    options.Authority = "https://www.alvachien.com/idserver";
-#endif
-#endif
-                    options.RequireHttpsMetadata = false;
-                    options.ApiName = "api.galleryapi";
-                    //options.AutomaticAuthenticate = true;
-                    //options.AutomaticChallenge = true;
+                    options.AddPolicy(MyAllowSpecificOrigins, builder =>
+                    {
+                        builder.WithOrigins(
+                            "https://localhost:16001"   // AC Gallery
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                    });
                 });
+            }
+            else if (Environment.EnvironmentName == "Production")
+            {
+                services.AddAuthentication("Bearer")
+                    .AddJwtBearer("Bearer", options =>
+                    {
+                        options.Authority = "https://www.alvachien.com/acidsrv";
+                        options.RequireHttpsMetadata = true;
+                        options.SaveToken = true;
+                        options.IncludeErrorDetails = true;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateAudience = false
+                        };
+
+                        options.Audience = "api.acgallery";
+                    });
+                services.AddCors(options =>
+                {
+                    options.AddPolicy(MyAllowSpecificOrigins, builder =>
+                    {
+                        builder.WithOrigins(
+                            "https://www.alvachien.com/acgallery"   // AC Gallery
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                    });
+                });
+            }
+            services.AddAuthorization();
 
             // Response Caching
             services.AddResponseCaching();
@@ -101,27 +147,7 @@ namespace GalleryAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(builder =>
-#if DEBUG
-                builder.WithOrigins(
-                    "https://localhost:16001"
-                    )
-#elif RELEASE
-#if USE_AZURE
-                builder.WithOrigins(
-                    "https://acgallery.azurewebsites.net"
-                    )
-#elif USE_ALIYUN
-                builder.WithOrigins(
-                    // "http://118.178.58.187:5210",
-                    "https://www.alvachien.com/acgallery"
-                    )
-#endif
-#endif
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials()
-                );
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseHttpsRedirection();
 
@@ -138,6 +164,7 @@ namespace GalleryAPI
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // a test middleware

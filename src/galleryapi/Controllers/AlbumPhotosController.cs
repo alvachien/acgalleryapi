@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GalleryAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
@@ -27,6 +28,7 @@ namespace GalleryAPI.Controllers
 
         [HttpPost]
         [EnableQuery]
+        [Authorize]
         public async Task<IActionResult> Post([FromBody] AlbumPhoto albpto)
         {
             var entry = await _context.AlbumPhotos.FindAsync(albpto.AlbumID, albpto.PhotoID);
@@ -43,6 +45,8 @@ namespace GalleryAPI.Controllers
 
         [HttpDelete]
         [EnableQuery]
+        [Authorize]
+
         public IActionResult Delete(int AlbumID, string PhotoID)
         {
             // Delete code here

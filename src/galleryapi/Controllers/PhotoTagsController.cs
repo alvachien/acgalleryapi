@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GalleryAPI.Controllers
 {
@@ -26,6 +27,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult Post([FromBody] PhotoTag ptag)
         {
             this._context.PhotoTags.Add(ptag);
@@ -35,6 +37,7 @@ namespace GalleryAPI.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> Delete([FromODataUri] string keyPhotoID, [FromODataUri] string keyTagString)
         {
             var entity = this._context.PhotoTags.Find(keyPhotoID, keyTagString);
