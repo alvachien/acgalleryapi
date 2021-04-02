@@ -133,6 +133,8 @@ namespace GalleryAPI
             }
             services.AddAuthorization();
 
+            services.AddHttpContextAccessor();
+
             // Response Caching
             services.AddResponseCaching();
             // Memory cache
@@ -145,6 +147,7 @@ namespace GalleryAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                // app.UseDollarOData();
             }
 
             app.UseCors(MyAllowSpecificOrigins);

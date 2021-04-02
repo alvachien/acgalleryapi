@@ -25,12 +25,12 @@ namespace acgalleryapi.Controllers
         // GET: api/Statistics
         [HttpGet]
         [ResponseCache(Duration = 1200)]
-        public async Task<IActionResult> Get()
+        public IActionResult Get()
         {
             var vmResult = new StatisticsInfo();
-//            var almcnt = from pm in _context.Albums
-//                         into g
-//                         select new { cnt = g.Count() };
+            vmResult.AlbumAmount = _context.Albums.Count();
+            vmResult.PhotoAmount = _context.Photos.Count();
+            
 
 //            SqlConnection conn = null;
 //            SqlCommand cmd = null;

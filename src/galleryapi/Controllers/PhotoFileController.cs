@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using GalleryAPI.Models;
 using ImageMagick;
+using System.Security.Claims;
 
 namespace GalleryAPI.Controllers
 {
@@ -21,14 +22,20 @@ namespace GalleryAPI.Controllers
         private readonly ILogger<PhotoFileController> _logger;
         private readonly IAuthorizationService _authorizationService;
         private readonly GalleryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PhotoFileController(IWebHostEnvironment env, ILogger<PhotoFileController> logger, IAuthorizationService authorizationService,
+        public PhotoFileController(
+            IWebHostEnvironment env, 
+            ILogger<PhotoFileController> logger,
+            IAuthorizationService authorizationService,
+            IHttpContextAccessor httpContextAccessor,
             GalleryContext context)
         {
             _hostingEnvironment = env;
             _logger = logger;
             _authorizationService = authorizationService;
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/PhotoFile/filename
@@ -53,8 +60,9 @@ namespace GalleryAPI.Controllers
         {
             if (Request.Form.Files.Count <= 0)
                 return BadRequest("No Files");
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            if (userId == null)
             {
                 return StatusCode(401);
             }
@@ -212,7 +220,7 @@ namespace GalleryAPI.Controllers
                             image.Write(thmFilePath);
                         }
 
-                        pht.UploadedBy = usrObj.Value;
+                        pht.UploadedBy = userId;
                         pht.UploadedTime = DateTime.Now;
                         this._context.Photos.Add(pht);
 
