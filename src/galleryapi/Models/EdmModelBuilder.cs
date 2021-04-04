@@ -15,6 +15,7 @@ namespace GalleryAPI.Models
             builder.EntitySet<AlbumPhoto>("AlbumPhotos");
             builder.EntitySet<PhotoTag>("PhotoTags");
             builder.EntitySet<UserDetail>("UserDetails");
+            builder.EntitySet<PhotoView>("PhotoViews");
 
             // Function on Album - Get Photos
             var functionWithOptional = builder.EntityType<Album>().Collection.Function("GetPhotos").ReturnsCollectionFromEntitySet<Photo>("Photos");

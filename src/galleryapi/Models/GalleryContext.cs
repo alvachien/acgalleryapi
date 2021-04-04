@@ -14,6 +14,7 @@ namespace GalleryAPI.Models
         public DbSet<PhotoTag> PhotoTags { get; set; }
         public DbSet<UserDetail> UserDetails { get; set; }
         public DbSet<AlbumPhoto> AlbumPhotos { get; set; }
+        public DbSet<PhotoView> PhotoViews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,6 +55,10 @@ namespace GalleryAPI.Models
             modelBuilder.Entity<PhotoTag>().HasKey(t => new { t.PhotoID, t.TagString });
 
             modelBuilder.Entity<PhotoTag>().HasOne(p => p.CurrentPhoto).WithMany(t => t.Tags).HasForeignKey(pt => pt.PhotoID);
+
+            modelBuilder.Entity<PhotoView>()
+                .HasNoKey()
+                .ToView("PhotoView");
         }
     }
 }

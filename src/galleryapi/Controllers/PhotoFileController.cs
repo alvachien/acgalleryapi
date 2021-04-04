@@ -40,7 +40,7 @@ namespace GalleryAPI.Controllers
 
         // GET: api/PhotoFile/filename
         [HttpGet("{filename}")]
-        [ResponseCache(Duration = 864000)]
+        [ResponseCache(Duration = 864000, Location = ResponseCacheLocation.Client, NoStore = false)]
         public IActionResult Get(string filename)
         {
             String strFullFile = Startup.UploadFolder + "\\" + filename;
