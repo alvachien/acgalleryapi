@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>2dae3a26-18cd-4ddc-96f7-18d33900a3a6</UserSecretsId>
-    <Version>0.1.12</Version>
+    <Version>0.1.15</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
     <Product>AC Photo Gallery</Product>
@@ -14,6 +14,7 @@
     <PackageProjectUrl>https://github.com/alvachien/acgalleryapi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alvachien/acgalleryapi</RepositoryUrl>
     <Configurations>Debug;Release;Debug With Azure Date</Configurations>
+    <PackageTags>Photo,Gallery</PackageTags>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug With Azure Date|AnyCPU'">
     <DefineConstants>DEBUG;TRACE;USE_AZURE</DefineConstants>

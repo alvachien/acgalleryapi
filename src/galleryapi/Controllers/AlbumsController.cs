@@ -30,13 +30,52 @@ namespace GalleryAPI.Controllers
             var usrObj = User.FindFirst(c => c.Type == "sub");
             if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
             {
-                var albs = _context.Albums.Where(p => p.IsPublic == true || p.CreatedBy == usrObj.Value);
+                var albs = from almphoto in _context.AlbumPhotos
+                           group almphoto by almphoto.AlbumID into almphotos
+                           select new
+                           {
+                               ID = almphotos.Key,
+                               PhotoCount = almphotos.Count()
+                           } into almphotocnts
+                           join alm in _context.Albums
+                           on new { Id = almphotocnts.ID, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrObj.Value }
+                           select new Album
+                           {
+                               Id = alm.Id,
+                               Title = alm.Title,
+                               Desp = alm.Desp,
+                               CreatedBy = alm.CreatedBy,
+                               CreatedAt = alm.CreatedAt,
+                               IsPublic = alm.IsPublic,
+                               AccessCodeHint = alm.AccessCodeHint,
+                               PhotoCount = almphotocnts.PhotoCount
+                           };
+
                 return Ok(albs);
             }
 
-            var rst = _context.Albums.Where(p => p.IsPublic == true);
+            var rst2 = from almphoto in _context.AlbumPhotos
+                               group almphoto by almphoto.AlbumID into almphotos
+                               select new
+                               {
+                                   ID = almphotos.Key,
+                                   PhotoCount = almphotos.Count()
+                               } into almphotocnts
+                       join alm in _context.Albums
+                       on new  { Id = almphotocnts.ID, IsPublic = true } equals new { alm.Id, alm.IsPublic }
+                       select new Album
+                       {
+                           Id = alm.Id,
+                           Title = alm.Title,
+                           Desp = alm.Desp,
+                           CreatedBy = alm.CreatedBy,
+                           CreatedAt = alm.CreatedAt,
+                           IsPublic = alm.IsPublic,
+                           AccessCodeHint = alm.AccessCodeHint,
+                           PhotoCount = almphotocnts.PhotoCount
+                       };
 
-            return Ok(rst);
+            return Ok(rst2);
         }
 
         [AlbumEnableQuery]
@@ -45,11 +84,55 @@ namespace GalleryAPI.Controllers
             var usrObj = User.FindFirst(c => c.Type == "sub");
             if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
             {
-                var alb = _context.Albums.FirstOrDefault(p => p.Id == key && ( p.IsPublic == true || p.CreatedBy == usrObj.Value));
+                var alb = from almphoto in _context.AlbumPhotos
+                           group almphoto by almphoto.AlbumID into almphotos
+                           // where almphotos.Key equals usrObj.Value
+                           select new
+                           {
+                               Key = almphotos.Key,
+                               PhotoCount = almphotos.Count()
+                           } into almphotocnts
+                          join alm in _context.Albums
+                          on new { Id = almphotocnts.Key, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrObj.Value }
+                          where alm.Id == key
+                          select new Album
+                          {
+                              Id = alm.Id,
+                              Title = alm.Title,
+                              Desp = alm.Desp,
+                              CreatedBy = alm.CreatedBy,
+                              CreatedAt = alm.CreatedAt,
+                              IsPublic = alm.IsPublic,
+                              AccessCodeHint = alm.AccessCodeHint,
+                              PhotoCount = almphotocnts.PhotoCount
+                          };
                 return Ok(alb);
             }
 
-            return Ok(_context.Albums.FirstOrDefault(c => c.Id == key && c.IsPublic == true));
+            var alb2 = from almphoto in _context.AlbumPhotos
+                       group almphoto by almphoto.AlbumID into almphotos
+                       // where almphotos.Key equals usrObj.Value
+                       select new
+                       {
+                           Key = almphotos.Key,
+                           PhotoCount = almphotos.Count()
+                       } into almphotocnts
+                       join alm in _context.Albums
+                       on new { Id = almphotocnts.Key, IsPublic = true } equals new { alm.Id, alm.IsPublic }
+                       where alm.Id == key
+                       select new Album
+                       {
+                           Id = alm.Id,
+                           Title = alm.Title,
+                           Desp = alm.Desp,
+                           CreatedBy = alm.CreatedBy,
+                           CreatedAt = alm.CreatedAt,
+                           IsPublic = alm.IsPublic,
+                           AccessCodeHint = alm.AccessCodeHint,
+                           PhotoCount = almphotocnts.PhotoCount
+                       };
+
+            return Ok(alb2);
         }
 
         [HttpGet]

@@ -21,7 +21,9 @@ namespace GalleryAPI.Models
             // modelBuilder.Entity<Customer>().OwnsOne(c => c.HomeAddress).WithOwner();
 
             // .NET 5.0
-            //modelBuilder.Entity<Album>()
+            modelBuilder.Entity<Album>()
+                .Ignore("PhotoCount")
+                .Ignore("AlbumThumnailUrl");
             //    .HasMany(p => p.Photos)
             //    .WithMany(p => p.Albums)
             //    .UsingEntity<AlbumPhoto>(

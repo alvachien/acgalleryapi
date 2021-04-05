@@ -51,11 +51,16 @@ namespace GalleryAPI
 
             // TBD
             // services.AddAuthentication();
+#if DEBUG
 #if USE_AZURE
             this.ConnectionString = Configuration["GalleryAPI_Azure:ConnectionString"];
 #else
             this.ConnectionString = Configuration["GalleryAPI:ConnectionString"];
 #endif
+#else
+            this.ConnectionString = Configuration.GetConnectionString("AliyunConnection");
+#endif
+
             if (!String.IsNullOrEmpty(this.ConnectionString))
                 services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(this.ConnectionString));
 
@@ -107,7 +112,7 @@ namespace GalleryAPI
                 services.AddAuthentication("Bearer")
                     .AddJwtBearer("Bearer", options =>
                     {
-                        options.Authority = "https://www.alvachien.com/acidsrv";
+                        options.Authority = "https://www.alvachien.com/idserver";
                         options.RequireHttpsMetadata = true;
                         options.SaveToken = true;
                         options.IncludeErrorDetails = true;
@@ -123,7 +128,7 @@ namespace GalleryAPI
                     options.AddPolicy(MyAllowSpecificOrigins, builder =>
                     {
                         builder.WithOrigins(
-                            "https://www.alvachien.com/acgallery"   // AC Gallery
+                            "https://www.alvachien.com/gallery"   // AC Gallery
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()

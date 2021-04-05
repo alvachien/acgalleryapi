@@ -50,9 +50,14 @@ namespace GalleryAPI.Models
         [Column("AccessCode", TypeName = "NVARCHAR(50)")]
         public String AccessCode { get; set; }
 
-        //public Int32 PhotoCount { get; set; }
-        //// First photo
-        //public String FirstPhotoThumnailUrl { get; set; }
+        // Photo Count
+        //[NotMapped]
+        // Exclude in entity framework context
+        public Int32 PhotoCount { get; set; }
+
+        // First photo
+        //[NotMapped]
+        public String AlbumThumnailUrl { get; set; }
 
         public List<AlbumPhoto> AlbumPhotos { get; set; }
     }
