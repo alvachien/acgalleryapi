@@ -106,7 +106,10 @@ namespace GalleryAPI.Controllers
                               AccessCodeHint = alm.AccessCodeHint,
                               PhotoCount = almphotocnts.PhotoCount
                           };
-                return Ok(alb);
+                if (alb.Count() != 1)
+                    return NotFound();
+
+                return Ok(alb.First());
             }
 
             var alb2 = from almphoto in _context.AlbumPhotos
@@ -132,7 +135,10 @@ namespace GalleryAPI.Controllers
                            PhotoCount = almphotocnts.PhotoCount
                        };
 
-            return Ok(alb2);
+            if (alb2.Count() != 1)
+                return NotFound();
+
+            return Ok(alb2.First());
         }
 
         [HttpGet]
