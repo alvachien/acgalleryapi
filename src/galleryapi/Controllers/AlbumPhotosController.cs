@@ -8,16 +8,21 @@ using Microsoft.AspNetCore.OData.Formatter;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using System;
 
 namespace GalleryAPI.Controllers
 {
     public class AlbumPhotosController : ODataController
     {
         private readonly GalleryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AlbumPhotosController(GalleryContext context)
+        public AlbumPhotosController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -37,7 +42,21 @@ namespace GalleryAPI.Controllers
                 return BadRequest();
             }
 
-            this._context.AlbumPhotos.Add(albpto);
+            string userId = null;
+            try
+            {
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch (Exception)
+            {
+                userId = null;
+            }
+            if (userId == null)
+            {
+                return StatusCode(401);
+            }
+
+            _context.AlbumPhotos.Add(albpto);
             await _context.SaveChangesAsync();
 
             return Created(albpto);
@@ -56,7 +75,21 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            this._context.AlbumPhotos.Remove(entry);
+            string userId = null;
+            try
+            {
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch (Exception)
+            {
+                userId = null;
+            }
+            if (userId == null)
+            {
+                return StatusCode(401);
+            }
+
+            _context.AlbumPhotos.Remove(entry);
             _context.SaveChanges();
 
             return Ok();

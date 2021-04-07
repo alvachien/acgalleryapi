@@ -64,6 +64,8 @@ namespace GalleryAPI
             if (!String.IsNullOrEmpty(this.ConnectionString))
                 services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(this.ConnectionString));
 
+            services.AddHttpContextAccessor();
+
             services.AddControllers();
 
             IEdmModel model = EdmModelBuilder.GetEdmModel();
@@ -137,8 +139,6 @@ namespace GalleryAPI
                 });
             }
             services.AddAuthorization();
-
-            services.AddHttpContextAccessor();
 
             // Response Caching
             services.AddResponseCaching();

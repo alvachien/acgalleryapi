@@ -8,16 +8,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using System;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace GalleryAPI.Controllers
 {
     public class UserDetailsController : ODataController
     {
         private readonly GalleryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserDetailsController(GalleryContext context)
+        public UserDetailsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -40,8 +44,8 @@ namespace GalleryAPI.Controllers
                 return BadRequest("Invalid model state");
             }
 
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return StatusCode(401);
             }
@@ -64,6 +68,17 @@ namespace GalleryAPI.Controllers
             {
                 return BadRequest("Key is unmatched");
             }
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return StatusCode(401);
+            }
+            // Can not change other user
+            if (String.CompareOrdinal(userId, key) != 0)
+            {
+                return StatusCode(401);
+            }
+
             var entry = await _context.UserDetails.FindAsync(key);
             if (entry == null)
             {

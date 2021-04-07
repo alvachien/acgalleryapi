@@ -61,7 +61,7 @@ namespace GalleryAPI.Controllers
             if (Request.Form.Files.Count <= 0)
                 return BadRequest("No Files");
 
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (userId == null)
             {
                 return StatusCode(401);

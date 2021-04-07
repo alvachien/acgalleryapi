@@ -31,6 +31,11 @@ namespace GalleryAPI.Models
             action.Parameter<string>("AccessCode"); // .Optional();
             action.Returns<Boolean>();
 
+            // Function on Phto view
+            var functionWithOpt = builder.EntityType<PhotoView>().Collection.Function("SearchPhotoInAlbum").ReturnsCollectionFromEntitySet<PhotoView>("PhotoViews");
+            functionWithOpt.Parameter<int>("AlbumID");
+            functionWithOpt.Parameter<string>("AccessCode").Optional();
+
             //// two overload function import
             //var function = builder.Function("CalcByRating");
             //function.Parameter<int>("order");

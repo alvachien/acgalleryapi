@@ -16,10 +16,12 @@ namespace acgalleryapi.Controllers
     public class StatisticsController : ControllerBase
     {
         private readonly GalleryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public StatisticsController(GalleryContext context)
+        public StatisticsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/Statistics

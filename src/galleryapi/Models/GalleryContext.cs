@@ -15,6 +15,7 @@ namespace GalleryAPI.Models
         public DbSet<UserDetail> UserDetails { get; set; }
         public DbSet<AlbumPhoto> AlbumPhotos { get; set; }
         public DbSet<PhotoView> PhotoViews { get; set; }
+        public DbSet<AlbumPhotoView> AlbumPhotoViews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,6 +62,9 @@ namespace GalleryAPI.Models
             modelBuilder.Entity<PhotoView>()
                 .HasNoKey()
                 .ToView("PhotoView");
+            modelBuilder.Entity<AlbumPhotoView>()
+                .HasNoKey()
+                .ToView("AlbumPhotoView");
         }
     }
 }

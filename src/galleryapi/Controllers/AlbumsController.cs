@@ -10,16 +10,20 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace GalleryAPI.Controllers
 {
     public class AlbumsController : ODataController
     {
         private readonly GalleryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AlbumsController(GalleryContext context)
+        public AlbumsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [AlbumEnableQuery]
@@ -217,10 +221,20 @@ namespace GalleryAPI.Controllers
         public IActionResult GetRelatedPhotos(int key, string AccessCode = null)
         {
             Album? selalb = null;
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+
+            string userId = null;
+            try
             {
-                selalb = _context.Albums.FirstOrDefault(p => p.Id == key && (p.IsPublic == true || p.CreatedBy == usrObj.Value));
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch(Exception)
+            {
+                userId = null;
+            }
+
+            if (userId != null)
+            {
+                selalb = _context.Albums.FirstOrDefault(p => p.Id == key && (p.IsPublic == true || p.CreatedBy == userId));
             }
             else
             {
@@ -268,8 +282,8 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult ChangeAccessCode(int key, ODataActionParameters paras)
         {
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return StatusCode(401);
             }
@@ -280,7 +294,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            if (String.CompareOrdinal(album.CreatedBy, usrObj.Value) != 0)
+            if (String.CompareOrdinal(album.CreatedBy, userId) != 0)
             {
                 return StatusCode(401);
             }
@@ -305,15 +319,15 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult Post([FromBody] Album album)
         {
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return StatusCode(401);
             }
 
             // Create new entries
             album.CreatedAt = DateTime.Now;
-            album.CreatedBy = usrObj.Value;
+            album.CreatedBy = userId;
 
             this._context.Albums.Add(album);
             _context.SaveChanges();
@@ -325,8 +339,8 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Put(int key, [FromBody] Album album)
         {
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return StatusCode(401);
             }
@@ -337,7 +351,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            if (String.CompareOrdinal(entry.CreatedBy, usrObj.Value) != 0)
+            if (String.CompareOrdinal(entry.CreatedBy, userId) != 0)
             {
                 return StatusCode(401);
             }
@@ -359,6 +373,11 @@ namespace GalleryAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return StatusCode(401);
+            }
 
             if (patchAlbum != null)
             {
@@ -366,6 +385,10 @@ namespace GalleryAPI.Controllers
                 if (entry == null)
                 {
                     return NotFound();
+                }
+                if (String.CompareOrdinal(entry.CreatedBy, userId) != 0)
+                {
+                    return StatusCode(401);
                 }
 
                 patchAlbum.Patch(entry);
@@ -390,8 +413,8 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int key)
         {
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj == null || String.IsNullOrEmpty(usrObj.Value))
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
             {
                 return StatusCode(401);
             }
@@ -402,7 +425,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            if (String.CompareOrdinal(entry.CreatedBy, usrObj.Value) != 0)
+            if (String.CompareOrdinal(entry.CreatedBy, userId) != 0)
             {
                 return StatusCode(401);
             }

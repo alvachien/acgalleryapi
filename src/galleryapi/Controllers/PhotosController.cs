@@ -12,16 +12,20 @@ using Microsoft.AspNetCore.OData.Formatter.Value;
 using System.IO;
 using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace GalleryAPI.Controllers
 {
     public class PhotosController : ODataController
     {
         private readonly GalleryContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PhotosController(GalleryContext context)
+        public PhotosController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -31,11 +35,15 @@ namespace GalleryAPI.Controllers
             // A tracking query projects owned entity without corresponding owner in result. Owned entities cannot be tracked without their owner...
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+            string userId = null;
+            try
             {
-                //var albs = _context.Alb
-            } 
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch (Exception)
+            {
+                userId = null;
+            }
 
             var rst = _context.Photos.Where(p => p.IsPublic == true);
             return Ok(rst);
@@ -79,6 +87,20 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
+            string userId = null;
+            try
+            {
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch (Exception)
+            {
+                userId = null;
+            }
+            if (userId == null)
+            {
+                return StatusCode(401);
+            }
+
             entry.Desp = pto.Desp;
             entry.IsPublic = pto.IsPublic;
             entry.Title = pto.Title;
@@ -95,6 +117,20 @@ namespace GalleryAPI.Controllers
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            string userId = null;
+            try
+            {
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            catch (Exception)
+            {
+                userId = null;
+            }
+            if (userId == null)
+            {
+                return StatusCode(401);
             }
 
             if (patchPhoto != null)
@@ -132,6 +168,20 @@ namespace GalleryAPI.Controllers
             if (entry == null)
             {
                 return NotFound();
+            }
+
+            string userId = null;
+            try
+            {
+                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            }
+            catch (Exception)
+            {
+                userId = null;
+            }
+            if (userId == null)
+            {
+                return StatusCode(401);
             }
 
             // Delete the file
