@@ -6,13 +6,13 @@ using GalleryAPI.Models;
 using Microsoft.OData;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Query.Validator;
+using Microsoft.OData.ModelBuilder.Config;
 
 namespace GalleryAPI.Controllers
 {
     public class AlbumExpandValidator : SelectExpandQueryValidator
     {
-        public AlbumExpandValidator(DefaultQuerySettings defaultQuerySettings)
-            : base(defaultQuerySettings)
+        public AlbumExpandValidator() : base()
         {
         }
 

@@ -33,7 +33,7 @@ namespace GalleryAPI.Controllers
         [EnableQuery]
         public IActionResult SearchPhotoInAlbum(int AlbumID, string AccessCode = null)
         {
-            Album? selalb = null;
+            Album selalb = null;
 
             // Is a logon user?
             string userId = null;

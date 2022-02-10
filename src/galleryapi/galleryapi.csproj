@@ -3,10 +3,10 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>2dae3a26-18cd-4ddc-96f7-18d33900a3a6</UserSecretsId>
-    <Version>0.1.18</Version>
+    <Version>0.2.22</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
-    <Product>AC Photo Gallery</Product>
+    <Product>Photo Gallery</Product>
     <Copyright>(C) Alva Chien, 2021</Copyright>
     <OutputType>Exe</OutputType>
     <Description>Web API for AC Photo Gallery, built on .Net Core.</Description>
@@ -23,14 +23,17 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="7.23.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.0-rc" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.5" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.0.7" />
+    <Compile Remove="uploads\**" />
+    <Content Remove="uploads\**" />
+    <EmbeddedResource Remove="uploads\**" />
+    <None Remove="uploads\**" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="uploads\" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="9.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.12" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.12" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 </Project>

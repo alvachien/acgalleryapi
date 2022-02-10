@@ -149,7 +149,7 @@ namespace GalleryAPI.Controllers
         [EnableQuery]
         public IActionResult GetPhotos(int AlbumID, string AccessCode = null)
         {
-            Album? selalb = null;
+            Album selalb = null;
             var usrObj = User.FindFirst(c => c.Type == "sub");
             if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
             {
@@ -220,7 +220,7 @@ namespace GalleryAPI.Controllers
         [EnableQuery]
         public IActionResult GetRelatedPhotos(int key, string AccessCode = null)
         {
-            Album? selalb = null;
+            Album selalb = null;
 
             string userId = null;
             try

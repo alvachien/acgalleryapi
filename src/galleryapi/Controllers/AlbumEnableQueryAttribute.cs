@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData.Query;
+using Microsoft.OData.ModelBuilder.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,19 +10,19 @@ namespace GalleryAPI.Controllers
 {
     public class AlbumEnableQueryAttribute : EnableQueryAttribute
     {
-        private readonly DefaultQuerySettings defaultQuerySettings;
+        //private readonly DefaultQuerySettings defaultQuerySettings;
 
         public AlbumEnableQueryAttribute()
         {
-            this.defaultQuerySettings = new DefaultQuerySettings();
-            this.defaultQuerySettings.EnableExpand = true;
-            this.defaultQuerySettings.EnableSelect = true;
+            //this.defaultQuerySettings = new DefaultQuerySettings();
+            //this.defaultQuerySettings.EnableExpand = true;
+            //this.defaultQuerySettings.EnableSelect = true;
         }
 
         public override void ValidateQuery(HttpRequest request, ODataQueryOptions queryOpts)
         {
             if (queryOpts != null && queryOpts.SelectExpand != null)
-                queryOpts.SelectExpand.Validator = new AlbumExpandValidator(this.defaultQuerySettings);
+                queryOpts.SelectExpand.Validator = new AlbumExpandValidator();
             base.ValidateQuery(request, queryOpts);
         }
     }

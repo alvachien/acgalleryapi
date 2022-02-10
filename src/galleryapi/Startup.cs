@@ -66,15 +66,11 @@ namespace GalleryAPI
 
             services.AddHttpContextAccessor();
 
-            services.AddControllers();
-
             IEdmModel model = EdmModelBuilder.GetEdmModel();
 
-            services.AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(50)
-                .AddModel(model)
-                .AddModel("v1", model)
-                // .AddModel("v2{data}", model2, builder => builder.AddService<ODataBatchHandler, DefaultODataBatchHandler>(Microsoft.OData.ServiceLifetime.Singleton))
-                // .ConfigureRoute(route => route.EnableQualifiedOperationCall = false) // use this to configure the built route template
+            services.AddControllers().AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(100)
+                .AddRouteComponents(model)
+                .AddRouteComponents("v1", model)
                 );
 
             services.AddSwaggerGen();
