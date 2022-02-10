@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30611.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32002.185
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI.test", "test\GalleryAPI.test\GalleryAPI.test.csproj", "{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI.unittest", "test\GalleryAPI.test\GalleryAPI.unittest.csproj", "{1035A7A7-AD09-46FF-AB4E-583F8DD2271F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI", "src\GalleryAPI\GalleryAPI.csproj", "{91DA67F3-E43F-41FD-B44D-B4C9B7ED5F52}"
 EndProject
