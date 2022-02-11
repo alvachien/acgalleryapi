@@ -4,11 +4,13 @@ namespace GalleryAPI.Models
 {
     public class GalleryContext : DbContext
     {
-        public GalleryContext(DbContextOptions<GalleryContext> options)
+        public GalleryContext(DbContextOptions<GalleryContext> options, bool testing)
             : base(options)
         {
+            TestingMode = testing;
         }
 
+        public bool TestingMode { get; private set; }
         public DbSet<Album> Albums { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<PhotoTag> PhotoTags { get; set; }
