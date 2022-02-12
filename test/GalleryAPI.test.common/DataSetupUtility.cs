@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GalleryAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
@@ -136,6 +137,46 @@ namespace GalleryAPI.test.common
 	            inner join Photo as c
 		            on a.PhotoID = c.PhotoID"
             );
+        }
+        #endregion
+
+        #region Create testing data
+        public static void CreateTestingData(GalleryContext context)
+        {
+            // Albums
+            context.Albums.Add(new Album
+            {
+                Id = 1,
+                Title = "Album 1",
+                IsPublic = true,
+                Desp = "Album Desp 1",
+            });
+            context.Albums.Add(new Album
+            {
+                Id = 2,
+                Title = "Album 2",
+                IsPublic = false,
+                Desp = "Album Desp 2",
+            }) ;
+
+            // Photos
+            var photoid1 = new Guid().ToString();
+            context.Photos.Add(new Photo
+            {
+                PhotoId = photoid1,
+                Title = "Photo A1001",
+                Width = 100,
+                Height = 100,
+                IsPublic = false,
+            });
+
+            context.AlbumPhotos.Add(new AlbumPhoto
+            {
+                AlbumID = 1,
+                PhotoID = photoid1,
+            });
+
+            context.SaveChanges();
         }
         #endregion
     }

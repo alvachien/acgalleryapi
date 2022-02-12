@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI", "src\GalleryAP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI.test.common", "test\GalleryAPI.test.common\GalleryAPI.test.common.csproj", "{C0FB45F3-F001-4AD5-A341-4F0E6AA6CC8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GalleryAPI.integratintest", "test\GalleryAPI.integratintest\GalleryAPI.integratintest.csproj", "{9AFBC3D6-953B-4054-A8B3-408C99E548C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug With Azure Date|Any CPU = Debug With Azure Date|Any CPU
@@ -34,6 +36,12 @@ Global
 		{C0FB45F3-F001-4AD5-A341-4F0E6AA6CC8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0FB45F3-F001-4AD5-A341-4F0E6AA6CC8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0FB45F3-F001-4AD5-A341-4F0E6AA6CC8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AFBC3D6-953B-4054-A8B3-408C99E548C6}.Debug With Azure Date|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AFBC3D6-953B-4054-A8B3-408C99E548C6}.Debug With Azure Date|Any CPU.Build.0 = Debug|Any CPU
+		{9AFBC3D6-953B-4054-A8B3-408C99E548C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AFBC3D6-953B-4054-A8B3-408C99E548C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AFBC3D6-953B-4054-A8B3-408C99E548C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AFBC3D6-953B-4054-A8B3-408C99E548C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -34,10 +34,6 @@ namespace GalleryAPI.unittest
 
                 context.Database.EnsureCreated();
 
-                //// Setup the tables
-                //DataSetupUtility.InitializeSystemTables(context);
-                //DataSetupUtility.InitializeHomeDefineAndMemberTables(context);
-
                 context.Dispose();
             }
             catch (Exception ex)
@@ -74,6 +70,18 @@ namespace GalleryAPI.unittest
             return context;
         }
 
+        public void InitTestData(GalleryContext context)
+        {
+            if (!this.IsTestDataInitialized)
+            {
+                DataSetupUtility.CreateTestingData(context);
+                this.IsTestDataInitialized = true;
+            }
+        }
+
+
         protected SqliteConnection DBConnection { get; private set; }
+        public bool IsTestDataInitialized { get; private set; }
+
     }
 }

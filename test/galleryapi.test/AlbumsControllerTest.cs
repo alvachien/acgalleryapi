@@ -1,4 +1,7 @@
-﻿using System;
+﻿using GalleryAPI.Controllers;
+using Microsoft.AspNetCore.Http;
+using Moq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +23,19 @@ namespace GalleryAPI.unittest
         public async Task TestCase_Read()
         {
             var context = fixture.GetCurrentDataContext();
+
+            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            mockHttpContextAccessor.Setup(req => req.HttpContext.User.Identity.Name).Returns(It.IsAny<string>());
+            var control = new AlbumsController(context, mockHttpContextAccessor.Object);
+
+            try
+            {
+                var getrst = control.Get();
+                Assert.NotNull(getrst);
+            }
+            catch (Exception ex)
+            {
+            }
 
             await context.DisposeAsync();
         }
