@@ -79,7 +79,6 @@ namespace GalleryAPI.unittest
             }
         }
 
-
         protected SqliteConnection DBConnection { get; private set; }
         public bool IsTestDataInitialized { get; private set; }
 

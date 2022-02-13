@@ -25,10 +25,12 @@ namespace GalleryAPI.test.common
         ///         Photo B1101
         ///         Photo B1102
         ///         Photo B1103
+        ///         
         /// Public Photos Without User
         ///         Photo ZZ001
         ///         Photo ZZ002
         ///         Photo ZZ003
+        ///         
         /// </summary>
         public const string UserA = "USERA";
         public const string UserB = "USERB";
@@ -150,6 +152,7 @@ namespace GalleryAPI.test.common
                 Title = "Album 1",
                 IsPublic = true,
                 Desp = "Album Desp 1",
+                CreatedBy = DataSetupUtility.UserA,
             });
             context.Albums.Add(new Album
             {
@@ -157,10 +160,20 @@ namespace GalleryAPI.test.common
                 Title = "Album 2",
                 IsPublic = false,
                 Desp = "Album Desp 2",
-            }) ;
+                CreatedBy = DataSetupUtility.UserA,
+            });
+            context.Albums.Add(new Album
+            {
+                Id = 11,
+                Title = "Album 11",
+                IsPublic = false,
+                Desp = "Album Desp 11",
+                CreatedBy = DataSetupUtility.UserB,
+            });
+            context.SaveChanges();
 
             // Photos
-            var photoid1 = new Guid().ToString();
+            var photoid1 = Guid.NewGuid().ToString();
             context.Photos.Add(new Photo
             {
                 PhotoId = photoid1,
@@ -168,12 +181,61 @@ namespace GalleryAPI.test.common
                 Width = 100,
                 Height = 100,
                 IsPublic = false,
+                FileUrl = "photoa1001",
+            });
+            var photoid2 = Guid.NewGuid().ToString();
+            context.Photos.Add(new Photo
+            {
+                PhotoId = photoid2,
+                Title = "Photo A1002",
+                Width = 100,
+                Height = 100,
+                IsPublic = false,
+                FileUrl = "photoa1002",
+            });
+            var photoid3 = Guid.NewGuid().ToString();
+            context.Photos.Add(new Photo
+            {
+                PhotoId = photoid3, 
+                Title = "Photo A2001",
+                Width = 100,
+                Height = 100,
+                IsPublic = false,
+                FileUrl = "photoa2001",
+            });
+            var photoid4 = Guid.NewGuid().ToString();
+            context.Photos.Add(new Photo
+            {
+                PhotoId = photoid4,
+                Title = "Photo A2002",
+                Width = 100,
+                Height = 100,
+                IsPublic = false,
+                FileUrl = "photoa2002",
             });
 
+            context.SaveChanges();
+
+            // Album phtoos
             context.AlbumPhotos.Add(new AlbumPhoto
             {
                 AlbumID = 1,
                 PhotoID = photoid1,
+            });
+            context.AlbumPhotos.Add(new AlbumPhoto
+            {
+                AlbumID = 1,
+                PhotoID = photoid2,
+            });
+            context.AlbumPhotos.Add(new AlbumPhoto
+            {
+                AlbumID = 2,
+                PhotoID = photoid3,
+            });
+            context.AlbumPhotos.Add(new AlbumPhoto
+            {
+                AlbumID = 2,
+                PhotoID = photoid4,
             });
 
             context.SaveChanges();

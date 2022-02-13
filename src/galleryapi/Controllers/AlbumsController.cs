@@ -31,8 +31,9 @@ namespace GalleryAPI.Controllers
         {
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+
+            if (!String.IsNullOrEmpty(usrID))
             {
                 var albs = from almphoto in _context.AlbumPhotos
                            group almphoto by almphoto.AlbumID into almphotos
@@ -42,7 +43,7 @@ namespace GalleryAPI.Controllers
                                PhotoCount = almphotos.Count()
                            } into almphotocnts
                            join alm in _context.Albums
-                           on new { Id = almphotocnts.ID, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrObj.Value }
+                           on new { Id = almphotocnts.ID, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrID }
                            select new Album
                            {
                                Id = alm.Id,
@@ -85,8 +86,9 @@ namespace GalleryAPI.Controllers
         [AlbumEnableQuery]
         public IActionResult Get(int key)
         {
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+
+            if (!String.IsNullOrEmpty(usrID))
             {
                 var alb = from almphoto in _context.AlbumPhotos
                            group almphoto by almphoto.AlbumID into almphotos
@@ -97,7 +99,7 @@ namespace GalleryAPI.Controllers
                                PhotoCount = almphotos.Count()
                            } into almphotocnts
                           join alm in _context.Albums
-                          on new { Id = almphotocnts.Key, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrObj.Value }
+                          on new { Id = almphotocnts.Key, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrID }
                           where alm.Id == key
                           select new Album
                           {
@@ -150,10 +152,12 @@ namespace GalleryAPI.Controllers
         public IActionResult GetPhotos(int AlbumID, string AccessCode = null)
         {
             Album selalb = null;
-            var usrObj = User.FindFirst(c => c.Type == "sub");
-            if (usrObj != null && !String.IsNullOrEmpty(usrObj.Value))
+
+            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+
+            if (!String.IsNullOrEmpty(usrID))
             {
-                selalb = _context.Albums.FirstOrDefault(p => p.Id == AlbumID && (p.IsPublic == true || p.CreatedBy == usrObj.Value));
+                selalb = _context.Albums.FirstOrDefault(p => p.Id == AlbumID && (p.IsPublic == true || p.CreatedBy == usrID));
             }
             else
             {
@@ -222,19 +226,11 @@ namespace GalleryAPI.Controllers
         {
             Album selalb = null;
 
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch(Exception)
-            {
-                userId = null;
-            }
+            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
 
-            if (userId != null)
+            if (!String.IsNullOrWhiteSpace(usrID))
             {
-                selalb = _context.Albums.FirstOrDefault(p => p.Id == key && (p.IsPublic == true || p.CreatedBy == userId));
+                selalb = _context.Albums.FirstOrDefault(p => p.Id == key && (p.IsPublic == true || p.CreatedBy == usrID));
             }
             else
             {
@@ -282,7 +278,8 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult ChangeAccessCode(int key, ODataActionParameters paras)
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+
             if (userId == null)
             {
                 return StatusCode(401);
@@ -319,7 +316,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult Post([FromBody] Album album)
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -339,7 +336,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Put(int key, [FromBody] Album album)
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -373,7 +370,7 @@ namespace GalleryAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -413,7 +410,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int key)
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
