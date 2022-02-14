@@ -26,7 +26,7 @@ namespace GalleryAPI.unittest
         [InlineData(null)]
         [InlineData(DataSetupUtility.UserA)]
         [InlineData(DataSetupUtility.UserB)]
-        public async Task TestCase_Read(String usrid)
+        public async Task TestCase_ReadList(String usrid)
         {
             var context = fixture.GetCurrentDataContext();
 
@@ -57,6 +57,45 @@ namespace GalleryAPI.unittest
             {
                 Assert.Equal(2, allalbums.Count());
             }
+
+            await context.DisposeAsync();
+        }
+
+        [Theory]
+        [InlineData(null, 1)]
+        [InlineData(DataSetupUtility.UserA, 1)]
+        [InlineData(DataSetupUtility.UserB, 1)]
+        public async Task TestCase_ReadSingle(String usrid, int albumid)
+        {
+            var context = fixture.GetCurrentDataContext();
+
+            this.fixture.InitTestData(context);
+
+            var mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
+            mockHttpContextAccessor.Setup(req => req.HttpContext.User.Identity.Name).Returns(
+                //It.IsAny<string>(usrid)
+                usrid
+            );
+
+            var control = new AlbumsController(context, mockHttpContextAccessor.Object);
+
+            var getrst = control.Get(albumid);
+            Assert.NotNull(getrst);
+            //var getokrst = Assert.IsType<OkObjectResult>(getrst);
+            //var allalbums = Assert.IsAssignableFrom<IQueryable<Album>>(getokrst.Value);
+
+            //if (String.IsNullOrEmpty(usrid))
+            //{
+            //    Assert.Equal(1, allalbums.Count());
+            //}
+            //else if (usrid == DataSetupUtility.UserA)
+            //{
+            //    Assert.Equal(2, allalbums.Count());
+            //}
+            //else if (usrid == DataSetupUtility.UserB)
+            //{
+            //    Assert.Equal(2, allalbums.Count());
+            //}
 
             await context.DisposeAsync();
         }

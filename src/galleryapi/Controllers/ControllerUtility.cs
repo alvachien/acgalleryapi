@@ -16,12 +16,13 @@ namespace GalleryAPI.Controllers
 
         internal static String GetUserID(IHttpContextAccessor _httpContextAccessor)
         {
-            if (_httpContextAccessor == null
-                || _httpContextAccessor.HttpContext == null
-                || _httpContextAccessor.HttpContext.User == null)
-                return null;
+            return _httpContextAccessor?.HttpContext.User?.Identity?.Name;
+            //if (_httpContextAccessor == null
+            //    || _httpContextAccessor.HttpContext == null
+            //    || _httpContextAccessor.HttpContext.User == null)
+            //    return null;
 
-            return _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //return _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }
