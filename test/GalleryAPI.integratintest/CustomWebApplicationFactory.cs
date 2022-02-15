@@ -9,6 +9,9 @@ using System.Collections.Generic;
 using System.Linq;
 using GalleryAPI.test.common;
 using GalleryAPI.Models;
+using Microsoft.Extensions.Hosting;
+using Xunit;
+using Microsoft.AspNetCore.TestHost;
 
 namespace GalleryAPI.integrationtest
 {
@@ -75,45 +78,69 @@ namespace GalleryAPI.integrationtest
             return context;
         }
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        protected override IHostBuilder CreateHostBuilder()
         {
-            builder.ConfigureServices(services =>
-            {
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<GalleryContext>));
-                services.Remove(descriptor);
-
-                services.AddDbContext<GalleryContext>(options =>
-                {                    
-                    options.UseSqlite(DBConnection, action =>
-                    {
-                         action.UseRelationalNulls();
-                    })
-                    .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll)
-                    .EnableSensitiveDataLogging();
+            var builder = Host.CreateDefaultBuilder()
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .ConfigureTestServices((services) =>
+                        {
+                            services
+                                .AddControllers()
+                                .AddApplicationPart(typeof(Startup).Assembly);
+                        });
                 });
 
-                var sp = services.BuildServiceProvider();
-                using (var scope = sp.CreateScope())
-                {
-                    var scopedServices = scope.ServiceProvider;
-                    var db = scopedServices.GetRequiredService<GalleryContext>();
-                    //var logger = scopedServices
-                    //    .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
+            return builder;
+        }
 
-                    db.Database.EnsureCreated();
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
+            builder.UseStartup<TStartup>();
+            base.ConfigureWebHost(builder);
 
-                    try
-                    {
-                        // Utilities.InitializeDbForTests(db);
-                    }
-                    catch (Exception exp)
-                    {
-                        
-                        //logger.LogError(ex, "An error occurred seeding the " +
-                        //    "database with test messages. Error: {Message}", ex.Message);
-                    }
-                }
-            });
+            //builder.ConfigureServices(services =>
+            //{
+            //    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<GalleryContext>));
+            //    services.Remove(descriptor);
+
+            //    services.AddDbContext<GalleryContext>(options =>
+            //    {                    
+            //        options.UseSqlite(DBConnection, action =>
+            //        {
+            //             action.UseRelationalNulls();
+            //        })
+            //        .UseQueryTrackingBehavior(QueryTrackingBehavior.TrackAll)
+            //        .EnableSensitiveDataLogging();
+            //    });
+
+            //    var sp = services.BuildServiceProvider();
+            //    using (var scope = sp.CreateScope())
+            //    {
+            //        var scopedServices = scope.ServiceProvider;
+            //        var db = scopedServices.GetRequiredService<GalleryContext>();
+            //        //var logger = scopedServices
+            //        //    .GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
+
+            //        db.Database.EnsureCreated();
+
+            //        try
+            //        {
+            //            // Utilities.InitializeDbForTests(db);
+            //        }
+            //        catch (Exception exp)
+            //        {
+
+            //            //logger.LogError(ex, "An error occurred seeding the " +
+            //            //    "database with test messages. Error: {Message}", ex.Message);
+            //        }
+            //    }
+            //});
         }
     }
 }

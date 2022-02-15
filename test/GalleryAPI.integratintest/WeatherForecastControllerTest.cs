@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,12 @@ namespace GalleryAPI.integrationtest
         public WeatherForecastControllerTest(CustomWebApplicationFactory<Startup> factory)
         {
             _factory = factory;
-            _client = _factory.CreateClient(new WebApplicationFactoryClientOptions
-            {
-                AllowAutoRedirect = false
-            });
+            _client = _factory
+                .WithWebHostBuilder(builder => builder.UseSolutionRelativeContentRoot("test//GalleryAPI.integratintest"))
+                .CreateClient(new WebApplicationFactoryClientOptions
+                {
+                    AllowAutoRedirect = false
+                });
         }
 
         [Fact]
