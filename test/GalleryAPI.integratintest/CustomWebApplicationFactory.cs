@@ -12,6 +12,7 @@ using GalleryAPI.Models;
 using Microsoft.Extensions.Hosting;
 using Xunit;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 
 namespace GalleryAPI.integrationtest
 {
@@ -78,26 +79,29 @@ namespace GalleryAPI.integrationtest
             return context;
         }
 
-        protected override IHostBuilder CreateHostBuilder()
-        {
-            var builder = Host.CreateDefaultBuilder()
-                .ConfigureLogging(logging =>
+        protected override IHostBuilder CreateHostBuilder() =>
+            base.CreateHostBuilder()
+                .ConfigureHostConfiguration(config =>
                 {
-                    logging.ClearProviders();
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder
-                        .ConfigureTestServices((services) =>
-                        {
-                            services
-                                .AddControllers()
-                                .AddApplicationPart(typeof(Startup).Assembly);
-                        });
+                    config.AddEnvironmentVariables("ASPNETCORE");
                 });
+        //    var builder = Host.CreateDefaultBuilder()
+        //        .ConfigureLogging(logging =>
+        //        {
+        //            //logging.ClearProviders();
+        //        })
+        //        .ConfigureWebHostDefaults(webBuilder =>
+        //        {
+        //            webBuilder
+        //                .ConfigureTestServices((services) =>
+        //                {
+        //                    services
+        //                        .AddControllers()
+        //                        .AddApplicationPart(typeof(Startup).Assembly);
+        //                });
+        //        });
 
-            return builder;
-        }
+        //    return builder;
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
