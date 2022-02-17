@@ -12,12 +12,12 @@ using Xunit;
 namespace GalleryAPI.integrationtest
 {
     [Collection("GalleryAPI_IntegrationTests#1")]
-    public class WeatherForecastControllerTest : IClassFixture<CustomWebApplicationFactory<Startup>>
+    public class ODataEndpointControllerTest : IClassFixture<CustomWebApplicationFactory<Startup>>
     {
         private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory<Startup> _factory;
 
-        public WeatherForecastControllerTest(CustomWebApplicationFactory<Startup> factory)
+        public ODataEndpointControllerTest(CustomWebApplicationFactory<Startup> factory)
         {
             _factory = factory;
             _client = _factory
@@ -32,13 +32,13 @@ namespace GalleryAPI.integrationtest
         public async Task GetResultPage()
         {
             // Arrange
-            var defaultPage = await _client.GetAsync("/WeatherForecast");
+            var defaultPage = await _client.GetAsync("/$odata");
             var content = await HtmlHelpers.GetDocumentAsync(defaultPage);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, defaultPage.StatusCode);
             Assert.NotNull(content);
+            Assert.Equal("http://localhost/$odata", content.Url);
         }
     }
 }
-

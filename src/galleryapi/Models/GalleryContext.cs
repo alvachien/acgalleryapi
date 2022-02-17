@@ -4,7 +4,7 @@ namespace GalleryAPI.Models
 {
     public class GalleryContext : DbContext
     {
-        public GalleryContext(DbContextOptions<GalleryContext> options, bool testing)
+        public GalleryContext(DbContextOptions<GalleryContext> options, bool testing = false)
             : base(options)
         {
             TestingMode = testing;

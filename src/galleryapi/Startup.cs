@@ -55,10 +55,12 @@ namespace GalleryAPI
 #if USE_AZURE
             this.ConnectionString = Configuration["GalleryAPI_Azure:ConnectionString"];
 #else
-            this.ConnectionString = Configuration["GalleryAPI:ConnectionString"];
+            if (Environment.IsDevelopment())
+                this.ConnectionString = Configuration["GalleryAPI:ConnectionString"];
 #endif
 #else
-            this.ConnectionString = Configuration.GetConnectionString("AliyunConnection");
+            if (Environment.IsProduction())           
+                this.ConnectionString = Configuration.GetConnectionString("AliyunConnection");
 #endif
 
             if (!String.IsNullOrEmpty(this.ConnectionString))
@@ -67,7 +69,6 @@ namespace GalleryAPI
             services.AddHttpContextAccessor();
 
             IEdmModel model = EdmModelBuilder.GetEdmModel();
-
             services.AddControllers().AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(100)
                 .AddRouteComponents(model)
                 .AddRouteComponents("v1", model)
@@ -75,7 +76,7 @@ namespace GalleryAPI
 
             services.AddSwaggerGen();
 
-            if (Environment.EnvironmentName == "Development")
+            if (Environment.IsDevelopment())
             {
                 services.AddAuthentication("Bearer")
                     .AddJwtBearer("Bearer", options =>
@@ -104,8 +105,9 @@ namespace GalleryAPI
                         .AllowCredentials();
                     });
                 });
+                services.AddAuthorization();
             }
-            else if (Environment.EnvironmentName == "Production")
+            else if (Environment.IsProduction())
             {
                 services.AddAuthentication("Bearer")
                     .AddJwtBearer("Bearer", options =>
@@ -133,8 +135,8 @@ namespace GalleryAPI
                         .AllowCredentials();
                     });
                 });
+                services.AddAuthorization();
             }
-            services.AddAuthorization();
 
             // Response Caching
             services.AddResponseCaching();
@@ -161,6 +163,7 @@ namespace GalleryAPI
             app.UseODataBatching();
 
             app.UseSwagger();
+
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "OData 8.x OpenAPI");
@@ -168,36 +171,14 @@ namespace GalleryAPI
 
             app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            // a test middleware
-            app.Use(next => context =>
+            if (env.IsDevelopment() || env.IsProduction())
             {
-                var endpoint = context.GetEndpoint();
-                if (endpoint == null)
-                {
-                    return next(context);
-                }
-
-                IEnumerable templates;
-                IODataRoutingMetadata metadata = endpoint.Metadata.GetMetadata<IODataRoutingMetadata>();
-                if (metadata != null)
-                {
-                    templates = metadata.Template.GetTemplates();
-                }
-
-                return next(context); // put a breaking point here
-            });
+                app.UseAuthentication();
+                app.UseAuthorization();
+            }
 
             app.UseEndpoints(endpoints =>
             {
-                if (env.IsDevelopment())
-                {
-                    // A odata debuger route is only for debugger view of the all OData endpoint routing.
-                    // endpoints.MapGet("/$odata", ODataRouteHandler.HandleOData);
-                }
-
                 endpoints.MapControllers();
             });
 

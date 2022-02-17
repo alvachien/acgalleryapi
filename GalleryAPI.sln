@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI", "src\GalleryAP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI.test.common", "test\GalleryAPI.test.common\GalleryAPI.test.common.csproj", "{C0FB45F3-F001-4AD5-A341-4F0E6AA6CC8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GalleryAPI.integratintest", "test\GalleryAPI.integratintest\GalleryAPI.integratintest.csproj", "{9AFBC3D6-953B-4054-A8B3-408C99E548C6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GalleryAPI.integrationtest", "test\GalleryAPI.integratintest\GalleryAPI.integrationtest.csproj", "{9AFBC3D6-953B-4054-A8B3-408C99E548C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
