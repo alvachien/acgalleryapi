@@ -35,15 +35,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult Post([FromBody] PhotoTag ptag)
         {
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -59,15 +51,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Delete([FromODataUri] string keyPhotoID, [FromODataUri] string keyTagString)
         {
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);

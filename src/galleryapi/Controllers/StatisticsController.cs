@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.SqlClient;
-using System.Net;
-using Microsoft.Extensions.Caching.Memory;
 using GalleryAPI.Models;
 
 namespace GalleryAPI.Controllers
@@ -16,12 +9,10 @@ namespace GalleryAPI.Controllers
     public class StatisticsController : ControllerBase
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public StatisticsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public StatisticsController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/Statistics

@@ -13,6 +13,7 @@ using Xunit;
 
 namespace GalleryAPI.unittest
 {
+    [Collection("API_UnitTests#1")]
     public class StatisticsControllerTest
     {
         private SqliteDatabaseFixture fixture = null;
@@ -21,15 +22,18 @@ namespace GalleryAPI.unittest
             this.fixture = fixture;
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData(DataSetupUtility.UserA)]
-        [InlineData(DataSetupUtility.UserB)]
-        public async Task TestCase_ReadList(String usrid)
+        [Fact]
+        public async Task TestCase_Read()
         {
             var context = fixture.GetCurrentDataContext();
 
             this.fixture.InitTestData(context);
+
+            var control = new StatisticsController(context);
+            var getrst = control.Get();
+            Assert.NotNull(getrst);
+            var getokrst = Assert.IsType<ObjectResult>(getrst);
+            var statisinfo = Assert.IsType<StatisticsInfo>(getokrst.Value);
 
             await context.DisposeAsync();
         }

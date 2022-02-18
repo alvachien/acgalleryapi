@@ -36,15 +36,7 @@ namespace GalleryAPI.Controllers
             Album selalb = null;
 
             // Is a logon user?
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
 
             if (userId != null)
             {

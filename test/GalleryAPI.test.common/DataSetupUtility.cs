@@ -182,6 +182,14 @@ namespace GalleryAPI.test.common
                 Height = 100,
                 IsPublic = false,
                 FileUrl = "photoa1001",
+                Tags = new List<PhotoTag>()
+                {
+                    new PhotoTag
+                    {
+                        PhotoID = photoid1,
+                        TagString = "A1001"
+                    }
+                },
             });
             var photoid2 = Guid.NewGuid().ToString();
             context.Photos.Add(new Photo
@@ -236,6 +244,18 @@ namespace GalleryAPI.test.common
             {
                 AlbumID = 2,
                 PhotoID = photoid4,
+            });
+
+            // User Detail
+            context.UserDetails.Add(new UserDetail
+            {
+                UserID = UserA,
+                DisplayAs = "User A",
+            });
+            context.UserDetails.Add(new UserDetail
+            {
+                UserID = UserB,
+                DisplayAs = "User B",
             });
 
             context.SaveChanges();

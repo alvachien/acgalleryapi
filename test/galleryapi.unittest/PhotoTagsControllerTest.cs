@@ -14,10 +14,10 @@ using Xunit;
 namespace GalleryAPI.unittest
 {
     [Collection("API_UnitTests#1")]
-    public class UserDetailsControllerTest
+    public class PhotoTagsControllerTest
     {
         private SqliteDatabaseFixture fixture = null;
-        public UserDetailsControllerTest(SqliteDatabaseFixture fixture)
+        public PhotoTagsControllerTest(SqliteDatabaseFixture fixture)
         {
             this.fixture = fixture;
         }
@@ -26,7 +26,7 @@ namespace GalleryAPI.unittest
         [InlineData(null)]
         [InlineData(DataSetupUtility.UserA)]
         [InlineData(DataSetupUtility.UserB)]
-        public async Task TestCase_ReadSingle(String usrid)
+        public async Task TestCase_ReadList(String usrid)
         {
             var context = fixture.GetCurrentDataContext();
 
@@ -38,19 +38,11 @@ namespace GalleryAPI.unittest
                 usrid
             );
 
-            if (!String.IsNullOrEmpty(usrid))
-            {
-                var control = new UserDetailsController(context, mockHttpContextAccessor.Object);
-
-                var getrst = control.Get(usrid);
-                Assert.NotNull(getrst);
-                var getokrst = Assert.IsType<OkObjectResult>(getrst);
-                var usrreadobj = Assert.IsAssignableFrom<UserDetail>(getokrst.Value);
-                Assert.Equal(usrid, usrreadobj.UserID);
-            }
+            var control = new PhotoTagsController(context, mockHttpContextAccessor.Object);
+            var getrst = control.Get();
+            Assert.NotNull(getrst);
 
             await context.DisposeAsync();
         }
     }
 }
-

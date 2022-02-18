@@ -35,15 +35,7 @@ namespace GalleryAPI.Controllers
             // A tracking query projects owned entity without corresponding owner in result. Owned entities cannot be tracked without their owner...
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
 
             var rst = _context.Photos.Where(p => p.IsPublic == true);
             return Ok(rst);
@@ -87,15 +79,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -119,15 +103,7 @@ namespace GalleryAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -170,15 +146,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            string userId = null;
-            try
-            {
-                userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            }
-            catch (Exception)
-            {
-                userId = null;
-            }
+            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);

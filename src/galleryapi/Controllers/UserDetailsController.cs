@@ -44,7 +44,7 @@ namespace GalleryAPI.Controllers
                 return BadRequest("Invalid model state");
             }
 
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -68,7 +68,8 @@ namespace GalleryAPI.Controllers
             {
                 return BadRequest("Key is unmatched");
             }
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var userId = ControllerUtility.GetUserID(this._httpContextAccessor);
             if (userId == null)
             {
                 return StatusCode(401);
