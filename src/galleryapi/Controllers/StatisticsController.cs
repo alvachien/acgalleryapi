@@ -9,7 +9,7 @@ using System.Net;
 using Microsoft.Extensions.Caching.Memory;
 using GalleryAPI.Models;
 
-namespace acgalleryapi.Controllers
+namespace GalleryAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

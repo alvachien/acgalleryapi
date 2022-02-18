@@ -6,7 +6,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.IO;
 
-namespace acgalleryapi
+namespace GalleryAPI
 {
     public struct ExifTagItem
     {
