@@ -30,10 +30,10 @@ jobs:
       run: dotnet build --configuration Release --no-restore
       
     - name: Test on unit test 
-      run: dotnet test --no-build test/galleryapi.unittest/GalleryAPI.unittest.csproj /p:CollectCoverage=true  /p:CoverletOutput=../../converage/
+      run: dotnet test --no-build --configuration Release test/galleryapi.unittest/GalleryAPI.unittest.csproj /p:CollectCoverage=true  /p:CoverletOutput=../../converage/
 
     - name: Test on integration test
-      run: dotnet test --no-build test/galleryapi.integrationtest/GalleryAPI.integrationtest.csproj /p:CollectCoverage=true /p:CoverletOutput=../../converage/ /p:MergeWith="../../converage/coverage.json" /p:CoverletOutputFormat="cobertura"
+      run: dotnet test --no-build --configuration Release test/galleryapi.integrationtest/GalleryAPI.integrationtest.csproj /p:CollectCoverage=true /p:CoverletOutput=../../converage/ /p:MergeWith="../../converage/coverage.json" /p:CoverletOutputFormat="cobertura"
     
     - name: Code Coverage Summary Report
       uses: irongut/CodeCoverageSummary@v1.0.2
