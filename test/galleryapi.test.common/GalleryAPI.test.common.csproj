@@ -5,7 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <ProjectReference Include="..\..\src\galleryapi\GalleryAPI.csproj" />
+=======
+    <ProjectReference Include="..\..\src\GalleryAPI\GalleryAPI.csproj" />
+>>>>>>> dev
   </ItemGroup>
 
 </Project>
