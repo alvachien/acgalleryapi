@@ -23,8 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\GalleryAPI\GalleryAPI.csproj" />
-    <ProjectReference Include="..\GalleryAPI.test.common\GalleryAPI.test.common.csproj" />
+    <ProjectReference Include="..\..\src\galleryapi\GalleryAPI.csproj" />
+    <ProjectReference Include="..\galleryapi.test.common\GalleryAPI.test.common.csproj" />
   </ItemGroup>
 
 </Project>
