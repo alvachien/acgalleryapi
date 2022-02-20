@@ -29,12 +29,12 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
       
-    - name: Test
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --logger trx --results-directory coverage
+    - name: Test on unit test 
+      run: dotnet test --no-build test/galleryapi.unittest/GalleryAPI.unittest.csproj /p:CollectCoverage=true  /p:CoverletOutput=../../converage/
 
-    - name: Copy Coverage To Predictable Location
-      run: cp coverage/*/coverage.cobertura.xml coverage/coverage.cobertura.xml
-
+    - name: Test on integration test
+      run: dotnet test --no-build test/galleryapi.integrationtest/GalleryAPI.integrationtest.csproj /p:CollectCoverage=true /p:CoverletOutput=../../converage/ /p:MergeWith="../../converage/coverage.json" /p:CoverletOutputFormat="cobertura"
+    
     - name: Code Coverage Summary Report
       uses: irongut/CodeCoverageSummary@v1.0.2
       # uses: joshjohanning/CodeCoverageSummary@v1.0.2
