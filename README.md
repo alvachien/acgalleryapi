@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.com/alvachien/acgalleryapi.svg?branch=master)](https://travis-ci.com/alvachien/acgalleryapi)
+
+
 # acgalleryapi
 Web API for [AC Gallery](https://github.com/alvachien/acgallery.git), built on ASP.NET Core. This web api can be deploy to Cloud platform like Microsoft Azure.
 

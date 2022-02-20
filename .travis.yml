@@ -1,0 +1,15 @@
+language: csharp
+mono: none
+sudo: required
+dotnet: 5.0.405
+branches:
+  only:
+    - master
+script:
+  - dotnet restore
+  - dotnet build GalleryAPI.sln
+  - dotnet test
+notifications:
+  email:
+    on_success: never
+    on_failure: always
