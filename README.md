@@ -1,5 +1,7 @@
-[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+[![build and test](https://github.com/alvachien/acgalleryapi/actions/workflows/build-test.yml/badge.svg)](https://github.com/alvachien/acgalleryapi/actions/workflows/build-test.yml)
 [![Build Status](https://travis-ci.com/alvachien/acgalleryapi.svg?branch=master)](https://travis-ci.com/alvachien/acgalleryapi)
+![Code Coverage](https://img.shields.io/badge/Code%20Coverage-48%25-yellow?style=flat)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
 
 
 # acgalleryapi
