@@ -35,14 +35,21 @@ jobs:
     - name: Test on integration test
       run: dotnet test --no-build --configuration Release test/galleryapi.integrationtest/GalleryAPI.integrationtest.csproj /p:CollectCoverage=true /p:CoverletOutput=../../converage/ /p:MergeWith="../../converage/coverage.json" /p:CoverletOutputFormat="cobertura"
     
+    - name: Copy Coverage To Predictable Location
+      run: cp coverage/coverage.cobertura.xml coverage.cobertura.xml
+
     - name: Code Coverage Summary Report
-      uses: irongut/CodeCoverageSummary@v1.0.2
-      # uses: joshjohanning/CodeCoverageSummary@v1.0.2
+      uses: irongut/CodeCoverageSummary@v1.2.0
       with:
-        filename: ./coverage/coverage.cobertura.xml
+        filename: coverage.cobertura.xml
         badge: true
-        format: 'markdown'
-        output: 'both'
+        fail_below_min: true
+        format: markdown
+        hide_branch_rate: false
+        hide_complexity: true
+        indicators: true
+        output: both
+        thresholds: '60 80'
 
     - name: Add Coverage PR Comment
       uses: marocchino/sticky-pull-request-comment@v2
