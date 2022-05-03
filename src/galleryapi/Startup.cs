@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.OData.Routing;
 using Microsoft.AspNetCore.OData.Routing.Template;
 using System.IO;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
 namespace GalleryAPI
 {
@@ -156,6 +157,8 @@ namespace GalleryAPI
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseHttpsRedirection();
+
+            app.UseSerilogRequestLogging(); // <-- Add this line
 
             // app.UseODataOpenApi();
 

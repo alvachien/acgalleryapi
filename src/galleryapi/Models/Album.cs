@@ -28,7 +28,7 @@ namespace GalleryAPI.Models
         [Column("CreatedBy", TypeName = "NVARCHAR(50)")]
         public String CreatedBy { get; set; }
 
-        [Column("CreatedAt")]
+        [Column("CreateAt")]
         [DataType(DataType.Date)]
         public DateTime CreatedAt { get; set; }
 
