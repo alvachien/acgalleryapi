@@ -47,7 +47,7 @@ namespace GalleryAPI.test.common
 	            TITLE nvarchar(50) NOT NULL,
 	            DESP nvarchar(100) NULL,
 	            CREATEDBY nvarchar(50) NULL,
-	            CREATEDAT date NULL DEFAULT CURRENT_DATE,
+	            CREATEAT date NULL DEFAULT CURRENT_DATE,
 	            UPDATEDBY nvarchar(50) NULL,
 	            UPDATEDAT date NULL DEFAULT CURRENT_DATE,
                 ISPUBLIC bit NULL DEFAULT 1,

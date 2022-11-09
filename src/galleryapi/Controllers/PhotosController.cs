@@ -47,28 +47,6 @@ namespace GalleryAPI.Controllers
             return Ok(_context.Photos.FirstOrDefault(c => c.PhotoId == key));
         }
 
-        /// <summary>
-        /// If testing in IISExpress with the POST request to: http://localhost:2087/test/my/a/Customers
-        /// Content-Type : application/json
-        /// {
-        ///    "Name": "Jonier","
-        /// }
-        /// 
-        /// Check the reponse header, you can see 
-        /// "Location" : "http://localhost:2087/test/my/a/Customers(0)"
-        /// </summary>
-        //[HttpPost]
-        ////[EnableQuery]
-        //public IActionResult Post([FromBody] Photo photo)
-        //{
-        //    return Forbid();
-        //    //photo.UploadedTime = DateTime.Now;
-        //    //this._context.Photos.Add(photo);
-        //    //_context.SaveChanges();
-
-        //    //return Created(photo);
-        //}
-
         [HttpPut]
         [Authorize]
         public async Task<IActionResult> Put(string key, [FromBody] Photo pto)
