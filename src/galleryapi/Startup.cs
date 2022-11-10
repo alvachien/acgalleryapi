@@ -1,24 +1,13 @@
-//#define USE_AZURE
-
 using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OData;
 using Microsoft.OData.Edm;
 using GalleryAPI.Models;
 using Microsoft.AspNetCore.OData;
-using Microsoft.AspNetCore.OData.Formatter.Deserialization;
-using GalleryAPI.Extensions;
-using Microsoft.AspNetCore.OData.Batch;
-using System.Collections;
-using Microsoft.AspNetCore.OData.Routing;
-using Microsoft.AspNetCore.OData.Routing.Template;
 using System.IO;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -50,19 +39,10 @@ namespace GalleryAPI
         {
             services.AddCors();
 
-            // TBD
-            // services.AddAuthentication();
-#if DEBUG
-#if USE_AZURE
-            this.ConnectionString = Configuration["GalleryAPI_Azure:ConnectionString"];
-#else
             if (Environment.IsDevelopment())
                 this.ConnectionString = Configuration["GalleryAPI:ConnectionString"];
-#endif
-#else
-            if (Environment.IsProduction())           
+            else if (Environment.IsProduction())
                 this.ConnectionString = Configuration.GetConnectionString("AliyunConnection");
-#endif
 
             if (!String.IsNullOrEmpty(this.ConnectionString))
                 services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(this.ConnectionString));

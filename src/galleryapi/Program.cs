@@ -18,9 +18,11 @@ namespace GalleryAPI
         {
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
+            .MinimumLevel.Debug()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
 #else
+            .MinimumLevel.Warning()
             .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
 #endif

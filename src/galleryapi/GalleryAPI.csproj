@@ -13,14 +13,14 @@
     <PackageId>ACGallery.API</PackageId>
     <PackageProjectUrl>https://github.com/alvachien/acgalleryapi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/alvachien/acgalleryapi</RepositoryUrl>
-    <Configurations>Debug;Release;Debug With Azure Date</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <PackageTags>Photo,Gallery</PackageTags>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug With Azure Date|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE;USE_AZURE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="uploads\**" />
