@@ -3,11 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>2dae3a26-18cd-4ddc-96f7-18d33900a3a6</UserSecretsId>
-    <Version>0.2.40</Version>
+    <Version>0.2.60</Version>
     <Authors>Alva Chien</Authors>
     <Company>Alva Chien</Company>
     <Product>Photo Gallery</Product>
-    <Copyright>(C) Alva Chien, 2016 - 2022</Copyright>
+    <Copyright>(C) Alva Chien, 2016 - 2023</Copyright>
     <OutputType>Exe</OutputType>
     <Description>Web API for AC Photo Gallery, built on .Net Core.</Description>
     <PackageId>ACGallery.API</PackageId>

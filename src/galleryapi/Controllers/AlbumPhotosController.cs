@@ -17,12 +17,10 @@ namespace GalleryAPI.Controllers
     public class AlbumPhotosController : ODataController
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AlbumPhotosController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public AlbumPhotosController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -42,7 +40,7 @@ namespace GalleryAPI.Controllers
                 return BadRequest();
             }
 
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -67,7 +65,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);

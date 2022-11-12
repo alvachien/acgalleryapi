@@ -17,12 +17,10 @@ namespace GalleryAPI.Controllers
     public class PhotoTagsController : ODataController
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PhotoTagsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public PhotoTagsController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -35,7 +33,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult Post([FromBody] PhotoTag ptag)
         {
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -51,7 +49,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Delete([FromODataUri] string keyPhotoID, [FromODataUri] string keyTagString)
         {
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);

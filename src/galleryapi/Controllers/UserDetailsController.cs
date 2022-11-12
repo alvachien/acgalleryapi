@@ -16,12 +16,10 @@ namespace GalleryAPI.Controllers
     public class UserDetailsController : ODataController
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserDetailsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public UserDetailsController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -44,7 +42,7 @@ namespace GalleryAPI.Controllers
                 return BadRequest("Invalid model state");
             }
 
-            var userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            var userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -69,7 +67,7 @@ namespace GalleryAPI.Controllers
                 return BadRequest("Key is unmatched");
             }
 
-            var userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            var userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);

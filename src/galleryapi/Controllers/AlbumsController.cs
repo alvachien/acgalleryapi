@@ -18,12 +18,10 @@ namespace GalleryAPI.Controllers
     public class AlbumsController : ODataController
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AlbumsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public AlbumsController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [AlbumEnableQuery]
@@ -31,7 +29,7 @@ namespace GalleryAPI.Controllers
         {
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String usrID = ControllerUtility.GetUserID(this);
 
             if (!String.IsNullOrEmpty(usrID))
             {
@@ -49,7 +47,7 @@ namespace GalleryAPI.Controllers
                                 PhotoCount = 0,
                             };
 
-                var albnums = from almphoto in _context.AlbumPhotos
+                var albnums = (from almphoto in _context.AlbumPhotos
                               join selalbum in alb2
                                 on almphoto.AlbumID equals selalbum.Id
                               group almphoto by almphoto.AlbumID into almphotos
@@ -57,10 +55,10 @@ namespace GalleryAPI.Controllers
                               {
                                   ID = almphotos.Key,
                                   PhotoCount = almphotos.Count()
-                              };
+                              }).ToList();
 
                 foreach (var album in alb2)
-                {
+                {                    
                     var albnum = albnums.FirstOrDefault(p => p.ID == album.Id);
                     if (albnum != null)
                         album.PhotoCount = albnum.PhotoCount;
@@ -117,7 +115,7 @@ namespace GalleryAPI.Controllers
         [AlbumEnableQuery]
         public IActionResult Get(int key)
         {
-            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String usrID = ControllerUtility.GetUserID(this);
 
             if (!String.IsNullOrEmpty(usrID))
             {
@@ -184,7 +182,7 @@ namespace GalleryAPI.Controllers
         {
             Album selalb = null;
 
-            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String usrID = ControllerUtility.GetUserID(this);
 
             if (!String.IsNullOrEmpty(usrID))
             {
@@ -257,7 +255,7 @@ namespace GalleryAPI.Controllers
         {
             Album selalb = null;
 
-            String usrID = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String usrID = ControllerUtility.GetUserID(this);
 
             if (!String.IsNullOrWhiteSpace(usrID))
             {
@@ -309,7 +307,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult ChangeAccessCode(int key, ODataActionParameters paras)
         {
-            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String userId = ControllerUtility.GetUserID(this);
 
             if (userId == null)
             {
@@ -347,7 +345,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public IActionResult Post([FromBody] Album album)
         {
-            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -367,7 +365,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Put(int key, [FromBody] Album album)
         {
-            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -401,7 +399,7 @@ namespace GalleryAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -441,7 +439,7 @@ namespace GalleryAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Delete(int key)
         {
-            String userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            String userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);

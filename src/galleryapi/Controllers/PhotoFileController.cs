@@ -18,24 +18,17 @@ namespace GalleryAPI.Controllers
     [Route("/PhotoFile")]
     public class PhotoFileController : Controller
     {
-        private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly ILogger<PhotoFileController> _logger;
-        private readonly IAuthorizationService _authorizationService;
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PhotoFileController(
             IWebHostEnvironment env, 
             ILogger<PhotoFileController> logger,
             IAuthorizationService authorizationService,
-            IHttpContextAccessor httpContextAccessor,
             GalleryContext context)
         {
-            _hostingEnvironment = env;
             _logger = logger;
-            _authorizationService = authorizationService;
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/PhotoFile/filename
@@ -61,7 +54,7 @@ namespace GalleryAPI.Controllers
             if (Request.Form.Files.Count <= 0)
                 return BadRequest("No Files");
 
-            var userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            var userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);

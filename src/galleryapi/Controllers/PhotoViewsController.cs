@@ -15,12 +15,10 @@ namespace GalleryAPI.Controllers
     public class PhotoViewsController : ODataController
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PhotoViewsController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public PhotoViewsController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -36,7 +34,7 @@ namespace GalleryAPI.Controllers
             Album selalb = null;
 
             // Is a logon user?
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
 
             if (userId != null)
             {

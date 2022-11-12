@@ -20,12 +20,10 @@ namespace GalleryAPI.Controllers
     public class PhotosController : ODataController
     {
         private readonly GalleryContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PhotosController(GalleryContext context, IHttpContextAccessor httpContextAccessor)
+        public PhotosController(GalleryContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         [EnableQuery]
@@ -35,7 +33,7 @@ namespace GalleryAPI.Controllers
             // A tracking query projects owned entity without corresponding owner in result. Owned entities cannot be tracked without their owner...
             _context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
 
             var rst = _context.Photos.Where(p => p.IsPublic == true);
             return Ok(rst);
@@ -57,7 +55,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -81,7 +79,7 @@ namespace GalleryAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
@@ -124,7 +122,7 @@ namespace GalleryAPI.Controllers
                 return NotFound();
             }
 
-            string userId = ControllerUtility.GetUserID(this._httpContextAccessor);
+            string userId = ControllerUtility.GetUserID(this);
             if (userId == null)
             {
                 return StatusCode(401);
