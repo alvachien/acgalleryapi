@@ -33,59 +33,61 @@ namespace GalleryAPI.Controllers
 
             if (!String.IsNullOrEmpty(usrID))
             {
-                var alb2 = from album in _context.Albums
-                           where album.IsPublic == true || album.CreatedBy == usrID
-                            select new Album
-                            {
-                                Id = album.Id,
-                                Title = album.Title,
-                                Desp = album.Desp,
-                                CreatedBy = album.CreatedBy,
-                                CreatedAt = album.CreatedAt,
-                                IsPublic = album.IsPublic,
-                                AccessCodeHint = album.AccessCodeHint,
-                                PhotoCount = 0,
-                            };
+                //var alb2 = from album in _context.Albums
+                //           where album.IsPublic == true || album.CreatedBy == usrID
+                //            select new Album
+                //            {
+                //                Id = album.Id,
+                //                Title = album.Title,
+                //                Desp = album.Desp,
+                //                CreatedBy = album.CreatedBy,
+                //                CreatedAt = album.CreatedAt,
+                //                IsPublic = album.IsPublic,
+                //                AccessCodeHint = album.AccessCodeHint,
+                //                PhotoCount = 0,
+                //            };
 
-                var albnums = (from almphoto in _context.AlbumPhotos
-                              join selalbum in alb2
-                                on almphoto.AlbumID equals selalbum.Id
-                              group almphoto by almphoto.AlbumID into almphotos
-                              select new
-                              {
-                                  ID = almphotos.Key,
-                                  PhotoCount = almphotos.Count()
-                              }).ToList();
+                //var albnums = (from almphoto in _context.AlbumPhotos
+                //              join selalbum in alb2
+                //                on almphoto.AlbumID equals selalbum.Id
+                //              group almphoto by almphoto.AlbumID into almphotos
+                //              select new
+                //              {
+                //                  ID = almphotos.Key,
+                //                  PhotoCount = almphotos.Count()
+                //              }).ToList();
 
-                foreach (var album in alb2)
-                {                    
-                    var albnum = albnums.FirstOrDefault(p => p.ID == album.Id);
-                    if (albnum != null)
-                        album.PhotoCount = albnum.PhotoCount;
-                }
+                //foreach (var album in alb2)
+                //{                    
+                //    var albnum = albnums.FirstOrDefault(p => p.ID == album.Id);
+                //    if (albnum != null)
+                //        album.PhotoCount = albnum.PhotoCount;
+                //}
 
-                //var albs = from almphoto in _context.AlbumPhotos
-                //           group almphoto by almphoto.AlbumID into almphotos
-                //           select new
-                //           {
-                //               ID = almphotos.Key,
-                //               PhotoCount = almphotos.Count()
-                //           } into almphotocnts
-                //           join alm in _context.Albums
-                //           on new { Id = almphotocnts.ID, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrID }
-                //           select new Album
-                //           {
-                //               Id = alm.Id,
-                //               Title = alm.Title,
-                //               Desp = alm.Desp,
-                //               CreatedBy = alm.CreatedBy,
-                //               CreatedAt = alm.CreatedAt,
-                //               IsPublic = alm.IsPublic,
-                //               AccessCodeHint = alm.AccessCodeHint,
-                //               PhotoCount = almphotocnts.PhotoCount
-                //           };
+                //return Ok(alb2);
 
-                return Ok(alb2);
+                var albs = from almphoto in _context.AlbumPhotos
+                           group almphoto by almphoto.AlbumID into almphotos
+                           select new
+                           {
+                               ID = almphotos.Key,
+                               PhotoCount = almphotos.Count()
+                           } into almphotocnts
+                           join alm in _context.Albums
+                           on new { Id = almphotocnts.ID, IsAllowed = true } equals new { Id = alm.Id, IsAllowed = alm.IsPublic || alm.CreatedBy == usrID }
+                           select new Album
+                           {
+                               Id = alm.Id,
+                               Title = alm.Title,
+                               Desp = alm.Desp,
+                               CreatedBy = alm.CreatedBy,
+                               CreatedAt = alm.CreatedAt,
+                               IsPublic = alm.IsPublic,
+                               AccessCodeHint = alm.AccessCodeHint,
+                               PhotoCount = almphotocnts.PhotoCount
+                           };
+
+                return Ok(albs);
             }
 
             var rst2 = from almphoto in _context.AlbumPhotos
