@@ -240,5 +240,13 @@ namespace GalleryAPI.Controllers
             }
             return new JsonResult(filerst);
         }
+
+        // DELETE
+        [HttpDelete]
+        public async Task<IActionResult> DeletePhoto(String fileName)
+        {
+            var id = Guid.NewGuid();
+            return new JsonResult(id);
+        }
     }
 }
