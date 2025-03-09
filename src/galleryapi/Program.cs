@@ -1,67 +1,226 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+using GalleryAPI.Models;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.OData;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.Edm;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
+using System;
 
-namespace GalleryAPI
+var builder = WebApplication.CreateBuilder(args);
+const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+// Config the log
+builder.Host.UseSerilog((context, config) =>
 {
-    public class Program
+    var environment = context.HostingEnvironment;
+    var outputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] {Message}{NewLine}{Exception}";
+
+    //config.MinimumLevel.Is(environment.IsDevelopment() ? LogEventLevel.Information : LogEventLevel.Warning)
+    //     .Enrich.FromLogContext()
+    //     .WriteTo.File(
+    //         path: "../Logs/ACIDServer/log-.txt",
+    //         rollingInterval: RollingInterval.Day, // 按天滚动
+    //         outputTemplate: outputTemplate,
+    //         retainedFileCountLimit: 14 // 保留最近7天日志
+    //     );
+    if (environment.IsDevelopment())
     {
-        public static int Main(string[] args)
-        {
-            Log.Logger = new LoggerConfiguration()
-#if DEBUG
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
-#else
-            .MinimumLevel.Warning()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-#endif
-            .Enrich.FromLogContext()
-#if DEBUG
-            .WriteTo.Console(theme: SystemConsoleTheme.Colored)
-#else
-            .WriteTo.File(
-                    @"C:\WebApps\Logs\ACGalleryAPI\log.txt",
-                    fileSizeLimitBytes: 1_000_000,
-                    rollOnFileSizeLimit: true,
-                    shared: true,
-                    flushToDiskInterval: TimeSpan.FromSeconds(30))
-#endif
-            .CreateLogger();
+        config.MinimumLevel.Is(LogEventLevel.Information)
+             .Enrich.FromLogContext()
+             .WriteTo.Console(theme: SystemConsoleTheme.Colored);
 
-            try
-            {
-                Log.Information("Starting web host");
-                CreateHostBuilder(args).Build().Run();
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Host terminated unexpectedly");
-                return 1;
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
-
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .UseSerilog()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
     }
+    else if (environment.IsProduction())
+    {
+        config.MinimumLevel.Is(LogEventLevel.Warning)
+             .Enrich.FromLogContext()
+             .WriteTo.File(
+                 path: "../Logs/galleryapi/log-.txt",
+                 rollingInterval: RollingInterval.Day, // 按天滚动
+                 outputTemplate: outputTemplate,
+                 retainedFileCountLimit: 14 // 保留最近7天日志
+             );
+    }
+});
+
+// Connection string
+var connstring = "";
+if (builder.Environment.IsDevelopment())
+    connstring = builder.Configuration["GalleryAPI:ConnectionString"];
+else if (builder.Environment.IsProduction())
+    connstring = builder.Configuration.GetConnectionString("AliyunConnection");
+
+if (!String.IsNullOrEmpty(connstring))
+    builder.Services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(connstring));
+
+builder.Services.AddHttpContextAccessor();
+
+IEdmModel model = EdmModelBuilder.GetEdmModel();
+builder.Services.AddControllers().AddOData(opt => opt.Count().Filter().Expand().Select().OrderBy().SetMaxTop(100)
+    .AddRouteComponents(model)
+    .AddRouteComponents("v1", model)
+    );
+
+builder.Services.AddSwaggerGen();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddAuthentication("Bearer")
+        .AddJwtBearer("Bearer", options =>
+        {
+            options.Authority = "https://localhost:44353";
+            options.RequireHttpsMetadata = true;
+            options.SaveToken = true;
+            options.IncludeErrorDetails = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false
+            };
+
+            options.Audience = "api.acgallery";
+        });
+
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(MyAllowSpecificOrigins, builder =>
+        {
+            builder.WithOrigins(
+                "https://localhost:16001"   // AC Gallery
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+    });
+    builder.Services.AddAuthorization();
 }
+else if (builder.Environment.IsProduction())
+{
+    builder.Services.AddAuthentication("Bearer")
+        .AddJwtBearer("Bearer", options =>
+        {
+            options.Authority = "https://www.alvachien.com/idserver";
+            options.RequireHttpsMetadata = true;
+            options.SaveToken = true;
+            options.IncludeErrorDetails = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false
+            };
+
+            options.Audience = "api.acgallery";
+        });
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(MyAllowSpecificOrigins, builder =>
+        {
+            builder.WithOrigins(
+                "https://www.alvachien.com/gallery"   // AC Gallery
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+        });
+    });
+    builder.Services.AddAuthorization();
+}
+
+// Response Caching
+builder.Services.AddResponseCaching();
+// Memory cache
+builder.Services.AddMemoryCache();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    // app.UseDollarOData();
+}
+
+app.UseCors(MyAllowSpecificOrigins);
+
+app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging(); // <-- Add this line
+
+// app.UseODataOpenApi();
+
+// Add the OData Batch middleware to support OData $Batch
+app.UseODataBatching();
+
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "OData 8.x OpenAPI");
+});
+
+app.UseRouting().UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+}
+
+app.UseResponseCaching();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
