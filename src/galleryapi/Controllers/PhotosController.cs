@@ -131,8 +131,8 @@ namespace GalleryAPI.Controllers
             // Delete the file
             try
             {
-                String strFullFile = Startup.UploadFolder + "\\" + entry.FileUrl;
-                var trashFolder = Startup.UploadFolder + "\\Trash";
+                String strFullFile = AppUtil.UploadFolder + "\\" + entry.FileUrl;
+                var trashFolder = AppUtil.UploadFolder + "\\Trash";
                 if (!Directory.Exists(trashFolder))
                 {
                     Directory.CreateDirectory(trashFolder);
@@ -141,7 +141,7 @@ namespace GalleryAPI.Controllers
                 {
                     System.IO.File.Move(strFullFile, trashFolder + "\\" + entry.FileUrl);
                 }
-                strFullFile = Startup.UploadFolder + "\\" + entry.ThumbnailFileUrl;
+                strFullFile = AppUtil.UploadFolder + "\\" + entry.ThumbnailFileUrl;
                 if (System.IO.File.Exists(strFullFile))
                 {
                     System.IO.File.Move(strFullFile, trashFolder + "\\" + entry.ThumbnailFileUrl);

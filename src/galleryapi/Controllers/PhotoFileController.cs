@@ -36,10 +36,10 @@ namespace GalleryAPI.Controllers
         [ResponseCache(Duration = 864000, Location = ResponseCacheLocation.Client, NoStore = false)]
         public IActionResult Get(string filename)
         {
-            String strFullFile = Startup.UploadFolder + "\\" + filename;
+            String strFullFile = AppUtil.UploadFolder + "\\" + filename;
             if (System.IO.File.Exists(strFullFile))
             {
-                var image = System.IO.File.OpenRead(Startup.UploadFolder + "\\" + filename);
+                var image = System.IO.File.OpenRead(AppUtil.UploadFolder + "\\" + filename);
                 return File(image, "image/jpeg");
             }
 
@@ -86,16 +86,16 @@ namespace GalleryAPI.Controllers
             PhotoFileSuccessResult succrst = new PhotoFileSuccessResult();
             try
             {
-                var filePath = Path.Combine(Startup.UploadFolder, targetfilename);
-                var thmFilePath = Path.Combine(Startup.UploadFolder, randomFileName + ".thumb" + fileext);
+                var filePath = Path.Combine(AppUtil.UploadFolder, targetfilename);
+                var thmFilePath = Path.Combine(AppUtil.UploadFolder, randomFileName + ".thumb" + fileext);
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
 
                     using (IMagickImage image = new MagickImage(filePath))
                     {
-                        filerst.width = image.Width;
-                        filerst.height = image.Height;
+                        filerst.width = (int)image.Width;
+                        filerst.height = (int)image.Height;
 
                         // Add the photo
                         var pht = new Photo();
@@ -182,8 +182,8 @@ namespace GalleryAPI.Controllers
                                     thumbnail.Write(thmFilePath);
                                     bThumbnailCreated = true;
 
-                                    filerst.thumbwidth = thumbnail.Width;
-                                    filerst.thumbheight = thumbnail.Height;
+                                    filerst.thumbwidth = (int)thumbnail.Width;
+                                    filerst.thumbheight = (int)thumbnail.Height;
 
                                     pht.ThumbnailFileUrl = filerst.thumbnailUrl;
                                     pht.ThumbHeight = filerst.thumbheight;
@@ -201,8 +201,8 @@ namespace GalleryAPI.Controllers
                             size.IgnoreAspectRatio = false;
 
                             image.Resize(size);
-                            filerst.thumbwidth = image.Width;
-                            filerst.thumbheight = image.Height;
+                            filerst.thumbwidth = (int)image.Width;
+                            filerst.thumbheight = (int)image.Height;
 
                             pht.ThumbnailFileUrl = filerst.thumbnailUrl;
                             pht.ThumbHeight = filerst.thumbheight;

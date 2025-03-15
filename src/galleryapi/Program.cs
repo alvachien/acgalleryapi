@@ -1,3 +1,4 @@
+using GalleryAPI;
 using GalleryAPI.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.OData;
@@ -11,6 +12,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using System;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -58,6 +60,14 @@ else if (builder.Environment.IsProduction())
 
 if (!String.IsNullOrEmpty(connstring))
     builder.Services.AddDbContext<GalleryContext>(opt => opt.UseSqlServer(connstring));
+
+// Upload folder
+var UploadFolder = Path.Combine(builder.Environment.ContentRootPath, @"data\uploads");
+if (!Directory.Exists(UploadFolder))
+{
+    Directory.CreateDirectory(UploadFolder);
+}
+AppUtil.UploadFolder = UploadFolder;
 
 builder.Services.AddHttpContextAccessor();
 
@@ -175,6 +185,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
 app.UseResponseCaching();
 
+app.Run();
 
 
 
