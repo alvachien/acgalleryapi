@@ -1,10 +1,12 @@
 using GalleryAPI;
 using GalleryAPI.Models;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OData.Edm;
@@ -146,6 +148,7 @@ builder.Services.AddResponseCaching();
 // Memory cache
 builder.Services.AddMemoryCache();
 
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -154,84 +157,42 @@ if (app.Environment.IsDevelopment())
     // app.UseDollarOData();
 }
 
-app.UseCors(MyAllowSpecificOrigins);
-
-app.UseHttpsRedirection();
-
-app.UseSerilogRequestLogging(); // <-- Add this line
+app.UseSerilogRequestLogging();
 
 // app.UseODataOpenApi();
+
+app.UseAuthentication();
 
 // Add the OData Batch middleware to support OData $Batch
 app.UseODataBatching();
 
 app.UseSwagger();
-
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "OData 8.x OpenAPI");
 });
 
-app.UseRouting().UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers();
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(UploadFolder),
+//    RequestPath = "/PhotoFile",
+//    OnPrepareResponse = ctx =>
+//    {
+//        ctx.Context.Response.Headers.Append(
+//            "Cache-Control", "public,max-age=604800");
+//    }
+//});
 
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
-{
-    app.UseAuthentication();
-    app.UseAuthorization();
-}
+app.UseRouting()
+    .UseHttpsRedirection()
+    .UseAuthorization()
+    .UseCors(MyAllowSpecificOrigins)
+    .UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+    });
 
 app.UseResponseCaching();
 
 app.Run();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

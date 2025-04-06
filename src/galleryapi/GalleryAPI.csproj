@@ -23,9 +23,13 @@
     <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="data\**" />
     <Compile Remove="uploads\**" />
+    <Content Remove="data\**" />
     <Content Remove="uploads\**" />
+    <EmbeddedResource Remove="data\**" />
     <EmbeddedResource Remove="uploads\**" />
+    <None Remove="data\**" />
     <None Remove="uploads\**" />
   </ItemGroup>
   <ItemGroup>
